@@ -10,3 +10,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial Release - Added all annotations and some examples
+- Comprehensive documentation for all annotation classes
+- Quick start example in README.md

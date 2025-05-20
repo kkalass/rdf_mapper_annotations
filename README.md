@@ -13,6 +13,100 @@ Dart annotations for declarative RDF graph mapping and code generation.
 
 `rdf_mapper_annotations` provides an elegant solution for transforming between Dart object models and RDF graphs, similar to an ORM for databases. This enables developers to work with semantic data in an object-oriented manner without manually managing the complexity of transforming between dart objects and RDF triples.
 
+## Quick Start
+
+1. Add dependencies to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  rdf_core: ^latest
+  rdf_mapper: ^latest
+  rdf_mapper_annotations: ^latest
+  rdf_vocabularies: ^latest # Optional but recommended
+
+dev_dependencies:
+  build_runner: ^latest
+  rdf_mapper_generator: ^latest
+```
+
+2. Define your data model with RDF annotations:
+
+```dart
+import 'package:rdf_core/rdf_core.dart';
+import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
+import 'package:rdf_vocabularies/schema.dart';
+
+@RdfGlobalResource(SchemaBook.classIri, RdfIri('http://example.org/book/{id}'))
+class Book {
+  @RdfIriPart('id')
+  final String id;
+
+  @RdfProperty(SchemaBook.name)
+  final String title;
+
+  @RdfProperty(SchemaBook.author)
+  final String author;
+
+  @RdfProperty(SchemaBook.hasPart)
+  @RdfCollectionOf(Chapter)
+  final List<Chapter> chapters;
+
+  Book({
+    required this.id,
+    required this.title,
+    required this.author,
+    required this.chapters,
+  });
+}
+
+@RdfLocalResource(SchemaChapter.classIri)
+class Chapter {
+  @RdfProperty(SchemaChapter.name)
+  final String title;
+
+  @RdfProperty(SchemaChapter.position)
+  final int number;
+
+  Chapter(this.title, this.number);
+}
+```
+
+3. Generate mappers:
+
+```bash
+dart run build_runner build
+```
+
+4. Use the generated mappers:
+
+```dart
+void main() {
+  // Initialize the generated mapper
+  final mapper = initRdfMapper();
+  
+  // Create a book with chapters
+  final book = Book(
+    id: '123',
+    title: 'RDF Mapping with Dart',
+    author: 'Klas Kalaß',
+    chapters: [
+      Chapter('Getting Started', 1),
+      Chapter('Advanced Mapping', 2),
+    ],
+  );
+  
+  // Convert to RDF graph
+  final graph = mapper.serialize(book);
+  print(graph.toString());
+  
+  // Parse back to Dart object
+  final parsedBook = mapper.deserialize<Book>(graph);
+  print(parsedBook.title); // 'RDF Mapping with Dart'
+}
+```
+
+For more detailed examples, see the [examples](https://github.com/kkalass/rdf_mapper_annotations/tree/main/example) directory.
+
 ---
 
 ## Part of a whole family of projects
