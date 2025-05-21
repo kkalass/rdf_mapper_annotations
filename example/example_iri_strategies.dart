@@ -70,7 +70,7 @@ class UserReferenceMapper implements IriTermMapper<UserReference> {
 // A resource class with static IRI construction from template
 @RdfGlobalResource(
   SchemaBook.classIri,
-  RdfIri('https://library.example.org/books/{id}.ttl'),
+  IriStrategy('https://library.example.org/books/{id}.ttl'),
 )
 class SimpleBook {
   // ID will be extracted from: https://library.example.org/books/{id}.ttl,
@@ -85,7 +85,7 @@ class SimpleBook {
 }
 
 // A resource class with the IRI as Id property.
-@RdfGlobalResource(SchemaPerson.classIri, RdfIri('{iri}'))
+@RdfGlobalResource(SchemaPerson.classIri, IriStrategy('{iri}'))
 class Person {
   // The field will contain the full IRI as Id, e.g.: https://example.org/person/43
   @RdfIriPart()
@@ -107,7 +107,7 @@ class Person {
   // we allow mapping multiple parts of the IRI to different fields and the
   // mapper will be an IriTermMapper, but for a record type with all fields
   // annotated with `@RdfIriPart.position()`.
-  RdfIri.namedMapper('chapterIdMapper'),
+  IriStrategy.namedMapper('chapterIdMapper'),
 )
 class Chapter {
   // Note that you can use both @RdfIriPart and @RdfProperty annotations on the same field.

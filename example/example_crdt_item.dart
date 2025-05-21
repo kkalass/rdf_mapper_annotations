@@ -7,7 +7,7 @@ import 'package:rdf_vocabularies/dcterms.dart';
 // -- Our model class --
 @RdfGlobalResource(
   SolidTaskTask.classIri,
-  RdfIri('{storageRoot}/solidtask/task/{id}.ttl'),
+  IriStrategy('{storageRoot}/solidtask/task/{id}.ttl'),
 )
 class Item {
   @RdfIriPart()
@@ -29,7 +29,7 @@ class Item {
 
   @RdfProperty(
     Dcterms.creator,
-    iri: RdfIri('{storageRoot}/solidtask/appinstance/{lastModifiedBy}.ttl'),
+    iri: IriMapping('{storageRoot}/solidtask/appinstance/{lastModifiedBy}.ttl'),
   )
   late String lastModifiedBy;
 
@@ -44,13 +44,14 @@ class Item {
 
 @RdfGlobalResource(
   SolidTaskVectorClockEntry.classIri,
-  RdfIri('{storageRoot}/solidtask/task/{taskId}/vectorclock/{clientId}.ttl'),
+  IriStrategy(
+      '{storageRoot}/solidtask/task/{taskId}/vectorclock/{clientId}.ttl'),
 )
 class VectorClockEntry {
   @RdfIriPart()
   @RdfProperty(
     SolidTaskVectorClockEntry.clientId,
-    iri: RdfIri('{storageRoot}/solidtask/appinstance/{clientId}.ttl'),
+    iri: IriMapping('{storageRoot}/solidtask/appinstance/{clientId}.ttl'),
   )
   @RdfCollectionKey()
   final String clientId;

@@ -8,7 +8,8 @@ import 'package:rdf_vocabularies/schema.dart';
 
 // --- Annotated Model Classes ---
 
-@RdfGlobalResource(SchemaBook.classIri, RdfIri('http://example.org/book/{id}'))
+@RdfGlobalResource(
+    SchemaBook.classIri, IriStrategy('http://example.org/book/{id}'))
 class Book {
   @RdfIriPart('id')
   final String id;
