@@ -32,7 +32,7 @@ class Book {
   @RdfProperty(SchemaBook.aggregateRating)
   final Rating rating;
 
-  // List type is automatically detected
+  // Iterable type is automatically detected, Chapter is also automatically detected.
   @RdfProperty(SchemaBook.hasPart)
   final Iterable<Chapter> chapters;
 
@@ -110,7 +110,6 @@ class GeneratedBookMapper implements GlobalResourceMapper<Book> {
       published: reader.require<DateTime>(SchemaBook.datePublished),
       isbn: reader.require<ISBN>(SchemaBook.isbn),
       rating: reader.require<Rating>(SchemaBook.aggregateRating),
-      // From @RdfProperty with mode = list
       chapters: reader.getValues<Chapter>(SchemaBook.hasPart),
     );
   }
@@ -123,15 +122,15 @@ class GeneratedBookMapper implements GlobalResourceMapper<Book> {
   }) {
     return context
         .resourceBuilder(IriTerm(_createIriFromId(book.id)))
-        .literal(SchemaBook.name, book.title)
-        .literal(SchemaBook.author, book.author)
-        .literal<DateTime>(SchemaBook.datePublished, book.published)
-        // Mode detected from @RdfIri annotation on ISBN class
-        .iri<ISBN>(SchemaBook.isbn, book.isbn)
-        // Mode detected from @RdfLiteral annotation on Rating class
-        .literal<Rating>(SchemaBook.aggregateRating, book.rating)
+        .addValue(SchemaBook.name, book.title)
+        .addValue(SchemaBook.author, book.author)
+        .addValue<DateTime>(SchemaBook.datePublished, book.published)
+        // There is a IriTermMapper for ISBN class registered, not a LiteralTermMapper - thus this will be an IriTerm and not a LiteralTerm
+        .addValue<ISBN>(SchemaBook.isbn, book.isbn)
+        // Default is LiteralTerm, and there is a LiteralTermMapper registered for Rating class automatically, so it will be used
+        .addValue<Rating>(SchemaBook.aggregateRating, book.rating)
         // Mode detected from property's List type
-        .childResources(SchemaBook.hasPart, book.chapters)
+        .addValues(SchemaBook.hasPart, book.chapters)
         .build();
   }
 }
@@ -158,8 +157,8 @@ class GeneratedChapterMapper implements LocalResourceMapper<Chapter> {
   }) {
     return context
         .resourceBuilder(BlankNodeTerm())
-        .literal(SchemaChapter.name, chapter.title)
-        .literal<int>(SchemaChapter.position, chapter.number)
+        .addValue(SchemaChapter.name, chapter.title)
+        .addValue<int>(SchemaChapter.position, chapter.number)
         .build();
   }
 }

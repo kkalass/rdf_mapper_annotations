@@ -18,7 +18,8 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 /// parameters:
 ///
 /// - **Basic literal mapping**: Simple values like String, num, bool, DateTime are
-///   automatically mapped to appropriate RDF literal values
+///   automatically mapped to appropriate RDF literal values. This is also true
+///   for all other types that have a registered LiteralTermMapper.
 /// - **Nested resources**: Properties that refer to other objects can be mapped as:
 ///   - *Global resources* with their own IRIs (using `globalResource` parameter)
 ///   - *Local resources* as blank nodes (using `localResource` parameter)
