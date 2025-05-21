@@ -96,7 +96,7 @@ class RdfLocalResource extends BaseMapping<LocalResourceMapper>
   ///   // ...
   /// }
   /// ```
-  const RdfLocalResource(this.classIri) : super();
+  const RdfLocalResource([this.classIri]) : super();
 
   /// Creates a reference to a named mapper that will be injected at runtime.
   ///

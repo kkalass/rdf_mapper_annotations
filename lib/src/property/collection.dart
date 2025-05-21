@@ -5,7 +5,12 @@ enum RdfCollectionType {
   /// Automatically determine collection type from property type.
   ///
   /// This default option analyzes the property type:
-  /// - For `List` or `Set` types, treats as a collection of values
+  /// - For `Iterable` types, treats as a collection of triples with the same subject and predicate.
+  /// - For `Map` types: A collection of triples with the same subject
+  ///   and predicate and the object being either a BlankNode or an IRI which
+  ///   points to a resource. Use in conjunction with [CollectionKey],
+  ///   [CollectionValue] and [CollectionOf] to specify the key and value predicates
+  ///   from this resource.
   /// - For other types, treats as a single value
   auto,
 
@@ -13,7 +18,7 @@ enum RdfCollectionType {
   /// collection.
   ///
   /// Use this to override automatic collection detection when you want a collection
-  /// property to be treated as a single value.
+  /// property to be treated as a single value (and thus have full control in your mapper).
   none,
 }
 
@@ -35,13 +40,13 @@ enum RdfCollectionType {
 /// late Map<String, int> vectorClock;
 ///
 /// // The item class that defines the structure of map entries:
-/// @RdfLocalResource(VectorClockEntryClass.classIri)
+/// @RdfLocalResource(IriTerm('http://example.org/vocab/VectorClockEntry'))
 /// class VectorClockEntry {
-///   @RdfProperty(VectorClockEntry.clientId)
+///   @RdfProperty(IriTerm('http://example.org/vocab/clientId'))
 ///   @RdfCollectionKey() // This property becomes the map key
 ///   final String clientId;
 ///
-///   @RdfProperty(VectorClockEntry.clockValue)
+///   @RdfProperty(IriTerm('http://example.org/vocab/clockValue'))
 ///   @RdfCollectionValue() // This property becomes the map value
 ///   final int clockValue;
 ///
@@ -70,10 +75,9 @@ class RdfCollectionValue extends RdfAnnotation {
 
 /// Specifies the Dart [Type] of the items within a collection property.
 ///
-/// This annotation is required on collection properties (`List`, `Set`, `Map`)
-/// to tell the generator what class represents each item in the collection.
-/// Without this annotation, the generator cannot determine the item type from
-/// generic type parameters due to Dart's type erasure at runtime.
+/// This annotation is required on `Map` collection properties, because
+/// a `Map` is treated as a collection of `MapEntry` objects. and we need this
+/// indirection to be able to map the key and value properties of the `MapEntry`.
 ///
 /// In RDF, collections can be represented in various ways (such as RDF Lists or
 /// subject-predicate-object patterns). This annotation helps the RDF mapper
@@ -82,15 +86,26 @@ class RdfCollectionValue extends RdfAnnotation {
 ///
 /// Examples:
 /// ```dart
-/// // For a List or Set:
-/// @RdfProperty(SchemaBook.hasPart)
-/// @RdfCollectionOf(Chapter) // Each item is a Chapter object
-/// final List<Chapter> chapters;
 ///
-/// // For a Map:
-/// @RdfProperty(TaskVocab.vectorClock)
-/// @RdfCollectionOf(VectorClockEntry) // Each entry is a VectorClockEntry
-/// final Map<String, int> vectorClock; // Keys and values extracted from VectorClockEntry
+/// // In your Resource class:
+/// @RdfProperty(ExampleVocab.counts)
+/// @RdfCollectionOf(CounterEntry) // Each entry is a CounterEntry
+/// final Map<String, int> counts; // Keys and values extracted from CounterEntry
+///
+/// // The item class that defines the structure of map entries and will be
+/// // used to map to RDF, and then to a Dart MapEntry:
+/// @RdfLocalResource()
+/// class CounterEntry {
+///   @RdfProperty(IriTerm('http://example.org/vocab/key'))
+///   @RdfCollectionKey() // This property becomes the map key
+///   final String key;
+///
+///   @RdfProperty(IriTerm('http://example.org/vocab/count'))
+///   @RdfCollectionValue() // This property becomes the map value
+///   final int count;
+///
+///   CounterEntry(this.key, this.count);
+/// }
 /// ```
 class RdfCollectionOf extends RdfAnnotation {
   /// The Dart [Type] of the class representing each item in the collection.
