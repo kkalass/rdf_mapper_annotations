@@ -1,7 +1,6 @@
 import 'package:rdf_core/src/graph/rdf_term.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
-import 'package:rdf_mapper_annotations/src/base/mapper_ref.dart';
 import 'package:test/test.dart';
 
 // Ein einfaches Interface für Test-Zwecke

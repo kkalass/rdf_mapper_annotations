@@ -1,6 +1,5 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
-import 'package:rdf_mapper_annotations/src/term/literal.dart';
 import 'package:test/test.dart';
 
 class MockGlobalResourceMapping implements GlobalResourceMapping {
