@@ -3,8 +3,8 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 import 'package:rdf_mapper_annotations/src/property/collection.dart';
 import 'package:rdf_mapper_annotations/src/resource/global_resource.dart';
 import 'package:rdf_mapper_annotations/src/resource/local_resource.dart';
-import 'package:rdf_mapper_annotations/src/term/iri_term.dart';
-import 'package:rdf_mapper_annotations/src/term/literal_term.dart';
+import 'package:rdf_mapper_annotations/src/term/iri.dart';
+import 'package:rdf_mapper_annotations/src/term/literal.dart';
 
 /// Marks a property to be mapped to/from an RDF predicate.
 ///
