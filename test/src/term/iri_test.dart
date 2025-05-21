@@ -1,0 +1,139 @@
+import 'package:rdf_mapper/rdf_mapper.dart';
+import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
+import 'package:test/test.dart';
+
+class MockIriTermMapper implements IriTermMapper {
+  const MockIriTermMapper();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
+}
+
+void main() {
+  group('RdfIri', () {
+    test('default constructor without template', () {
+      final annotation = RdfIri();
+
+      expect(annotation.template, isNull);
+      expect(annotation.mapper, isNull);
+    });
+
+    test('default constructor with template', () {
+      const template = 'http://example.org/resource/{id}';
+      final annotation = RdfIri(template);
+
+      expect(annotation.template, equals(template));
+      expect(annotation.mapper, isNull);
+    });
+
+    test('namedMapper constructor sets mapper name', () {
+      const mapperName = 'testMapper';
+      final annotation = RdfIri.namedMapper(mapperName);
+
+      expect(annotation.template, isNull);
+      expect(annotation.mapper, isNotNull);
+      expect(annotation.mapper!.name, equals(mapperName));
+      expect(annotation.mapper!.type, isNull);
+      expect(annotation.mapper!.instance, isNull);
+    });
+
+    test('mapper constructor sets mapper type', () {
+      final annotation = RdfIri.mapper(MockIriTermMapper);
+
+      expect(annotation.template, isNull);
+      expect(annotation.mapper, isNotNull);
+      expect(annotation.mapper!.name, isNull);
+      expect(annotation.mapper!.type, equals(MockIriTermMapper));
+      expect(annotation.mapper!.instance, isNull);
+    });
+
+    test('mapperInstance constructor sets mapper instance', () {
+      const mapperInstance = MockIriTermMapper();
+      final annotation = RdfIri.mapperInstance(mapperInstance);
+
+      expect(annotation.template, isNull);
+      expect(annotation.mapper, isNotNull);
+      expect(annotation.mapper!.name, isNull);
+      expect(annotation.mapper!.type, isNull);
+      expect(annotation.mapper!.instance, equals(mapperInstance));
+    });
+  });
+
+  group('IriMapping', () {
+    test('constructor with template', () {
+      const template = 'http://example.org/resource/{id}';
+      final mapping = IriMapping(template);
+
+      expect(mapping.template, equals(template));
+      expect(mapping.mapper, isNull);
+    });
+
+    test('namedMapper constructor sets mapper name', () {
+      const mapperName = 'testMapper';
+      final mapping = IriMapping.namedMapper(mapperName);
+
+      expect(mapping.template, isNull);
+      expect(mapping.mapper, isNotNull);
+      expect(mapping.mapper!.name, equals(mapperName));
+      expect(mapping.mapper!.type, isNull);
+      expect(mapping.mapper!.instance, isNull);
+    });
+
+    test('mapper constructor sets mapper type', () {
+      final mapping = IriMapping.mapper(MockIriTermMapper);
+
+      expect(mapping.template, isNull);
+      expect(mapping.mapper, isNotNull);
+      expect(mapping.mapper!.name, isNull);
+      expect(mapping.mapper!.type, equals(MockIriTermMapper));
+      expect(mapping.mapper!.instance, isNull);
+    });
+
+    test('mapperInstance constructor sets mapper instance', () {
+      const mapperInstance = MockIriTermMapper();
+      final mapping = IriMapping.mapperInstance(mapperInstance);
+
+      expect(mapping.template, isNull);
+      expect(mapping.mapper, isNotNull);
+      expect(mapping.mapper!.name, isNull);
+      expect(mapping.mapper!.type, isNull);
+      expect(mapping.mapper!.instance, equals(mapperInstance));
+    });
+  });
+
+  group('IriStrategy', () {
+    test('constructor with template', () {
+      const template = 'http://example.org/resource/{id}';
+      final strategy = IriStrategy(template);
+
+      expect(strategy.template, equals(template));
+    });
+  });
+
+  group('RdfIriPart', () {
+    test('default constructor without name', () {
+      final annotation = RdfIriPart();
+
+      expect(annotation.name, isNull);
+      expect(annotation.pos, isNull);
+    });
+
+    test('default constructor with name', () {
+      const name = 'testName';
+      final annotation = RdfIriPart(name);
+
+      expect(annotation.name, equals(name));
+      expect(annotation.pos, isNull);
+    });
+
+    test('position constructor', () {
+      const position = 2;
+      final annotation = RdfIriPart.position(position);
+
+      expect(annotation.name, isNull);
+      expect(annotation.pos, equals(position));
+    });
+  });
+}
