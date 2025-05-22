@@ -223,7 +223,7 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///
   /// // In initialization code:
   /// final tempMapper = MyTemperatureMapper();
-  /// initRdfMapper({required LiteralTermMapper<Temperature> temperatureMapper: tempMapper}) { ... }
+  /// final rdfMapper = initRdfMapper(temperatureMapper: tempMapper);
   /// ```
   const RdfLiteral.namedMapper(String name)
       : toLiteralTermMethod = null,
@@ -361,7 +361,7 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///
   /// // In initialization code:
   /// final tempMapper = MyTemperatureMapper();
-  /// initRdfMapper({required LiteralTermMapper<Temperature> temperatureMapper: tempMapper}) { ... }
+  /// final rdfMapper = initRdfMapper(temperatureMapper: tempMapper);
   /// ```
   const LiteralMapping.namedMapper(String name)
       : language = null,

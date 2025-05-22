@@ -146,7 +146,7 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   ///
   /// // In initialization code:
   /// final chapterMapper = MyChapterMapper();
-  /// final rdfMapper = initRdfMapper({customChapterMapper: chapterMapper});
+  /// final rdfMapper = initRdfMapper(customChapterMapper: chapterMapper);
   /// ```
   const RdfLocalResource.namedMapper(String name)
       : classIri = null,
@@ -254,7 +254,7 @@ class LocalResourceMapping extends BaseMapping<LocalResourceMapper> {
   ///
   /// // In initialization code:
   /// final bookMapper = MyBookMapper();
-  /// final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
+  /// final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
   /// ```
   const LocalResourceMapping.namedMapper(String name) : super.namedMapper(name);
 

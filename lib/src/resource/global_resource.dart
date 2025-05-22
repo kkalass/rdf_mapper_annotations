@@ -47,8 +47,8 @@ import 'package:rdf_mapper_annotations/src/term/iri.dart';
 /// - Top-level objects in your data model
 /// - Entities that might be referenced by external systems
 ///
-/// Note: Besides using this annotation at the class level, you can also use it as a parameter
-/// in the `@RdfProperty` annotation with the `globalResource` parameter. This primarily allows you to
+/// Note: Besides using this annotation at the class level, you can also use [GlobalResourceMapping] as a parameter
+/// in the `@RdfProperty` annotation with the `globalResource` parameter. This allows you to
 /// specify custom mappers for specific relationships, overriding the globally registered mapper.
 /// This is especially useful when you need different mapping behaviors for the same type depending
 /// on the context where it's used. See `RdfProperty.globalResource` for more details and examples.
@@ -77,8 +77,11 @@ import 'package:rdf_mapper_annotations/src/term/iri.dart';
 ///   // ...
 /// }
 ///
-/// // In initialization code:
-/// initRdfMapper({required GlobalResourceMapper<Book> customBookMapper}) { ... }
+/// // Generated initRdfMapper function will have a parameter:
+/// initRdfMapper({
+///   required GlobalResourceMapper<Book> customBookMapper,
+///   // other parameters...
+/// }) { ... }
 /// ```
 class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
     implements RdfAnnotation {
@@ -160,7 +163,7 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   ///
   /// // In initialization code:
   /// final bookMapper = MyBookMapper();
-  /// final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
+  /// final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
   /// ```
   const RdfGlobalResource.namedMapper(String name)
       : iri = null,
@@ -276,7 +279,7 @@ class GlobalResourceMapping extends BaseMapping<GlobalResourceMapper> {
   ///
   /// // In initialization code:
   /// final bookMapper = MyBookMapper();
-  /// final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
+  /// final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
   /// ```
   const GlobalResourceMapping.namedMapper(String name)
       : super.namedMapper(name);

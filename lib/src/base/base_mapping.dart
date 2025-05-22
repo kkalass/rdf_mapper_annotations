@@ -71,9 +71,9 @@ abstract class BaseMapping<M extends Mapper> {
   /// final Price price;
   ///
   /// // Later when initializing mappers:
-  /// final rdfMapper = initRdfMapper({
+  /// final rdfMapper = initRdfMapper(
   ///   priceMapper: myCustomPriceMapper
-  /// });
+  /// );
   /// ```
   const BaseMapping.namedMapper(String name)
       : _mapperName = name,

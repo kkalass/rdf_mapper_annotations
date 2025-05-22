@@ -166,9 +166,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///
   /// // In initialization code:
   /// final userRefMapper = MyUserReferenceMapper();
-  /// initRdfMapper({
-  ///   required IriTermMapper<UserReference> userReferenceMapper: userRefMapper
-  /// }) { ... }
+  /// final rdfMapper = initRdfMapper(userReferenceMapper);
   /// ```
   const RdfIri.namedMapper(String name)
       : template = null,
@@ -336,9 +334,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///
   /// // In initialization code:
   /// final userRefMapper = MyUserReferenceMapper();
-  /// initRdfMapper({
-  ///   required IriTermMapper<UserReference> userReferenceMapper: userRefMapper
-  /// }) { ... }
+  /// final rdfMapper = initRdfMapper(userReferenceMapper: userRefMapper);
   /// ```
   const IriMapping.namedMapper(String name)
       : template = null,
@@ -417,9 +413,10 @@ class IriMapping extends BaseMapping<IriTermMapper> {
 /// how to construct unique IRIs for instances of annotated classes. It provides a
 /// template-based mechanism that combines static text with dynamic values from object properties.
 ///
+/// ## IRI Template Variables
 /// The IRI template supports two types of variables:
 ///
-/// 1. **Property-based variables** - Values from object properties marked with `@RdfIriPart`:
+/// 1. **Property-based variables** - Values from properties marked with `@RdfIriPart`:
 ///    ```dart
 ///    @RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/books/{isbn}'))
 ///    class Book {
@@ -429,7 +426,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
 ///    }
 ///    ```
 ///
-/// 2. **Context variables** - Values provided through one of two methods:
+/// 2. **Context variables** - Values provided externally:
 ///    ```dart
 ///    @RdfGlobalResource(
 ///      SchemaBook.classIri,
@@ -438,84 +435,165 @@ class IriMapping extends BaseMapping<IriTermMapper> {
 ///    class Book {
 ///      @RdfIriPart('id')
 ///      final String id;
-///
-///      // Option 1: Provide the context variable within the class
-///      @RdfProvides('baseUrl')
-///      final String apiUrl = 'https://myapp.example.org';
 ///      // ...
 ///    }
 ///
-///    // Option 2: Via initialization code:
+///    // When registerGlobally is true (default):
 ///    final rdfMapper = initRdfMapper(
-///      baseUrlProvider: () => 'https://myapp.example.org'  // Provides value for {baseUrl}
+///      baseUrlProvider: () => 'https://myapp.example.org'  // Auto-injected parameter
 ///    );
 ///    ```
 ///
-/// You can combine both types of variables in a single template to create flexible,
-/// context-aware IRI patterns for your resources. Unlike the `RdfIri` annotation which is used
+/// ## Context Variable Resolution
+///
+/// When the generator encounters template variables that aren't bound to properties with
+/// `@RdfIriPart`, it treats them as context variables and resolves them in the following ways:
+///
+/// 1. **Global Registration** (when `registerGlobally = true` in `@RdfGlobalResource`, which is the default):
+///    - The generator adds required provider parameters to `initRdfMapper()`
+///    - These providers must be supplied when initializing the RDF mapper
+///    - Example: `{baseUrl}` becomes `required String Function() baseUrlProvider`
+///
+/// 2. **Local Resolution** (when `registerGlobally = false`):
+///    - The parent mapper that uses this type needs to provide the context values
+///    - Context variables can be resolved from:
+///      a. Properties in the parent class annotated with `@RdfProvides('variableName')`
+///      b. Or required in the parent mapper's constructor (which may propagate up to `initRdfMapper`)
+///
+/// This system enables flexible, context-aware IRI patterns that can adapt to different
+/// deployment environments without hardcoding values. Unlike the `RdfIri` annotation which is used
 /// for classes that represent IRI terms themselves, `IriStrategy` is used within `RdfGlobalResource`
 /// to define how instance IRIs are constructed from their properties.
+///
+/// ## Internal Record-Based Mechanism
+///
+/// Unlike `RdfIri` and `IriMapping` which work with complete objects, `IriStrategy` operates
+/// on a record composed of the values from properties marked with `@RdfIriPart`. This
+/// record-based approach allows resource mappers to:
+///
+/// 1. Extract only the necessary IRI-related properties when serializing
+/// 2. Populate these same properties when deserializing from an IRI term
+///
+///
+/// ## Constructor Choice and RdfIriPart Usage
+///
+/// * **Default constructor**: The generator creates an `IriTermMapper` implementation that
+///   handles mapping between a record of the `@RdfIriPart` values and IRI terms. With this
+///   approach, you can use the standard `@RdfIriPart([name])` constructor.
+///
+/// * **Custom mappers** (via `.namedMapper()`, `.mapper()`, or `.mapperInstance()`): You must
+///   implement an `IriTermMapper` that works with a record of the property values. For multiple
+///   `@RdfIriPart` properties, use `@RdfIriPart.position(index, [name])` to specify the
+///   positional order of fields in the record for more robustness and to avoid bugs introduced by
+///   changing field order.
+///
 class IriStrategy extends BaseMapping<IriTermMapper> {
-  /// An optional template string for constructing the IRI.
+  /// An optional template string for constructing IRIs from resource properties.
   ///
-  /// Template variables are enclosed in curly braces and can be of two types:
+  /// The template can contain static text combined with variables in curly braces (`{variable}`).
+  /// Variables are resolved in the following order:
   ///
-  /// 1. **Class property variables**: Correspond to properties in the class marked with `@RdfIriPart`
-  ///    - Example: In `IriStrategy('urn:isbn:{isbn}')`, the `{isbn}` variable will be replaced with
-  ///      the value of the property marked with `@RdfIriPart('isbn')`
-  ///    - You can use multiple properties to create complex IRIs like `{baseUrl}/users/{userId}/profiles/{profileId}`
+  /// 1. **Class property variables**: Bound to properties marked with `@RdfIriPart`
+  ///    - Example: `IriStrategy('urn:isbn:{isbn}')` where `{isbn}` is replaced with
+  ///      the value of a property marked with `@RdfIriPart('isbn')`
+  ///    - Multiple properties can be combined: `{baseUrl}/users/{userId}/profiles/{profileId}`
   ///
-  /// 2. **Context variables**: Variables like `{baseUrl}` or `{storageRoot}` that can be provided
-  ///    through one of two methods:
-  ///    - Via global provider functions in `initRdfMapper` (e.g., `baseUrlProvider: () => 'https://example.com'`).
-  ///      The generator will automatically add a required parameter to `initRdfMapper`.
-  ///    - Via properties in the same class annotated with `@RdfProvides('baseUrl')`, which is
-  ///      preferred for context variables already available in the class.
+  /// 2. **Context variables**: Any variable not bound to a property (e.g., `{baseUri}`)
+  ///    - When used with `registerGlobally = true` (default):
+  ///      - The generator adds provider parameters to `initRdfMapper`
+  ///      - Example: `{baseUri}` creates `required baseUriProvider: () => 'https://example.org'`
+  ///    - When used with `registerGlobally = false`:
+  ///      - The mapper looks for:
+  ///        - Properties in the parent class with `@RdfProvides('variableName')`
+  ///        - Or adds the provider as a required constructor parameter
   ///
   /// If no template is provided (`template == null`), the property marked with `@RdfIriPart`
-  /// will be used as the complete IRI value.
+  /// will be used directly as the complete IRI value.
   final String? template;
 
-  /// Creates an annotation for a class to be mapped to an IRI term.
+  /// Creates a strategy for generating IRIs from resource properties.
   ///
-  /// An optional [template] can be provided to define how the IRI is constructed.
-  /// If no template is provided, the property value marked with `@RdfIriPart`
-  /// will be used directly as the complete IRI. When using this standard constructor,
-  /// the mapper is automatically generated and registered within initRdfMapper.
-  const IriStrategy([this.template]) : super();
-
-  /// Creates a reference to a named mapper for this IRI term.
+  /// Use this constructor with `@RdfGlobalResource` to have the generator create
+  /// an IRI mapper automatically. The generator will:
   ///
-  /// Use this constructor when you want to provide a custom `IriTermMapper`
-  /// implementation via dependency injection. When using this approach, you must:
-  /// 1. Implement the mapper yourself
-  /// 2. Instantiate the mapper (outside of the generated code)
-  /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
-  ///
-  /// The [name] will be used as a parameter name in the generated `initRdfMapper` function.
-  ///
-  /// This approach is particularly useful for IRIs that require complex logic or
-  /// external context (like base URLs) that might vary between deployments.
+  /// 1. Create a record type from all properties marked with `@RdfIriPart`
+  /// 2. Generate an `IriTermMapper<RecordType>` implementation
+  /// 3. Extract values from the resource into this record during serialization
+  /// 4. Set properties in the resource from the record during deserialization
+  ///    (unless they are also annotated with `@RdfProperty`, in which case the
+  ///     value from @RdfProperty takes precedence)
   ///
   /// Example:
   /// ```dart
-  /// @RdfIri.namedMapper('userReferenceMapper')
-  /// class UserReference {
-  ///   final String username;
-  ///   UserReference(this.username);
+  /// @RdfGlobalResource(
+  ///   Person.classIri,
+  ///   IriStrategy('{baseUri}/people/{id}')
+  /// )
+  /// class Person {
+  ///   @RdfIriPart('id')  // Standard form works with generated mappers
+  ///   final String id;
+  ///   // ...
+  /// }
+  /// ```
+  ///
+  /// When the [template] contains unbound variables (not matching any property with `@RdfIriPart`),
+  /// the generator will automatically create provider parameters. With `registerGlobally = true`
+  /// (the default), these providers become required parameters in the `initRdfMapper` function.
+  const IriStrategy([this.template]) : super();
+
+  /// Creates a reference to a named mapper for this IRI strategy.
+  ///
+  /// Use this constructor when you want to provide a custom `IriTermMapper`
+  /// implementation via dependency injection. With this approach, you must:
+  /// 1. Implement the mapper yourself that works with a **record type**
+  /// 2. Instantiate the mapper (outside of the generated code)
+  /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
+  ///
+  /// Note that - unlike similar constructors like `RdfIri.namedMapper` - the
+  /// named mapper will not be registered globally, it will only be used
+  /// for the class annotated with `@RdfGlobalResource`.
+  ///
+  /// Unlike the default constructor which generates a mapper, this requires you to
+  /// implement a mapper that works with a record of the property values from fields
+  /// marked with `@RdfIriPart`.
+  ///
+  /// **Important:** When using custom mappers with multiple IRI part properties,
+  /// use `@RdfIriPart.position(index)` to specify the order of fields in the record:
+  ///
+  /// ```dart
+  /// @RdfGlobalResource(Product.classIri, IriStrategy.namedMapper('productIdMapper'))
+  /// class Product {
+  ///   @RdfIriPart.position(1) // First field in the record
+  ///   final String category;
+  ///
+  ///   @RdfIriPart.position(2) // Second field in the record
+  ///   final String id;
+  ///   // ...
   /// }
   ///
-  /// // You must implement the mapper:
-  /// class MyUserReferenceMapper implements IriTermMapper<UserReference> {
-  ///   // Your implementation...
+  /// // Implement mapper for the (String, String) record:
+  /// class ProductIdMapper implements IriTermMapper<(String, String)> {
+  ///   @override
+  ///   IriTerm toRdfTerm((String, String) record, SerializationContext context) {
+  ///     final (category, id) = record;
+  ///     return IriTerm('https://example.org/products/$category/$id');
+  ///   }
+  ///
+  ///   @override
+  ///   (String, String) fromRdfTerm(IriTerm term, DeserializationContext context) {
+  ///     final parts = term.iri.split('/').takeLast(2).toList();
+  ///     return (parts[0], parts[1]);
+  ///   }
   /// }
   ///
   /// // In initialization code:
-  /// final userRefMapper = MyUserReferenceMapper();
-  /// initRdfMapper({
-  ///   required IriTermMapper<UserReference> userReferenceMapper: userRefMapper
-  /// }) { ... }
+  /// final productMapper = ProductIdMapper();
+  /// final rdfMapper = initRdfMapper(productIdMapper: productMapper);
   /// ```
+  ///
+  /// The resource mapper will:
+  /// - During serialization: Extract the properties into a record to pass to your mapper
+  /// - During deserialization: Take the record your mapper produces and set the properties
   const IriStrategy.namedMapper(String name)
       : template = null,
         super.namedMapper(name);
@@ -523,33 +601,40 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// Creates a reference to a mapper that will be instantiated from the given type.
   ///
   /// The generator will create an instance of [mapperType] to handle IRI mapping
-  /// for this class. The type must implement `IriTermMapper`.
+  /// for this class. The type must implement `IriTermMapper` for a **record type**
+  /// composed of the `@RdfIriPart` property values.
   ///
-  /// This approach is useful when the mapper has a default constructor and doesn't
-  /// require additional configuration parameters.
+  /// Note that - unlike similar constructors like `RdfIri.namedMapper` - the
+  /// mapper will not be registered globally, it will only be used
+  /// for the class annotated with `@RdfGlobalResource`.
+  ///
+  /// When implementing the mapper for multiple IRI parts, use `@RdfIriPart.position(index)`
+  /// to define the position of each property in the record that will be passed to your mapper.
   ///
   /// Example:
   /// ```dart
-  /// @RdfIri.mapper(StandardIsbnMapper)
-  /// class ISBN {
-  ///   final String value;
-  ///   ISBN(this.value);
+  /// @RdfGlobalResource(Product.classIri, IriStrategy.mapper(ProductIdMapper))
+  /// class Product {
+  ///   @RdfIriPart.position(1) // First field in record
+  ///   final String category;
+  ///
+  ///   @RdfIriPart.position(2) // Second field in record
+  ///   final String id;
+  ///   // ...
   /// }
   ///
-  /// // The mapper implementation must be accessible to the generator:
-  /// class StandardIsbnMapper implements IriTermMapper<ISBN> {
+  /// // Mapper must work with the record type defined by the RdfIriPart positions:
+  /// class ProductIdMapper implements IriTermMapper<(String, String)> {
   ///   @override
-  ///   IriTerm toRdfTerm(ISBN isbn, SerializationContext context) {
-  ///     return IriTerm('urn:isbn:${isbn.value}');
+  ///   IriTerm toRdfTerm((String, String) record, SerializationContext context) {
+  ///     final (category, id) = record;
+  ///     return IriTerm('https://example.org/products/$category/$id');
   ///   }
   ///
   ///   @override
-  ///   ISBN fromRdfTerm(IriTerm term, DeserializationContext context) {
-  ///     final iri = term.iri;
-  ///     if (!iri.startsWith('urn:isbn:')) {
-  ///       throw ArgumentError('Invalid ISBN IRI: $iri');
-  ///     }
-  ///     return ISBN(iri.substring(9));
+  ///   (String, String) fromRdfTerm(IriTerm term, DeserializationContext context) {
+  ///     final parts = term.iri.split('/').takeLast(2).toList();
+  ///     return (parts[0], parts[1]);
   ///   }
   /// }
   /// ```
@@ -560,23 +645,30 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// Creates a reference to a directly provided mapper instance for this IRI term.
   ///
   /// This allows you to directly provide a pre-configured `IriTermMapper` instance
-  /// to handle mapping for this class without dependency injection.
+  /// that works with a **record type** composed of the values from properties marked
+  /// with `@RdfIriPart`. Unlike `RdfIri` and `IriMapping` which work with whole objects,
+  /// `IriStrategy` mappers must work with records of property values.
   ///
-  /// This approach is ideal when your mapper requires configuration that must be
-  /// provided at initialization time, such as base URLs or formatting parameters.
+  /// For multiple IRI parts, use `@RdfIriPart.position(index)` to specify the order
+  /// of each property in the record:
   ///
-  /// Example:
   /// ```dart
-  /// // Create a pre-configured mapper with const constructor:
-  /// const catalogMapper = ProductCatalogMapper(
+  /// // Create a pre-configured mapper for a record type:
+  /// const productMapper = CustomProductMapper(
   ///   baseUrl: 'https://shop.example.org/catalog/',
   ///   format: UriFormat.pretty,
   /// );
   ///
-  /// @RdfIri.mapperInstance(catalogMapper)
-  /// class ProductReference {
+  /// @RdfGlobalResource(Product.classIri, IriStrategy.mapperInstance(productMapper))
+  /// class Product {
+  ///   // First field in the record passed to productMapper
+  ///   @RdfIriPart.position(0)
+  ///   final String category;
+  ///
+  ///   // Second field in the record passed to productMapper
+  ///   @RdfIriPart.position(1)
   ///   final String sku;
-  ///   ProductReference(this.sku);
+  ///   // ...
   /// }
   /// ```
   ///
@@ -593,7 +685,20 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
 /// properties that contribute to IRI construction. This annotation creates a binding
 /// between template variables and property values.
 ///
-/// Example with named template variable:
+/// ## Usage with IriStrategy
+///
+/// The annotation has different usage patterns depending on the `IriStrategy` constructor:
+///
+/// * With the **default constructor** (`IriStrategy(template)`), use the standard form
+///   `@RdfIriPart([name])` - the generator handles record creation automatically.
+///
+/// * With **custom mappers** (`IriStrategy.namedMapper()`, `.mapper()`, or `.mapperInstance()`),
+///   use `@RdfIriPart.position(index, [name])` for multiple properties to ensure
+///   correct positioning in the record passed to your mapper.
+///
+/// ## Examples
+///
+/// Example with named template variable (generated mapper):
 /// ```dart
 /// @RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/book/{id}'))
 /// class Book {
@@ -613,15 +718,18 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
 /// }
 /// ```
 ///
-/// Example with positional parts for complex cases:
+/// Example with positional parts for custom mappers:
 /// ```dart
-/// @RdfIri.namedMapper('chapterIdMapper')
-/// class Chapter {
+/// @RdfGlobalResource(
+///   Product.classIri,
+///   IriStrategy.namedMapper('productIdMapper')
+/// )
+/// class Product {
 ///   @RdfIriPart.position(1) // First position in the generated record type
-///   final String bookId;
+///   final String category;
 ///
 ///   @RdfIriPart.position(2) // Second position in the generated record type
-///   final int chapterNumber;
+///   final String id;
 ///   // ...
 /// }
 /// ```
@@ -632,6 +740,10 @@ class RdfIriPart implements RdfAnnotation {
 
   /// The positional index of the IRI part, used when the IRI is constructed
   /// from multiple unnamed parts, typically for record types in custom mappers.
+  ///
+  /// Starts from 1 for the first part, 2 for the second, and so on - in sync
+  /// with the `.$1`, `.$2` syntax for accessing the first, second etc.
+  /// part of a record.
   final int? pos;
 
   /// Creates an IRI part annotation with a given [name].
