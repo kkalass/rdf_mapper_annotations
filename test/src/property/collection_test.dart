@@ -4,39 +4,37 @@ import 'package:test/test.dart';
 class MockItemClass {}
 
 void main() {
-  group('RdfCollectionOf', () {
+  group('RdfMapEntry', () {
     test('constructor sets item class', () {
-      final annotation = RdfCollectionOf(MockItemClass);
+      final annotation = RdfMapEntry(MockItemClass);
 
       expect(annotation.itemClass, equals(MockItemClass));
     });
   });
 
-  group('RdfCollectionKey', () {
+  group('RdfMapKey', () {
     test('constructor creates instance', () {
-      final annotation = RdfCollectionKey();
+      final annotation = RdfMapKey();
 
       expect(annotation, isA<RdfAnnotation>());
-      expect(annotation, isA<RdfCollectionKey>());
+      expect(annotation, isA<RdfMapKey>());
     });
 
     test('constructor is const', () {
-      expect(identical(const RdfCollectionKey(), const RdfCollectionKey()),
-          isTrue);
+      expect(identical(const RdfMapKey(), const RdfMapKey()), isTrue);
     });
   });
 
-  group('RdfCollectionValue', () {
+  group('RdfMapValue', () {
     test('constructor creates instance', () {
-      final annotation = RdfCollectionValue();
+      final annotation = RdfMapValue();
 
       expect(annotation, isA<RdfAnnotation>());
-      expect(annotation, isA<RdfCollectionValue>());
+      expect(annotation, isA<RdfMapValue>());
     });
 
     test('constructor is const', () {
-      expect(identical(const RdfCollectionValue(), const RdfCollectionValue()),
-          isTrue);
+      expect(identical(const RdfMapValue(), const RdfMapValue()), isTrue);
     });
   });
 

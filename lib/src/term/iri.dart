@@ -32,6 +32,12 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// 2. **Direct value** - `@RdfIri()` (uses the `@RdfIriPart` property value as-is)
 /// 3. **External mappers** - `.namedMapper()`, `.mapper()`, or `.mapperInstance()`
 ///
+/// By default, the generated mapper is registered globally in `initRdfMapper`. Set
+/// [registerGlobally] to `false` if this mapper should not be registered
+/// automatically. This is useful when the mapper requires constructor parameters
+/// that are only available at runtime and should be provided via `@Provider`
+/// annotations in the parent class.
+///
 /// ## Property-Level Usage
 ///
 /// You can also apply this as part of an `@RdfProperty` annotation to override
@@ -40,7 +46,7 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// ```dart
 /// @RdfProperty(
 ///   Dcterms.creator,
-///   iri: IriMapping('https://example.org/users/{value}')
+///   iri: IriMapping('https://example.org/users/{userId}')
 /// )
 /// final String userId;
 /// ```
@@ -70,7 +76,8 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///   // Uses the value directly as IRI: 'https://example.org/resource/123'
 /// }
 /// ```
-class RdfIri extends BaseMapping<IriTermMapper> implements RdfAnnotation {
+class RdfIri extends BaseMappingAnnotation<IriTermMapper>
+    implements RdfAnnotation {
   /// An optional template string for constructing the IRI.
   ///
   /// Template variables are enclosed in curly braces and can be of two types:
@@ -81,10 +88,12 @@ class RdfIri extends BaseMapping<IriTermMapper> implements RdfAnnotation {
   ///    - When multiple properties use `@RdfIriPart.position()`, the generator creates a record-based
   ///      mapper to handle complex multi-part IRIs
   ///
-  /// 2. **External variables**: Variables like `{baseUri}` or `{storageRoot}` that are provided
-  ///    at runtime through the generated `initRdfMapper` method
-  ///    - Example: `@RdfIri('{baseUri}/books/{id}')` would require a parameter like
-  ///      `String Function() baseUriProvider` in the `initRdfMapper` method
+  /// 2. **Context variables**: Variables like `{baseUri}` or `{storageRoot}` that are provided
+  ///    through one of two methods:
+  ///    - Via global provider functions in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`).
+  ///      The generator will automatically add a required parameter to `initRdfMapper`.
+  ///    - Via other properties in the same class annotated with `@RdfProvides('baseUri')`.
+  ///      This is preferred for context variables that are already available in the class.
   ///
   /// If no template is provided (`template == null`), the property marked with `@RdfIriPart`
   /// will be used as the complete IRI value.
@@ -93,7 +102,10 @@ class RdfIri extends BaseMapping<IriTermMapper> implements RdfAnnotation {
   /// Creates an annotation for a class to be mapped to an IRI term.
   ///
   /// This standard constructor creates a mapper that automatically handles the
-  /// conversion between your class and an IRI term using:
+  /// conversion between your class and an IRI term. By default, this mapper is
+  /// registered within `initRdfMapper` when [registerGlobally] is `true`.
+  ///
+  /// The mapper uses:
   ///
   /// - An optional [template] with placeholders like `{propertyName}` that will be
   ///   replaced with values from properties marked with `@RdfIriPart`
@@ -118,7 +130,13 @@ class RdfIri extends BaseMapping<IriTermMapper> implements RdfAnnotation {
   ///   // ...
   /// }
   /// ```
-  const RdfIri([this.template]) : super();
+  ///
+  /// The [registerGlobally] parameter determines whether the generated mapper is
+  /// registered globally in `initRdfMapper`. If set to `false`, the mapper will
+  /// not be registered automatically and must be provided via `@Provider`
+  /// annotations in the parent class.
+  const RdfIri([this.template, bool registerGlobally = true])
+      : super(registerGlobally: registerGlobally);
 
   /// Creates a reference to a named mapper for this IRI term.
   ///
@@ -240,7 +258,7 @@ class RdfIri extends BaseMapping<IriTermMapper> implements RdfAnnotation {
 /// ```dart
 /// @RdfProperty(
 ///   Dcterms.creator,
-///   iri: IriMapping('https://example.org/users/{value}')
+///   iri: IriMapping('https://example.org/users/{userId}')
 /// )
 /// final String userId;
 /// ```
@@ -250,25 +268,22 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// Template variables are enclosed in curly braces and can be of two types:
   ///
   /// 1. **Property variables**: Correspond to values from the property this mapping is applied to
-  ///    - Example: In `IriMapping('urn:isbn:{value}')`, the `{value}` variable will be replaced with
+  ///    - Example: In `IriMapping('urn:isbn:{userId}')`, the `{userId}` variable will be replaced with
   ///      the value of the property it's applied to
-  ///    - The template can reference a property directly without needing additional `@RdfIriPart` annotations
-  ///    - Multiple property variables can be used like: `{baseUrl}/users/{userId}/profile`
+  ///    - The actual property name is used as the placeholder, creating a clear connection between
+  ///      the template and the property
+  ///    - The property itself doesn't need additional `@RdfIriPart` annotations
   ///
-  /// 2. **External variables**: Variables like `{baseUri}` or `{storageRoot}` that are provided
-  ///    at runtime through the generated `initRdfMapper` method
-  ///    - Example: `'{baseUrl}/books/{id}'` would require a parameter like
-  ///      `String Function() baseUrl` in the `initRdfMapper` method
-  ///
-  /// If no template is provided (`template == null`), the property value will be
-  /// used as the complete IRI value, which is useful for properties that already contain
-  /// fully qualified URIs.
-  ///    at runtime through the generated `initRdfMapper` method
-  ///    - Example: `IriMapping('{baseUri}/users/{value}')` would require a parameter like
-  ///      `String Function() baseUri` in the `initRdfMapper` method
+  /// 2. **Context variables**: Variables like `{baseUri}` or `{storageRoot}` that are provided
+  ///    through one of two methods:
+  ///    - Via global provider functions in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`).
+  ///      The generator will automatically add a required parameter to `initRdfMapper`.
+  ///    - Via other properties in the same class annotated with `@RdfProvides('baseUri')`.
+  ///      This is preferred for context variables that are already available in the class.
+  ///    - Example: `IriMapping('{baseUri}/users/{userId}')`
   ///
   /// If no template is provided (`template == null`), the property value will be used directly
-  /// as the complete IRI.
+  /// as the complete IRI, which is useful for properties that already contain fully qualified URIs.
   final String? template;
 
   /// Creates an IRI mapping template for property-specific IRI generation.
@@ -287,7 +302,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// ```dart
   /// @RdfProperty(
   ///   Dcterms.source,
-  ///   iri: IriMapping('urn:isbn:{value}')
+  ///   iri: IriMapping('urn:isbn:{isbn}')
   /// )
   /// final String isbn; // Will be mapped to an IRI like "urn:isbn:9780123456789"
   /// ```
@@ -414,21 +429,25 @@ class IriMapping extends BaseMapping<IriTermMapper> {
 ///    }
 ///    ```
 ///
-/// 2. **External variables** - Values provided at runtime through the `initRdfMapper` method:
+/// 2. **Context variables** - Values provided through one of two methods:
 ///    ```dart
 ///    @RdfGlobalResource(
 ///      SchemaBook.classIri,
-///      IriStrategy('{baseUrl}/books/{id}')  // {baseUrl} is external
+///      IriStrategy('{baseUrl}/books/{id}')  // {baseUrl} is a context variable
 ///    )
 ///    class Book {
 ///      @RdfIriPart('id')
 ///      final String id;
+///
+///      // Option 1: Provide the context variable within the class
+///      @RdfProvides('baseUrl')
+///      final String apiUrl = 'https://myapp.example.org';
 ///      // ...
 ///    }
 ///
-///    // In your initialization code:
+///    // Option 2: Via initialization code:
 ///    final rdfMapper = initRdfMapper(
-///      baseUrl: () => 'https://myapp.example.org'  // Provides value for {baseUrl}
+///      baseUrlProvider: () => 'https://myapp.example.org'  // Provides value for {baseUrl}
 ///    );
 ///    ```
 ///
@@ -446,10 +465,12 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   ///      the value of the property marked with `@RdfIriPart('isbn')`
   ///    - You can use multiple properties to create complex IRIs like `{baseUrl}/users/{userId}/profiles/{profileId}`
   ///
-  /// 2. **External variables**: Variables like `{baseUrl}` or `{storageRoot}` that are provided
-  ///    at runtime through the generated `initRdfMapper` method
-  ///    - Example: `'{baseUrl}/books/{id}'` would require a parameter like
-  ///      `String Function() baseUrl` in the `initRdfMapper` method
+  /// 2. **Context variables**: Variables like `{baseUrl}` or `{storageRoot}` that can be provided
+  ///    through one of two methods:
+  ///    - Via global provider functions in `initRdfMapper` (e.g., `baseUrlProvider: () => 'https://example.com'`).
+  ///      The generator will automatically add a required parameter to `initRdfMapper`.
+  ///    - Via properties in the same class annotated with `@RdfProvides('baseUrl')`, which is
+  ///      preferred for context variables already available in the class.
   ///
   /// If no template is provided (`template == null`), the property marked with `@RdfIriPart`
   /// will be used as the complete IRI value.

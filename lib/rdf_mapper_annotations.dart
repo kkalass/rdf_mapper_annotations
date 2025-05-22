@@ -118,7 +118,7 @@
 /// - [RdfProperty]: Main property annotation, links to an RDF predicate
 /// - [RdfIriPart]: Marks properties that contribute to IRI construction
 /// - [RdfValue]: Identifies the value source for literal serialization
-/// - [RdfCollectionOf]: Specifies item type for collections
+/// - [RdfMapEntry]: Specifies how map entries shall be (de-)serialized
 ///
 /// For usage examples, see the [example](https://github.com/kkalass/rdf_mapper_annotations/tree/main/example) directory.
 library;

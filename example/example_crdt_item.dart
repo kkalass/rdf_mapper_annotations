@@ -21,7 +21,7 @@ class Item {
   late DateTime createdAt;
 
   @RdfProperty(SolidTaskTask.vectorClock)
-  @RdfCollectionOf(VectorClockEntry)
+  @RdfMapEntry(VectorClockEntry)
   late Map<String, int> vectorClock;
 
   @RdfProperty(SolidTaskTask.isDeleted)
@@ -46,6 +46,7 @@ class Item {
   SolidTaskVectorClockEntry.classIri,
   IriStrategy(
       '{storageRoot}/solidtask/task/{taskId}/vectorclock/{clientId}.ttl'),
+  registerGlobally: false,
 )
 class VectorClockEntry {
   @RdfIriPart()
@@ -53,11 +54,11 @@ class VectorClockEntry {
     SolidTaskVectorClockEntry.clientId,
     iri: IriMapping('{storageRoot}/solidtask/appinstance/{clientId}.ttl'),
   )
-  @RdfCollectionKey()
+  @RdfMapKey()
   final String clientId;
 
   @RdfProperty(SolidTaskVectorClockEntry.clockValue)
-  @RdfCollectionValue()
+  @RdfMapValue()
   final int clockValue;
 
   /// Creates a new vector clock entry

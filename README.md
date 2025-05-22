@@ -48,7 +48,6 @@ class Book {
   final String author;
 
   @RdfProperty(SchemaBook.hasPart)
-  @RdfCollectionOf(Chapter)
   final List<Chapter> chapters;
 
   Book({

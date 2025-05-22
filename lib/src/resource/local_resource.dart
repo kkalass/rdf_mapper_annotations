@@ -14,8 +14,14 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///
 /// When using the standard constructor (`@RdfLocalResource(classIri)`), a mapper is
 /// automatically generated based on the property annotations (like `@RdfProperty`)
-/// in your class and registered within initRdfMapper. This generated mapper will
-/// create RDF triples with the blank node as the subject for each annotated property.
+/// in your class. By default, this mapper is registered within `initRdfMapper`
+/// (when [registerGlobally] is true). This generated mapper will create RDF triples
+/// with the blank node as the subject for each annotated property.
+///
+/// Set [registerGlobally] to `false` if this mapper should not be registered
+/// automatically. This is useful when the mapper requires constructor parameters
+/// that are only available at runtime and should be provided via `@Provider`
+/// annotations in the parent class.
 ///
 /// Unlike `@RdfGlobalResource`, instances with this annotation will be mapped to
 /// blank nodes (anonymous resources) rather than resources with IRIs.
@@ -28,7 +34,8 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///
 /// You can use this annotation in several ways, depending on your mapping needs:
 /// 1. Standard: With a class IRI (`@RdfLocalResource(classIri)`) - the mapper is
-///    automatically generated and registered within initRdfMapper
+///    automatically generated and registered within `initRdfMapper` when
+///    [registerGlobally] is true, which is the default
 /// 2. Named mapper: With `@RdfLocalResource.namedMapper()` - you must implement
 ///    the mapper, instantiate it, and provide it to `initRdfMapper` as a named
 ///    parameter
@@ -64,22 +71,35 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///   // ...
 /// }
 /// ```
-class RdfLocalResource extends BaseMapping<LocalResourceMapper>
+class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
     implements RdfAnnotation {
   /// The RDF class IRI for this blank node.
   ///
   /// This defines the RDF type of the blank node using the `rdf:type` predicate.
   final IriTerm? classIri;
 
-  /// Creates an annotation for a class to be mapped to a blank node.
+  /// Creates an annotation for a class whose instances will be mapped to RDF
+  /// blank nodes.
   ///
-  /// This standard constructor enables automatic generation of a mapper that will
-  /// create RDF triples from instances of the annotated class. The generated
-  /// mapper is automatically registered within initRdfMapper.
+  /// This standard constructor creates a mapper that will create RDF triples from
+  /// instances of the annotated class, with each instance represented as a blank
+  /// node. The generated mapper is automatically registered within `initRdfMapper`
+  /// when [registerGlobally] is `true` (the default).
+  ///
+  /// Set [registerGlobally] to `false` if this mapper should not be registered
+  /// automatically. This is useful when:
+  /// - The mapper requires constructor parameters that are only available at runtime
+  /// - The mapper is only used in specific contexts via `@Provider` annotations
+  /// - You want to manually manage the mapper registration when [registerGlobally] is true.
   ///
   /// [classIri] specifies the `rdf:type` for the blank node, which defines what kind
   /// of entity this is in RDF terms. It is optional, but it's highly recommended to
   /// provide a class IRI to ensure proper typing in the RDF graph.
+  ///
+  /// [registerGlobally] controls whether the generated mapper should be registered globally
+  /// in the `initRdfMapper` function. Set to `false` when the mapper should not be
+  /// globally accessible, typically when all required context will be provided by parent
+  /// objects via `@RdfProvides` annotations.
   ///
   /// Unlike `RdfGlobalResource`, no IRI construction strategy is needed since blank
   /// nodes are anonymous resources that do not have permanent identifiers.
@@ -96,19 +116,21 @@ class RdfLocalResource extends BaseMapping<LocalResourceMapper>
   ///   // ...
   /// }
   /// ```
-  const RdfLocalResource([this.classIri]) : super();
+  const RdfLocalResource([this.classIri, bool registerGlobally = true])
+      : super(registerGlobally: registerGlobally);
 
-  /// Creates a reference to a named mapper that will be injected at runtime.
+  /// Creates a reference to a named mapper for this local resource.
   ///
-  /// This constructor is used when you want to provide a custom
-  /// `LocalResourceMapper` implementation for this class via dependency
-  /// injection. When using this approach, you must:
+  /// Use this constructor when you want to provide a custom `LocalResourceMapper`
+  /// implementation via dependency injection. When using this approach, you must:
   /// 1. Implement the mapper yourself
   /// 2. Instantiate the mapper (outside of the generated code)
   /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
   ///
-  /// The [name] will correspond to a parameter in the generated `initRdfMapper`
-  /// function.
+  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function.
+  ///
+  /// Note: The mapper will be registered globally in the `RdfMapper` instance.
+  /// If you need non-global registration, do not annotate your class with this annotation.
   ///
   /// Example:
   /// ```dart

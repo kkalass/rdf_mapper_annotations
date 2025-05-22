@@ -45,7 +45,6 @@ void main() {
       final annotation = RdfProperty(predicate);
 
       expect(annotation.predicate, equals(predicate));
-      expect(annotation.required, isTrue);
       expect(annotation.include, isTrue);
       expect(annotation.globalResource, isNull);
       expect(annotation.localResource, isNull);
@@ -62,7 +61,6 @@ void main() {
 
       final annotation = RdfProperty(
         predicate,
-        required: false,
         include: false,
         globalResource: mockGlobalResource,
         localResource: mockLocalResource,
@@ -71,7 +69,7 @@ void main() {
       );
 
       expect(annotation.predicate, equals(predicate));
-      expect(annotation.required, isFalse);
+
       expect(annotation.include, isFalse);
       expect(annotation.globalResource, equals(mockGlobalResource));
       expect(annotation.localResource, equals(mockLocalResource));

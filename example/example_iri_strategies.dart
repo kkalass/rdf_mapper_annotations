@@ -85,7 +85,7 @@ class SimpleBook {
 }
 
 // A resource class with the IRI as Id property.
-@RdfGlobalResource(SchemaPerson.classIri, IriStrategy('{iri}'))
+@RdfGlobalResource(SchemaPerson.classIri, IriStrategy())
 class Person {
   // The field will contain the full IRI as Id, e.g.: https://example.org/person/43
   @RdfIriPart()

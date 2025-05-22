@@ -1,3 +1,4 @@
+import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
@@ -101,7 +102,7 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
 /// }
 /// ```
-class RdfLiteral extends BaseMapping<LiteralTermMapper>
+class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
     implements RdfAnnotation {
   /// Optional method name to use for converting the object to a [LiteralTerm].
   ///
@@ -119,6 +120,8 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
   /// and attempt to deserialize the literal value into that property's type
   /// and pass it to the class's constructor.
   final String? fromLiteralTermMethod;
+
+  final IriTerm? datatype;
 
   /// Creates an annotation for a class to be mapped to a literal term.
   ///
@@ -145,18 +148,18 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
   ///   }
   /// }
   /// ```
-  const RdfLiteral()
+  const RdfLiteral([this.datatype])
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
-        super();
+        super(registerGlobally: true);
 
   /// Creates an annotation for a class using custom methods for literal conversion.
   ///
   /// This approach allows you to define how your class is converted to/from RDF literals
   /// by specifying methods in your class:
   ///
-  /// * [toLiteralTermMethod]: An instance method that converts your object to a `LiteralTerm`
-  /// * [fromLiteralTermMethod]: A static method that creates your object from a `LiteralTerm`
+  /// * [toLiteralTermMethod]: An instance method that converts your object to a `String`
+  /// * [fromLiteralTermMethod]: A static method that creates your object from a `String`
   ///
   /// This is ideal for classes that need special formatting or validation during
   /// serialization, such as formatted values with specific string representations
@@ -174,17 +177,18 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
   ///   Temperature(this.celsius);
   ///
   ///   // Instance method for serialization
-  ///   LiteralTerm formatCelsius() => LiteralTerm('$celsius°C');
+  ///   String formatCelsius() => '$celsius°C';
   ///
   ///   // Static method for deserialization
-  ///   static Temperature parse(LiteralTerm term) =>
-  ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
+  ///   static Temperature parse(String value) =>
+  ///     Temperature(double.parse(value.replaceAll('°C', '')));
   /// }
   /// ```
-  const RdfLiteral.custom({
-    required String toLiteralTermMethod,
-    required String fromLiteralTermMethod,
-  })  : toLiteralTermMethod = toLiteralTermMethod,
+  const RdfLiteral.custom(
+      {this.datatype,
+      required String toLiteralTermMethod,
+      required String fromLiteralTermMethod})
+      : toLiteralTermMethod = toLiteralTermMethod,
         fromLiteralTermMethod = fromLiteralTermMethod,
         super();
 
@@ -224,6 +228,7 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
   const RdfLiteral.namedMapper(String name)
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
+        datatype = null,
         super.namedMapper(name);
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
@@ -260,6 +265,7 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
   const RdfLiteral.mapper(Type mapperType)
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
+        datatype = null,
         super.mapper(mapperType);
 
   /// Creates a reference to a directly provided mapper instance for this literal
@@ -294,6 +300,7 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
   const RdfLiteral.mapperInstance(LiteralTermMapper instance)
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
+        datatype = null,
         super.mapperInstance(instance);
 }
 
@@ -320,6 +327,9 @@ class RdfLiteral extends BaseMapping<LiteralTermMapper>
 /// final Price price;
 /// ```
 class LiteralMapping extends BaseMapping<LiteralTermMapper> {
+  final String? language;
+  final IriTerm? datatype;
+
   /// Creates a reference to a named mapper for this literal term.
   ///
   /// This constructor is used when you want to provide a custom `LiteralTermMapper`
@@ -353,7 +363,10 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   /// final tempMapper = MyTemperatureMapper();
   /// initRdfMapper({required LiteralTermMapper<Temperature> temperatureMapper: tempMapper}) { ... }
   /// ```
-  const LiteralMapping.namedMapper(String name) : super.namedMapper(name);
+  const LiteralMapping.namedMapper(String name)
+      : language = null,
+        datatype = null,
+        super.namedMapper(name);
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
   ///
@@ -386,7 +399,10 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///   }
   /// }
   /// ```
-  const LiteralMapping.mapper(Type mapperType) : super.mapper(mapperType);
+  const LiteralMapping.mapper(Type mapperType)
+      : language = null,
+        datatype = null,
+        super.mapper(mapperType);
 
   /// Creates a reference to a directly provided mapper instance for this literal
   /// term.
@@ -418,7 +434,73 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
   const LiteralMapping.mapperInstance(LiteralTermMapper instance)
-      : super.mapperInstance(instance);
+      : language = null,
+        datatype = null,
+        super.mapperInstance(instance);
+
+  /// Specifies a language tag for string literals.
+  ///
+  /// This constructor creates a mapping that will apply the given language tag
+  /// to string values when serialized as RDF literals. This is particularly useful
+  /// for human-readable text that appears in a specific language.
+  ///
+  /// The [language] parameter must be a valid BCP47 language tag (e.g., 'en', 'de-DE').
+  ///
+  /// Example:
+  /// ```dart
+  /// @RdfProperty(
+  ///   SchemaBook.description,
+  ///   literal: LiteralMapping.withLanguage('en')
+  /// )
+  /// final String description; // Will be serialized as "description"@en
+  /// ```
+  ///
+  /// Note: While language tags are primarily intended for string properties, this constructor
+  /// can also be used with non-string properties. In such cases, the mapper first converts
+  /// the value to a string representation using the appropriate registered mapper, then
+  /// applies the language tag to the resulting string literal. This makes it ideal for use
+  /// with custom value types that essentially wrap a string, such as translated content,
+  /// descriptions, or any text that should be associated with a specific language.
+  const LiteralMapping.withLanguage(String language)
+      : language = language,
+        datatype = null,
+        super();
+
+  /// Specifies a custom datatype for literal values.
+  ///
+  /// This constructor creates a mapping that will apply the given datatype IRI
+  /// to values when serialized as RDF literals. This is useful when you need to
+  /// explicitly set the datatype of a literal, overriding the default datatype
+  /// that would be inferred from the Dart type.
+  ///
+  /// The [datatype] parameter must be an `IriTerm` representing the IRI of the RDF datatype.
+  /// Well-known datatypes are available as constants in the Xsd class in the
+  /// `rdf_vocabularies` package. For example:
+  /// - Xsd.string
+  /// - Xsd.integer
+  /// - Xsd.decimal
+  /// - Xsd.boolean
+  /// - Xsd.date
+  /// - Xsd.time
+  ///
+  /// Example:
+  /// ```dart
+  /// @RdfProperty(
+  ///   SchemaBook.publicationYear,
+  ///   literal: LiteralMapping.withType(Xsd.gYear)
+  /// )
+  /// final int year; // Will be serialized with a specific year datatype
+  /// ```
+  ///
+  /// Note: This constructor can be used with both string and non-string properties. For non-string
+  /// properties, the mapper first converts the value to a string representation using the
+  /// appropriate registered mapper for the property's type, then applies the custom datatype
+  /// to the resulting string literal. This allows you to use custom datatypes with any property
+  /// type that has a registered mapper, while preserving the semantics of the original value.
+  const LiteralMapping.withType(IriTerm datatype)
+      : language = null,
+        datatype = datatype,
+        super();
 }
 
 /// Marks a property within a class as the primary value source for RDF literal

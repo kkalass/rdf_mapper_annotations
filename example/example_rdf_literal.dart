@@ -20,6 +20,10 @@ class EnhancedRating {
 
 /// Example for a class that uses custom conversion methods
 @RdfLiteral.custom(
+  // If you leave out the datatype, it will be `Xsd.string` by default.
+  // Note that you may have compatibility issues with other RDF libraries
+  // if you use a datatype that is not in the `Xsd` namespace.
+  datatype: IriTerm.prevalidated('http://example.org/temperature'),
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
 )
@@ -29,17 +33,11 @@ class Temperature {
   Temperature(this.celsius);
 
   // Custom formatting method used by the @RdfLiteral annotation
-  LiteralTerm formatCelsius() => LiteralTerm(
-        '$celsius°C',
-        // For maximum compatibility you would typically not specify
-        // a datatype here (thus defaulting to xsd:string), but we can also
-        // specify a custom datatype.
-        datatype: IriTerm('http://example.org/temperature'),
-      );
+  String formatCelsius() => '$celsius°C';
 
   // Static method for parsing text back into a Temperature instance
-  static Temperature parse(LiteralTerm term) {
-    return Temperature(double.parse(term.value.replaceAll('°C', '')));
+  static Temperature parse(String value) {
+    return Temperature(double.parse(value.replaceAll('°C', '')));
   }
 }
 
@@ -83,13 +81,18 @@ class GeneratedTemperatureMapper implements LiteralTermMapper<Temperature> {
   @override
   LiteralTerm toRdfTerm(Temperature temp, SerializationContext context) {
     // The toStringMethod is used from the @RdfLiteral annotation
-    return temp.formatCelsius();
+    return LiteralTerm(temp.formatCelsius(),
+        datatype: IriTerm.prevalidated('http://example.org/temperature'));
   }
 
   @override
   Temperature fromRdfTerm(LiteralTerm term, DeserializationContext context) {
+    assert(
+      term.datatype == IriTerm.prevalidated('http://example.org/temperature'),
+      'Expected datatype to be http://example.org/temperature',
+    );
     // Convert back to a Temperature instance with the static parse method
-    return Temperature.parse(term);
+    return Temperature.parse(term.value);
   }
 }
 

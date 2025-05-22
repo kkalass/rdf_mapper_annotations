@@ -135,3 +135,34 @@ abstract class BaseMapping<M extends Mapper> {
         _mapperType = null,
         _mapperInstance = instance;
 }
+
+abstract class BaseMappingAnnotation<M extends Mapper> extends BaseMapping<M>
+    implements RdfAnnotation {
+  /// Controls whether the generated mapper should be registered globally
+  /// in the `initRdfMapper` function.
+  ///
+  /// When `true` (default), the mapper is registered globally and can be used by any
+  /// class in your application. Use this for standard resources that are accessed
+  /// throughout your application.
+  ///
+  /// When `false`, the mapper is not registered globally and is only used within
+  /// the context where it's needed. Use this when:
+  /// - The mapper has dependencies that are provided by parent objects via `@RdfProvides`
+  /// - The mapper is only used in specific contexts and shouldn't be generally available
+  /// - You want to prevent the mapper's dependencies from being required in `initRdfMapper`
+  final bool registerGlobally;
+
+  const BaseMappingAnnotation({this.registerGlobally = true}) : super();
+
+  const BaseMappingAnnotation.namedMapper(String name)
+      : registerGlobally = true,
+        super.namedMapper(name);
+
+  const BaseMappingAnnotation.mapper(Type mapperType)
+      : registerGlobally = true,
+        super.mapper(mapperType);
+
+  const BaseMappingAnnotation.mapperInstance(M instance)
+      : registerGlobally = true,
+        super.mapperInstance(instance);
+}
