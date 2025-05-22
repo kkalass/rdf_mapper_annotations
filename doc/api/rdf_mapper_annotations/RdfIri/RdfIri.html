@@ -57,14 +57,17 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfIri</span>(<wbr>[<ol class="parameter-list single-line"> <li><span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span></span></li>
+      <span class="name ">RdfIri</span>(<wbr>[<ol class="parameter-list single-line"> <li><span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span>, </span></li>
+<li><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span></li>
 </ol>])
     </section>
     
 <section class="desc markdown">
   <p>Creates an annotation for a class to be mapped to an IRI term.</p>
 <p>This standard constructor creates a mapper that automatically handles the
-conversion between your class and an IRI term using:</p>
+conversion between your class and an IRI term. By default, this mapper is
+registered within <code>initRdfMapper</code> when <code>registerGlobally</code> is <code>true</code>.</p>
+<p>The mapper uses:</p>
 <ul>
 <li>An optional <code>template</code> with placeholders like <code>{propertyName}</code> that will be
 replaced with values from properties marked with <code>@RdfIriPart</code></li>
@@ -88,13 +91,18 @@ class Uri {
   // ...
 }
 </code></pre>
+<p>The <code>registerGlobally</code> parameter determines whether the generated mapper is
+registered globally in <code>initRdfMapper</code>. If set to <code>false</code>, the mapper will
+not be registered automatically and must be provided via <code>@Provider</code>
+annotations in the parent class.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfIri([this.template]) : super();</code></pre>
+  <pre class="language-dart"><code class="language-dart">const RdfIri([this.template, bool registerGlobally = true])
+    : super(registerGlobally: registerGlobally);</code></pre>
 </section>
 
 
@@ -122,7 +130,7 @@ class Uri {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

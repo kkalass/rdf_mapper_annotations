@@ -62,7 +62,24 @@
 
     
 <section class="desc markdown">
-  <p>The type of collection to use for RDF property serialization.</p>
+  <p>Specifies how Dart collection properties are represented in the RDF graph.</p>
+<p>This enum determines the serialization strategy for collection types (List, Set, Map, etc.)
+when mapping between Dart objects and RDF triples.</p>
+<p>IMPORTANT NOTE: By default, this library represents Dart collections (List, Set, etc.)
+as multiple RDF triples with the same subject and predicate, but different objects.
+This is NOT the same as the RDF Collection concept (rdf:List with rdf:first/rdf:rest/rdf:nil),
+which requires specific handling to maintain order.</p>
+<p>For Map collections, you have two options:</p>
+<ul>
+<li>Provide a mapper for <code>MapEntry&amp;lt;K,V&amp;gt;</code> instances directly in the <code>@RdfProperty</code> annotation (as iri, literal, localResource or globalResource).</li>
+<li>Use the dedicated annotations for complex map entries:
+<ul>
+<li><a href="../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a> - Defines the class that represents a map entry</li>
+<li><a href="../rdf_mapper_annotations/RdfMapKey-class.html">RdfMapKey</a> - Marks a property as the key in a map entry</li>
+<li><a href="../rdf_mapper_annotations/RdfMapValue-class.html">RdfMapValue</a> - Marks a property as the value in a map entry</li>
+</ul>
+</li>
+</ul>
 </section>
 
 
@@ -101,11 +118,33 @@
 
 </dt>
 <dd>
-  <p>Automatically determine collection type from property type.</p>
-<p>This default option analyzes the property type:</p>
+  <p>Automatically determines the appropriate collection representation based on the Dart property type.</p>
+<p>This default option intelligently analyzes the property type:</p>
 <ul>
-<li>For <code>List</code> or <code>Set</code> types, treats as a collection of values</li>
-<li>For other types, treats as a single value</li>
+<li>
+<p>For <code>Iterable</code> types (List, Set, etc.): Creates multiple triples sharing the same subject and predicate.
+Each item produces a separate triple with the same predicate. For example:</p>
+<pre class="language-dart"><code>&lt;subject&gt; &lt;predicate&gt; "item1" .
+&lt;subject&gt; &lt;predicate&gt; "item2" .
+&lt;subject&gt; &lt;predicate&gt; "item3" .
+</code></pre>
+<p>For complex objects, each item is fully serialized as a separate resource in the RDF graph.</p>
+<p>Note: This is NOT an rdf:List (which would use rdf:first/rdf:rest/rdf:nil).
+Order is not guaranteed to be preserved in the RDF serialization.</p>
+</li>
+<li>
+<p>For <code>Map</code> types: Creates a collection of triples with the same subject and predicate.
+Each map entry is processed according to available mapping configurations:</p>
+<ul>
+<li>If <code>@RdfProperty</code> includes a mapper that handles <code>MapEntry&amp;lt;K,V&amp;gt;</code> directly (e.g.,
+through <code>literal</code>, <code>iri</code>, etc.), that mapper is used without requiring additional annotations.</li>
+<li>Otherwise, each entry is serialized as a separate resource in the RDF graph, using either
+<a href="../rdf_mapper_annotations/RdfMapKey-class.html">RdfMapKey</a>, <a href="../rdf_mapper_annotations/RdfMapValue-class.html">RdfMapValue</a>, and <a href="../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a> annotations or standard registered mappers for <code>MapEntry</code> (if any).</li>
+</ul>
+</li>
+<li>
+<p>For all other types: Treats as a single value (non-collection).</p>
+</li>
 </ul>
   
 
@@ -118,10 +157,10 @@
 
 </dt>
 <dd>
-  <p>Not a collection - treat as a single value even if the Dart type is a
-collection.</p>
-<p>Use this to override automatic collection detection when you want a collection
-property to be treated as a single value.</p>
+  <p>Forces the property to be treated as a single value, even if the Dart type is a collection.</p>
+<p>Use this to explicitly override the automatic collection detection when you need a collection
+property to be serialized as a single value in the RDF graph. This gives you full control
+over the mapping process in your custom mapper implementation.</p>
   
 
 </dd>
@@ -289,7 +328,7 @@ property to be treated as a single value.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

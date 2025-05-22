@@ -58,37 +58,60 @@
     
 <section class="desc markdown">
   <p>Marks a property as providing a named value that can be referenced in
-IRI templates throughout the data model.</p>
-<p>This annotation creates a shared variable that can be used in IRI templates
-of related resources. This is particularly useful for maintaining referential
-integrity between related entities without duplicating logic.</p>
-<p>Example:</p>
+IRI templates in the RDF mapping system.</p>
+<p>This annotation makes the property's value available to mappers via constructor injection,
+but only to those that explicitly require the value by name and signature in their constructor.
+The value can then be referenced in IRI templates using the provided name. This works
+consistently across all levels:</p>
+<ul>
+<li>Property mappers within the same class receive the provided values if their constructor
+requires a provider for that specific variable</li>
+<li>Property mappers for nested resources (child objects) receive the provided values if they
+require them in their constructor</li>
+<li>IRI templates can reference these values using <code>{variableName}</code> and the system automatically
+ensures the necessary providers are available</li>
+</ul>
+<p>Technically, the same constructor injection mechanism is used in all cases - each property
+mapper receives provider functions for all variables it needs. This avoids the need
+to register global provider functions in <code>initRdfMapper</code> for values that are
+available within the object graph.</p>
+<p>Examples:</p>
+<p><strong>Example: Using @RdfProvides to pass parentId to Iri property and nested resource</strong></p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
-  TaskVocab.Task.classIri,
-  IriStrategy('{storageRoot}/tasks/{id}.ttl'),
+  ExampleVocab.Parent,
+  IriStrategy('{baseUri}/{id}.ttl'),
 )
-class Task {
-  @RdfIriPart('id')
-  @RdfProvides("taskId") // Makes 'id' available as '{taskId}' in other templates
-  final String id;
+class Parent {
+  @RdfIriPart()
+  @RdfProvides("parentId")
+  late String id;
 
-  @RdfProperty(TaskVocab.Task.comments)
-  @RdfCollectionOf(Comment)
-  final List&lt;Comment&gt; comments;
-  // ...
+  @RdfProperty(ExampleVocab.child)
+  late Child child;
+
+  @RdfProperty(ExampleVocab.sibling,
+      iri: IriMapping('{baseUri}/{parentId}/sibling/{siblingId}.ttl'))
+  late String siblingId;
 }
 
 @RdfGlobalResource(
-  TaskVocab.Comment.classIri,
-  IriStrategy('{storageRoot}/tasks/{taskId}/comments/{commentId}.ttl'),
+  ExampleVocab.Child,
+  IriStrategy('{baseUri}/{parentId}/child/{id}.ttl'),
+  registerGlobally: false,
 )
-class Comment {
-  @RdfIriPart('commentId')
-  final String commentId;
-  // The {taskId} in the IRI comes from the Task.id via @RdfProvides
-  // ...
+class Child {
+  @RdfIriPart()
+  late String id;
+
+  @RdfProperty(ExampleVocab.childName)
+  late String name;
 }
 </code></pre>
+<p>Note that the baseUri will be provided by a global provider function
+in <code>initRdfMapper</code>, while the parentId is provided by the <code>@RdfProvides</code>
+annotation on the <code>id</code> property of the <code>Parent</code> class. The Child class
+is annotated to not be registered globally, so it will not be available
+in <code>initRdfMapper</code> and will only be used within the context of the Parent.</p>
 </section>
 
 
@@ -120,10 +143,10 @@ class Comment {
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfProvides" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfProvides/RdfProvides.html">RdfProvides</a></span><span class="signature">(<span class="parameter" id="-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">name</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfProvides/RdfProvides.html">RdfProvides</a></span><span class="signature">([<span class="parameter" id="-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">name</span></span>])</span>
         </dt>
         <dd>
-          
+          Creates an annotation that provides a value to be used in IRI templates.
             <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
@@ -255,7 +278,7 @@ class Comment {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

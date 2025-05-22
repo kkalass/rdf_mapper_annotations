@@ -65,8 +65,11 @@
       </section>
       
 <section class="desc markdown">
-  <p>Whether to include this property during serialization.
-If <code>false</code>, the property will be skipped when generating RDF. Defaults to <code>true</code>.</p>
+  <p>Whether to include this property during serialization to RDF.</p>
+<p>If <code>false</code>, the property will be read during deserialization but skipped when generating RDF output.
+This creates a one-way mapping (read-only from RDF perspective). This is useful for properties that
+should be loaded from RDF but then managed internally by your application logic without writing changes
+back to RDF. Defaults to <code>true</code>.</p>
 </section>
 
       
@@ -101,7 +104,7 @@ If <code>false</code>, the property will be skipped when generating RDF. Default
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

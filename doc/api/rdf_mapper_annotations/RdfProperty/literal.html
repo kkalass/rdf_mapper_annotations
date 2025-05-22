@@ -65,34 +65,48 @@
       </section>
       
 <section class="desc markdown">
-  <p>Optional specification for treating the property's value as a literal with
-special handling (e.g., custom serialization/deserialization methods,
-language tags).</p>
-<p>Use this parameter when the property's value requires specialized literal serialization
-that differs from the standard mapper behavior. It allows you to customize how a property
-value is serialized as an RDF literal, independent of how the class is mapped globally.</p>
-<p>When specified at the property level, this annotation can provide property-specific
-literal conversion rules. This is especially useful when:</p>
+  <p>Specifies custom literal conversion for the property value.</p>
+<p>Use this parameter when a property requires specialized literal serialization
+different from the standard mapping behavior, such as custom formatting,
+language tags, or datatype handling.</p>
+<p>Only needed when there is no LiteralMapper already registered globally for the
+property value's type, or when you need to override the standard literal conversion
+for this specific property.</p>
+<p>This provides property-specific literal conversion rules, useful when:</p>
 <ul>
-<li>You need different serialization rules for the same type in different contexts</li>
+<li>Different serialization rules are needed for the same type in different contexts</li>
 <li>A property requires special datatype handling or language tags</li>
-<li>You want to use specialized formatting for a specific property value</li>
+<li>You need specialized formatting for a specific property</li>
 </ul>
-<p>You can use any of the RdfLiteral constructor variants:</p>
+<p>Available LiteralMapping constructor variants:</p>
 <ul>
-<li>Standard constructor: <code>literal: RdfLiteral()</code> - automatic conversion based on @RdfValue</li>
-<li><code>.custom()</code> - specify custom conversion methods: <code>literal: RdfLiteral.custom(...)</code></li>
 <li><code>.namedMapper()</code> - reference a mapper provided to <code>initRdfMapper</code></li>
 <li><code>.mapper()</code> - use a mapper type that will be instantiated</li>
 <li><code>.mapperInstance()</code> - use a specific mapper instance</li>
+<li><code>.withLanguage()</code> - add a language tag to string literals (e.g., "text"@en)</li>
+<li><code>.withType()</code> - specify a custom RDF datatype for the literal</li>
 </ul>
-<p>Example:</p>
+<p>Examples:</p>
 <pre class="language-dart"><code class="language-dart">// Using a custom literal mapper for a property
 @RdfProperty(
   SchemaBook.price,
   literal: LiteralMapping.namedMapper('currencyMapper')
 )
-final Price price; // Will be serialized using the custom 'currencyMapper'
+final Price price; // Serialized using the custom 'currencyMapper'
+
+// Adding a language tag to a string property
+@RdfProperty(
+  SchemaBook.description,
+  literal: LiteralMapping.withLanguage('en')
+)
+final String description; // Serialized as "description"@en
+
+// Specifying a custom datatype
+@RdfProperty(
+  SchemaBook.publicationDate,
+  literal: LiteralMapping.withType(Xsd.date)
+)
+final String date; // Serialized with a specific datatype
 </code></pre>
 </section>
 
@@ -128,7 +142,7 @@ final Price price; // Will be serialized using the custom 'currencyMapper'
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

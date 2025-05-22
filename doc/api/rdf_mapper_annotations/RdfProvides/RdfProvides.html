@@ -57,16 +57,21 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfProvides</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">name</span></span></li>
-</ol>)
+      <span class="name ">RdfProvides</span>(<wbr>[<ol class="parameter-list single-line"> <li><span class="parameter" id="-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">name</span></span></li>
+</ol>])
     </section>
     
+<section class="desc markdown">
+  <p>Creates an annotation that provides a value to be used in IRI templates.</p>
+<p><code>name</code> is the name by which the value can be referenced in templates.
+If omitted, the property's own name is used.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfProvides(this.name);</code></pre>
+  <pre class="language-dart"><code class="language-dart">const RdfProvides([this.name]);</code></pre>
 </section>
 
 
@@ -94,7 +99,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

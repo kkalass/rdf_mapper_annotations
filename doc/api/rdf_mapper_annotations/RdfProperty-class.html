@@ -57,59 +57,125 @@
 
     
 <section class="desc markdown">
-  <p>Marks a property to be mapped to/from an RDF predicate.</p>
-<p>This is the core annotation for class properties, defining how they
-are serialized to RDF and deserialized back to Dart objects. Every property
-that should be included in RDF serialization must be annotated with
-<code>@RdfProperty</code> and provide a predicate IRI that identifies the relationship
-in the RDF graph.</p>
-<p><code>RdfProperty</code> supports several advanced mapping scenarios through its
-parameters:</p>
+  <p>Maps a Dart class property to an RDF predicate.</p>
+<p>This core annotation defines how properties are serialized to RDF and
+deserialized to Dart objects. Any property that should participate in
+RDF serialization must use <code>@RdfProperty</code> with a predicate IRI that identifies
+the relationship in the RDF graph.</p>
+<p>NOTE: Only public properties are supported. Private properties (with underscore prefix)
+cannot be used with RDF mapping.</p>
+<p>The annotation can be applied to:</p>
 <ul>
-<li><strong>Basic literal mapping</strong>: Simple values like String, num, bool, DateTime are
-automatically mapped to appropriate RDF literal values</li>
-<li><strong>Nested resources</strong>: Properties that refer to other objects can be mapped as:
+<li><strong>Instance fields</strong>: Compatible with all type-annotated fields (mutable, <code>final</code>, and <code>late</code>)</li>
+<li><strong>Getters and setters</strong>: Follow these rules:
 <ul>
-<li><em>Global resources</em> with their own IRIs (using <code>globalResource</code> parameter)</li>
-<li><em>Local resources</em> as blank nodes (using <code>localResource</code> parameter)</li>
+<li>With <code>include: true</code> (default): Requires both getter and setter for full serialization/deserialization</li>
+<li>With <code>include: false</code> (read-only from RDF): Requires only a setter as the value is only deserialized</li>
 </ul>
 </li>
-<li><strong>Custom IRI mapping</strong>: Property values can be converted to IRIs (using <code>iri</code> parameter)</li>
-<li><strong>Custom literal serialization</strong>: Property values can use specialized literal
-serialization (using <code>literal</code> parameter)</li>
-<li><strong>Collections</strong>: Lists, Sets and Maps are handled automatically or can be customized</li>
 </ul>
-<p><strong>Important:</strong> Only specify one of <code>iri</code>, <code>localResource</code>, <code>literal</code>, or
-<code>globalResource</code> for a property, as they define mutually exclusive
-mapping strategies.</p>
+<p><code>RdfProperty</code> handles data conversion in these ways:</p>
+<ul>
+<li>
+<p><strong>Automatic type mapping</strong>:</p>
+<ul>
+<li>Standard Dart types (String, int, bool, DateTime, etc.) → RDF literals</li>
+<li>Types with annotations (<code>@RdfIri</code>, <code>@RdfLiteral</code>, <code>@RdfGlobalResource</code>, <code>@RdfLocalResource</code>)
+→ use their generated mappers</li>
+<li>Types with registered mappers → handled according to their registration</li>
+</ul>
+</li>
+<li>
+<p><strong>Custom mapping overrides</strong>: For specialized cases, specify exactly one of:</p>
+<ul>
+<li><code>iri</code>: Converts values to IRI references</li>
+<li><code>localResource</code>: Maps nested objects without assigned IRIs (using anonymous identifiers)</li>
+<li><code>globalResource</code>: Maps nested objects as resources with their own IRIs</li>
+<li><code>literal</code>: Applies custom literal serialization</li>
+</ul>
+</li>
+<li>
+<p><strong>Default value handling</strong>:</p>
+<ul>
+<li>Provides fallbacks when properties are missing during deserialization</li>
+<li>Optional compact serialization by excluding properties matching defaults</li>
+<li>Enables non-nullable fields to work with potentially missing data</li>
+</ul>
+</li>
+<li>
+<p><strong>Collection handling</strong>: Lists, Sets and Maps receive special treatment:</p>
+<ul>
+<li>Automatically detected based on type</li>
+<li>Each item generates a separate triple with the same predicate</li>
+<li>Not serialized as RDF Lists (rdf:first/rdf:rest/rdf:nil)</li>
+<li>Map collections must use <a href="../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a>, <a href="../rdf_mapper_annotations/RdfMapKey-class.html">RdfMapKey</a>, and <a href="../rdf_mapper_annotations/RdfMapValue-class.html">RdfMapValue</a></li>
+</ul>
+</li>
+</ul>
 <h2 id="basic-usage">Basic Usage</h2>
 <pre class="language-dart"><code class="language-dart">// Basic literal properties with default serialization
 @RdfProperty(SchemaBook.name)
 final String title;
 
-// Optional property (not required during deserialization)
-@RdfProperty(SchemaBook.author, required: false)
+// Optional property (nullable type makes it not required during deserialization)
+@RdfProperty(SchemaBook.author)
 String? author;
 
-// Property that won't be included in serialization (read-only)
+// Property that will be read from RDF but not written back during serialization
 @RdfProperty(SchemaBook.modified, include: false)
-DateTime get lastModified =&gt; _modified;
+DateTime lastModified;
+
+// A setter that updates the lastModified field internally
+set updateLastModified(DateTime value) {
+  lastModified = value;
+}
+
+// A completely separate property without RDF mapping - no annotation needed
+bool get isRecentlyModified =&gt;
+  DateTime.now().difference(lastModified).inDays &lt; 7;
+
+// Non-nullable property with default value (won't cause error if missing)
+@RdfProperty(SchemaBook.status, defaultValue: 'active')
+final String status;
+
+// Property with default that will be included in serialization even if equal to default
+@RdfProperty(
+  SchemaBook.rating,
+  defaultValue: 0,
+  includeDefaultsInSerialization: true
+)
+final int rating;
 </code></pre>
 <h2 id="advanced-mapping-scenarios">Advanced Mapping Scenarios</h2>
+<p>These examples demonstrate how to override the default mapping behavior when needed.</p>
 <h3 id="iri-mapping">IRI Mapping</h3>
-<pre class="language-dart"><code class="language-dart">// Property value converted to an IRI using a template
+<pre class="language-dart"><code class="language-dart">// Override: String property value converted to an IRI using a template
 @RdfProperty(
   Dcterms.creator,
-  iri: IriMapping('{baseUri}/profile/{value}')
+  iri: IriMapping('{baseUri}/profile/{userId}')
 )
 final String userId;
 </code></pre>
-<h3 id="local-resource-blank-node-mapping">Local Resource (Blank Node) Mapping</h3>
-<pre class="language-dart"><code class="language-dart">// Nested object as blank node with standard mapper
+<p>In the example above:</p>
+<ul>
+<li><code>{userId}</code> is a property-specific placeholder that refers directly to the property's value</li>
+<li><code>{baseUri}</code> is a context variable that must be provided through one of two methods:
+<ol>
+<li>Via a global provider function in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>)
+The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
+<li>Via another property in the same class annotated with <code>@RdfProvides('baseUri')</code>
+This is preferred for context variables that are already available in the class.</li>
+</ol>
+</li>
+</ul>
+<p>For instance, if <code>userId</code> contains "jsmith", and <code>baseUri</code> resolves to "https://example.com",
+this will generate an IRI: "https://example.com/profile/jsmith"</p>
+<h3 id="local-resource-anonymous-resource-mapping">Local Resource (Anonymous Resource) Mapping</h3>
+<pre class="language-dart"><code class="language-dart">// Automatic: Person class is already annotated with @RdfLocalResource or implemented and registered manually
 @RdfProperty(SchemaBook.author)
-final Person author; // Person class must have @RdfLocalResource
+final Person author;
 
-// Nested object with custom mapper specifically for this relationship
+// Override: Use custom mapper for this specific relationship
 @RdfProperty(
   SchemaBook.publisher,
   localResource: LocalResourceMapping.namedMapper('customPublisherMapper')
@@ -117,11 +183,11 @@ final Person author; // Person class must have @RdfLocalResource
 final Publisher publisher;
 </code></pre>
 <h3 id="global-resource-mapping">Global Resource Mapping</h3>
-<pre class="language-dart"><code class="language-dart">// Reference to another resource with its own IRI
+<pre class="language-dart"><code class="language-dart">// Automatic: Organization class is already annotated with @RdfGlobalResource or implemented and registered manually
 @RdfProperty(SchemaBook.publisher)
-final Organization publisher; // Organization must have @RdfGlobalResource
+final Organization publisher;
 
-// With custom mapper override for this specific relationship
+// Override: Use custom mapper for this specific relationship
 @RdfProperty(
   SchemaBook.publisher,
   globalResource: GlobalResourceMapping.namedMapper('specialPublisherMapper')
@@ -129,7 +195,7 @@ final Organization publisher; // Organization must have @RdfGlobalResource
 final Publisher publisher;
 </code></pre>
 <h3 id="custom-literal-serialization">Custom Literal Serialization</h3>
-<pre class="language-dart"><code class="language-dart">// Custom serialization for a property with special formatting needs
+<pre class="language-dart"><code class="language-dart">// Override: Use custom serialization for a property with special formatting needs
 @RdfProperty(
   SchemaBook.price,
   literal: LiteralMapping.namedMapper('priceMapper')
@@ -137,14 +203,15 @@ final Publisher publisher;
 final Price price;
 </code></pre>
 <h3 id="collection-handling">Collection Handling</h3>
-<pre class="language-dart"><code class="language-dart">// Automatically handled as multiple triples (one per item)
+<pre class="language-dart"><code class="language-dart">// Default behavior: Automatically handles each collection item separately
 @RdfProperty(SchemaBook.author)
-final List&lt;Person&gt; authors;
+final Iterable&lt;Person&gt; authors; // Each Person is fully mapped with its own set of triples
 
-// Force a collection to be treated as a single value
+// Override: Force a collection to be treated as a single value
 @RdfProperty(
   SchemaBook.keywords,
-  collection: RdfCollectionType.none
+  collection: RdfCollectionType.none,
+  literal: LiteralMapping.mapperInstance(const StringListMapper())
 )
 final List&lt;String&gt; tags;
 </code></pre>
@@ -177,10 +244,10 @@ final List&lt;String&gt; tags;
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfProperty" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/RdfProperty.html">RdfProperty</a></span><span class="signature">(<span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span><span class="parameter" id="-param-required"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">required</span> = <span class="default-value">true</span>, </span><span class="parameter" id="-param-include"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">include</span> = <span class="default-value">true</span>, </span><span class="parameter" id="-param-iri"><span class="type-annotation"><a href="../rdf_mapper_annotations/IriMapping-class.html">IriMapping</a>?</span> <span class="parameter-name">iri</span>, </span><span class="parameter" id="-param-localResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/LocalResourceMapping-class.html">LocalResourceMapping</a>?</span> <span class="parameter-name">localResource</span>, </span><span class="parameter" id="-param-literal"><span class="type-annotation"><a href="../rdf_mapper_annotations/LiteralMapping-class.html">LiteralMapping</a>?</span> <span class="parameter-name">literal</span>, </span><span class="parameter" id="-param-globalResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a>?</span> <span class="parameter-name">globalResource</span>, </span><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../rdf_mapper_annotations/RdfCollectionType.html">RdfCollectionType</a></span> <span class="parameter-name">collection</span> = <span class="default-value">RdfCollectionType.auto</span></span>})</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/RdfProperty.html">RdfProperty</a></span><span class="signature">(<span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span><span class="parameter" id="-param-include"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">include</span> = <span class="default-value">true</span>, </span><span class="parameter" id="-param-defaultValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">defaultValue</span>, </span><span class="parameter" id="-param-includeDefaultsInSerialization"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeDefaultsInSerialization</span> = <span class="default-value">false</span>, </span><span class="parameter" id="-param-iri"><span class="type-annotation"><a href="../rdf_mapper_annotations/IriMapping-class.html">IriMapping</a>?</span> <span class="parameter-name">iri</span>, </span><span class="parameter" id="-param-localResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/LocalResourceMapping-class.html">LocalResourceMapping</a>?</span> <span class="parameter-name">localResource</span>, </span><span class="parameter" id="-param-literal"><span class="type-annotation"><a href="../rdf_mapper_annotations/LiteralMapping-class.html">LiteralMapping</a>?</span> <span class="parameter-name">literal</span>, </span><span class="parameter" id="-param-globalResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a>?</span> <span class="parameter-name">globalResource</span>, </span><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../rdf_mapper_annotations/RdfCollectionType.html">RdfCollectionType</a></span> <span class="parameter-name">collection</span> = <span class="default-value">RdfCollectionType.auto</span></span>})</span>
         </dt>
         <dd>
-          Creates a property annotation that maps a class property to an RDF predicate.
+          Creates an RDF property mapping annotation.
             <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
@@ -198,7 +265,19 @@ final List&lt;String&gt; tags;
 
 </dt>
 <dd>
-  Optional specification for collection handling.
+  Controls how collection properties are serialized to RDF.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="defaultValue" class="property">
+  <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/defaultValue.html">defaultValue</a></span>
+  <span class="signature">&#8594; dynamic</span>
+  
+
+</dt>
+<dd>
+  Optional default value for this property.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -210,7 +289,7 @@ final List&lt;String&gt; tags;
 
 </dt>
 <dd>
-  Optional specification for treating the property's value as an RDF global resource.
+  Specifies how to treat the property's value as an RDF resource with its own IRI.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -234,8 +313,19 @@ final List&lt;String&gt; tags;
 
 </dt>
 <dd>
-  Whether to include this property during serialization.
-If <code>false</code>, the property will be skipped when generating RDF. Defaults to <code>true</code>.
+  Whether to include this property during serialization to RDF.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="includeDefaultsInSerialization" class="property">
+  <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/includeDefaultsInSerialization.html">includeDefaultsInSerialization</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  Whether to include properties with default values during serialization.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -247,7 +337,7 @@ If <code>false</code>, the property will be skipped when generating RDF. Default
 
 </dt>
 <dd>
-  Optional specification for treating the property's value as an IRI reference.
+  Specifies how to treat the property's value as an IRI reference.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -259,9 +349,7 @@ If <code>false</code>, the property will be skipped when generating RDF. Default
 
 </dt>
 <dd>
-  Optional specification for treating the property's value as a literal with
-special handling (e.g., custom serialization/deserialization methods,
-language tags).
+  Specifies custom literal conversion for the property value.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -273,7 +361,7 @@ language tags).
 
 </dt>
 <dd>
-  Optional specification for treating the property's value as a blank node.
+  Specifies how to treat the property's value as a nested anonymous resource.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -286,20 +374,6 @@ language tags).
 </dt>
 <dd>
   The RDF predicate (IRI) for this property, e.g., <code>SchemaBook.name</code>.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-        <dt id="required" class="property">
-  <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/required.html">required</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
-  
-
-</dt>
-<dd>
-  Whether this property is required during deserialization.
-If <code>true</code> and the property is missing in the RDF, a deserialization error
-will occur. Defaults to <code>true</code>.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -401,7 +475,7 @@ will occur. Defaults to <code>true</code>.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

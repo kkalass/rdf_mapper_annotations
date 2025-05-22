@@ -69,6 +69,8 @@ how instances of the class are mapped to RDF subjects.</p>
 <p>The generator will create an instance of <code>mapperType</code> to handle mapping
 for instances of this class. The type must implement <code>GlobalResourceMapper&lt;T&gt;</code> where T
 is the annotated class.</p>
+<p>Note: The mapper will be registered globally in the <code>RdfMapper</code> instance.
+If you need non-global registration, do not annotate your class with <code>@RdfGlobalResource</code>.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource.mapper(CustomBookMapper)
 class Book {
@@ -118,7 +120,7 @@ class CustomBookMapper implements GlobalResourceMapper&lt;Book&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

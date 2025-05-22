@@ -65,30 +65,46 @@
       </section>
       
 <section class="desc markdown">
-  <p>Optional specification for treating the property's value as an IRI reference.</p>
-<p>Use this when the property's value itself represents an IRI (e.g., a URL).</p>
-<p>When specified at the property level, this annotation allows you to customize how the
-property value is converted to an IRI. This can be useful for:</p>
+  <p>Specifies how to treat the property's value as an IRI reference.</p>
+<p>Use this when the property's value represents an IRI (e.g., a URL) or when
+you need to override the default literal mapping for a type.</p>
+<p>Only needed when there is no IriMapper already registered globally for the
+property value's type, or when you need to override the standard mapping behavior
+for this specific property.</p>
+<p>This parameter customizes how property values are converted to IRIs, enabling:</p>
 <ul>
-<li>Applying specific IRI templates to property values</li>
-<li>Using custom mappers for IRI conversion in specific contexts</li>
-<li>Implementing different IRI construction strategies based on property location</li>
+<li>IRI templates with placeholders (e.g., converting a username to a complete URI)</li>
+<li>Custom mappers for specialized IRI conversion</li>
+<li>Context-dependent IRI construction strategies</li>
 </ul>
-<p>You can use any of the RdfIri constructor variants:</p>
+<p>Available IriMapping constructor variants:</p>
 <ul>
-<li>Standard constructor with template: <code>iri: RdfIri('prefix:{value}')</code></li>
-<li>Standard constructor without template: <code>iri: RdfIri()</code></li>
-<li><code>.namedMapper()</code> - reference a mapper provided to <code>initRdfMapper</code></li>
-<li><code>.mapper()</code> - use a mapper type that will be instantiated</li>
-<li><code>.mapperInstance()</code> - use a specific mapper instance</li>
+<li>Template constructor: <code>iri: IriMapping('{baseUri}/profile/{propertyName}')</code></li>
+<li><code>.namedMapper()</code> - references a mapper provided to <code>initRdfMapper</code></li>
+<li><code>.mapper()</code> - uses a mapper type that will be instantiated</li>
+<li><code>.mapperInstance()</code> - uses a specific mapper instance</li>
 </ul>
+<p>Template placeholders are resolved in two ways:</p>
+<ol>
+<li>Property placeholders (e.g., <code>{userId}</code>) use the property's value directly</li>
+<li>Context variables (e.g., <code>{baseUri}</code>) are provided through:
+<ul>
+<li>Global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>)</li>
+<li>Properties in the same class annotated with <code>@RdfProvides('baseUri')</code></li>
+</ul>
+</li>
+</ol>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">// Using an IRI template for a property
+<pre class="language-dart"><code class="language-dart">// Context variable provided by another property
+@RdfProvides('baseUri')
+final String serviceUrl = 'https://example.com';
+
+// Using an IRI template for a property
 @RdfProperty(
   Dcterms.creator,
-  iri: IriMapping('{baseUri}/profile/{value}')
+  iri: IriMapping('{baseUri}/profile/{userId}')
 )
-final String userId; // Will be converted to an IRI using the template
+final String userId; // Converts to "https://example.com/profile/jsmith" if userId="jsmith"
 </code></pre>
 </section>
 
@@ -124,7 +140,7 @@ final String userId; // Will be converted to an IRI using the template
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

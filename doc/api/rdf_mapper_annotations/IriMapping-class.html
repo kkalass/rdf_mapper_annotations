@@ -71,7 +71,7 @@ that overrides the class-level configuration defined with <code>@RdfIri</code>.<
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(
   Dcterms.creator,
-  iri: IriMapping('https://example.org/users/{value}')
+  iri: IriMapping('https://example.org/users/{userId}')
 )
 final String userId;
 </code></pre>
@@ -85,7 +85,7 @@ final String userId;
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
       <li>IriMapping</li>
     </ul>
   </dd>
@@ -120,7 +120,7 @@ final String userId;
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriMapping.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriMapping/IriMapping.mapperInstance.html">IriMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriMapping/IriMapping.mapperInstance.html">IriMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -155,7 +155,7 @@ final String userId;
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span>?</span>
   
 
 </dt>
@@ -274,7 +274,7 @@ final String userId;
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

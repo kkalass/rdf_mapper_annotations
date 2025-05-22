@@ -62,17 +62,17 @@
     </section>
     
 <section class="desc markdown">
-  <p>Creates a reference to a named mapper that will be injected at runtime.</p>
-<p>This constructor is used when you want to provide a custom
-<code>LocalResourceMapper</code> implementation for this class via dependency
-injection. When using this approach, you must:</p>
+  <p>Creates a reference to a named mapper for this local resource.</p>
+<p>Use this constructor when you want to provide a custom <code>LocalResourceMapper</code>
+implementation via dependency injection. When using this approach, you must:</p>
 <ol>
 <li>Implement the mapper yourself</li>
 <li>Instantiate the mapper (outside of the generated code)</li>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
-<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code>
-function.</p>
+<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function.</p>
+<p>Note: The mapper will be registered globally in the <code>RdfMapper</code> instance.
+If you need non-global registration, do not annotate your class with this annotation.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfLocalResource.namedMapper('customChapterMapper')
 class Chapter {
@@ -124,7 +124,7 @@ final rdfMapper = initRdfMapper({customChapterMapper: chapterMapper});
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

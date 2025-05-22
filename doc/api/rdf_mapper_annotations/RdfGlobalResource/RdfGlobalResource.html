@@ -57,23 +57,36 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfGlobalResource</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="-param-classIri"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">classIri</span>, </span></li>
-<li><span class="parameter" id="-param-iriStrategy"><span class="type-annotation"><a href="../../rdf_mapper_annotations/IriStrategy-class.html">IriStrategy</a></span> <span class="parameter-name">iriStrategy</span></span></li>
-</ol>)
+      <span class="name ">RdfGlobalResource</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-classIri"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">classIri</span>, </span></li>
+<li><span class="parameter" id="-param-iriStrategy"><span class="type-annotation"><a href="../../rdf_mapper_annotations/IriStrategy-class.html">IriStrategy</a></span> <span class="parameter-name">iriStrategy</span>, {</span></li>
+<li><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates an annotation for a class whose instances will be mapped to RDF
 subjects with specific IRIs.</p>
-<p>This standard constructor enables automatic generation of a mapper that will
+<p>This standard constructor creates a mapper that will
 create RDF triples from instances of the annotated class. The generated
-mapper is automatically registered within initRdfMapper.</p>
+mapper is automatically registered within <code>initRdfMapper</code> when <code>registerGlobally</code>
+is <code>true</code> (the default).</p>
+<p>Set <code>registerGlobally</code> to <code>false</code> if this mapper should not be registered
+automatically. This is useful when:</p>
+<ul>
+<li>The mapper requires constructor parameters that are only available at runtime</li>
+<li>The mapper is only used in specific contexts via <code>@Provider</code> annotations</li>
+<li>You want to manually manage the mapper registration</li>
+</ul>
 <p><code>classIri</code> specifies the <code>rdf:type</code> for the resource, which defines what kind
 of entity this is in RDF terms. It is optional, but it's highly recommended to
 provide a class IRI to ensure proper typing in the RDF graph.
 <code>iriStrategy</code> defines the IRI construction strategy for instances of this class, which
 determines how unique identifiers are generated for each instance
-(typically based on annotated properties).</p>
+(typically based on annotated properties).
+<code>registerGlobally</code> controls whether the generated mapper should be registered globally
+in the <code>initRdfMapper</code> function. Set to <code>false</code> when the mapper should not be
+globally accessible, typically when all required context will be provided by parent
+objects via <code>@RdfProvides</code> annotations.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/book/{id}'))
 class Book {
@@ -88,7 +101,8 @@ class Book {
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfGlobalResource(this.classIri, IriStrategy iriStrategy)
+  <pre class="language-dart"><code class="language-dart">const RdfGlobalResource(this.classIri, IriStrategy iriStrategy,
+    {super.registerGlobally = true})
     : iri = iriStrategy,
       super();</code></pre>
 </section>
@@ -118,7 +132,7 @@ class Book {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

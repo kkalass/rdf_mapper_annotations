@@ -80,8 +80,8 @@ dependency injection. With this approach:</p>
 final Price price;
 
 // Later when initializing mappers:
-initRdfMapper({
-  required LiteralTermMapper&lt;Price&gt; priceMapper: myCustomPriceMapper
+final rdfMapper = initRdfMapper({
+  priceMapper: myCustomPriceMapper
 });
 </code></pre>
 </section>
@@ -121,7 +121,7 @@ initRdfMapper({
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

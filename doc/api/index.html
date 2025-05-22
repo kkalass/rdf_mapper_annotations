@@ -88,7 +88,6 @@ class Book {
   final String author;
 
   @RdfProperty(SchemaBook.hasPart)
-  @RdfCollectionOf(Chapter)
   final List&lt;Chapter&gt; chapters;
 
   Book({
@@ -204,7 +203,7 @@ class Chapter {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

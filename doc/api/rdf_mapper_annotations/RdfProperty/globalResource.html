@@ -65,32 +65,32 @@
       </section>
       
 <section class="desc markdown">
-  <p>Optional specification for treating the property's value as an RDF global resource.</p>
-<p>Use this when the property's value is a nested resource that has its own
-globally unique IRI.</p>
-<p>When specified at the property level, this annotation can override globally registered
-mappers for the same type. This allows you to customize how specific instances of a type
-are mapped to RDF, while using the global mapper for other instances of the same type elsewhere.</p>
-<p>The primary use case is providing custom mappers for specific relationships:</p>
+  <p>Specifies how to treat the property's value as an RDF resource with its own IRI.</p>
+<p>Use this when the property represents a nested resource that should have its own
+globally unique IRI, or to override default mapping behavior for this relationship.</p>
+<p>Only needed when there is no GlobalResourceMapper already registered globally for the
+property value's type, or when you need a specific mapper for this relationship that
+differs from the standard global resource mapping.</p>
+<p>This parameter can override globally registered mappers for the same type,
+allowing relationship-specific mapping while maintaining standard mapping elsewhere:</p>
 <pre class="language-dart"><code class="language-dart">class Book {
-  // This property uses a custom mapper specific to this relationship
+  // Uses custom mapper for this specific relationship
   @RdfProperty(
     SchemaBook.publisher,
     globalResource: GlobalResourceMapping.namedMapper('customPublisherMapper')
   )
   final Publisher publisher;
 
-  // Other Publisher instances elsewhere will still use the globally registered mapper
+  // Uses the globally registered mapper for Publisher
   @RdfProperty(SchemaBook.recommendedBy)
   final Publisher recommendedBy;
 }
 </code></pre>
-<p>You can use any of the RdfGlobalResource constructor variants:</p>
+<p>Available GlobalResourceMapping constructor variants:</p>
 <ul>
-<li><code>.namedMapper()</code> - reference a mapper provided to <code>initRdfMapper</code></li>
-<li><code>.mapper()</code> - use a mapper type that will be instantiated</li>
-<li><code>.mapperInstance()</code> - use a specific mapper instance</li>
-<li>Standard constructor - usefull when you need a completely different IRI pattern for specific instances</li>
+<li><code>.namedMapper()</code> - references a mapper provided to <code>initRdfMapper</code></li>
+<li><code>.mapper()</code> - uses a mapper type that will be instantiated</li>
+<li><code>.mapperInstance()</code> - uses a specific mapper instance</li>
 </ul>
 </section>
 
@@ -126,7 +126,7 @@ are mapped to RDF, while using the global mapper for other instances of the same
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

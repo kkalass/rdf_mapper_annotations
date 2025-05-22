@@ -74,20 +74,24 @@ class Book {
 </code></pre>
 </li>
 <li>
-<p><strong>External variables</strong> - Values provided at runtime through the <code>initRdfMapper</code> method:</p>
+<p><strong>Context variables</strong> - Values provided through one of two methods:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
   SchemaBook.classIri,
-  IriStrategy('{baseUrl}/books/{id}')  // {baseUrl} is external
+  IriStrategy('{baseUrl}/books/{id}')  // {baseUrl} is a context variable
 )
 class Book {
   @RdfIriPart('id')
   final String id;
+
+  // Option 1: Provide the context variable within the class
+  @RdfProvides('baseUrl')
+  final String apiUrl = 'https://myapp.example.org';
   // ...
 }
 
-// In your initialization code:
+// Option 2: Via initialization code:
 final rdfMapper = initRdfMapper(
-  baseUrl: () =&gt; 'https://myapp.example.org'  // Provides value for {baseUrl}
+  baseUrlProvider: () =&gt; 'https://myapp.example.org'  // Provides value for {baseUrl}
 );
 </code></pre>
 </li>
@@ -106,7 +110,7 @@ to define how instance IRIs are constructed from their properties.</p>
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
       <li>IriStrategy</li>
     </ul>
   </dd>
@@ -141,7 +145,7 @@ to define how instance IRIs are constructed from their properties.</p>
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -176,7 +180,7 @@ to define how instance IRIs are constructed from their properties.</p>
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span>?</span>
   
 
 </dt>
@@ -295,7 +299,7 @@ to define how instance IRIs are constructed from their properties.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

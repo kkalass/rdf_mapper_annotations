@@ -95,7 +95,10 @@ class TemperatureMapper implements LiteralTermMapper&lt;Temperature&gt; {
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const LiteralMapping.mapper(Type mapperType) : super.mapper(mapperType);</code></pre>
+  <pre class="language-dart"><code class="language-dart">const LiteralMapping.mapper(Type mapperType)
+    : language = null,
+      datatype = null,
+      super.mapper(mapperType);</code></pre>
 </section>
 
 
@@ -123,7 +126,7 @@ class TemperatureMapper implements LiteralTermMapper&lt;Temperature&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

@@ -179,7 +179,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 <li><a href="../rdf_mapper_annotations/RdfProperty-class.html">RdfProperty</a>: Main property annotation, links to an RDF predicate</li>
 <li><a href="../rdf_mapper_annotations/RdfIriPart-class.html">RdfIriPart</a>: Marks properties that contribute to IRI construction</li>
 <li><a href="../rdf_mapper_annotations/RdfValue-class.html">RdfValue</a>: Identifies the value source for literal serialization</li>
-<li><a href="../rdf_mapper_annotations/RdfCollectionOf-class.html">RdfCollectionOf</a>: Specifies item type for collections</li>
+<li><a href="../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a>: Specifies how map entries shall be (de-)serialized</li>
 </ul>
 <p>For usage examples, see the <a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">example</a> directory.</p>
 </section>
@@ -189,11 +189,19 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
       <h2>Classes</h2>
       <dl>
           <dt id="BaseMapping">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends Mapper</span>&gt;</span></span> 
 
 </dt>
 <dd>
   Base class for all mapping configurations that share common mapper functionality.
+</dd>
+
+          <dt id="BaseMappingAnnotation">
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends Mapper</span>&gt;</span></span> 
+
+</dt>
+<dd>
+  
 </dd>
 
           <dt id="GlobalResourceMapping">
@@ -252,30 +260,6 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
   Base annotation interface for RDF mapper generation.
 </dd>
 
-          <dt id="RdfCollectionKey">
-  <span class="name "><a href="../rdf_mapper_annotations/RdfCollectionKey-class.html">RdfCollectionKey</a></span> 
-
-</dt>
-<dd>
-  Marks a property that serves as the key in a mapped <code>Map&lt;K,V&gt;</code> collection.
-</dd>
-
-          <dt id="RdfCollectionOf">
-  <span class="name "><a href="../rdf_mapper_annotations/RdfCollectionOf-class.html">RdfCollectionOf</a></span> 
-
-</dt>
-<dd>
-  Specifies the Dart <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a> of the items within a collection property.
-</dd>
-
-          <dt id="RdfCollectionValue">
-  <span class="name "><a href="../rdf_mapper_annotations/RdfCollectionValue-class.html">RdfCollectionValue</a></span> 
-
-</dt>
-<dd>
-  Marks a property that serves as the value in a mapped <code>Map&lt;K,V&gt;</code> collection.
-</dd>
-
           <dt id="RdfGlobalResource">
   <span class="name "><a href="../rdf_mapper_annotations/RdfGlobalResource-class.html">RdfGlobalResource</a></span> 
 
@@ -324,12 +308,36 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
   Marks a Dart class as a local RDF resource (referred to via a blank node).
 </dd>
 
+          <dt id="RdfMapEntry">
+  <span class="name "><a href="../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a></span> 
+
+</dt>
+<dd>
+  Specifies the Dart <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a> that represents each entry in a Map.
+</dd>
+
+          <dt id="RdfMapKey">
+  <span class="name "><a href="../rdf_mapper_annotations/RdfMapKey-class.html">RdfMapKey</a></span> 
+
+</dt>
+<dd>
+  Designates a property as the key in a mapped <code>Map&lt;K,V&gt;</code> collection.
+</dd>
+
+          <dt id="RdfMapValue">
+  <span class="name "><a href="../rdf_mapper_annotations/RdfMapValue-class.html">RdfMapValue</a></span> 
+
+</dt>
+<dd>
+  Designates a property or class as the value in a mapped <code>Map&lt;K,V&gt;</code> collection.
+</dd>
+
           <dt id="RdfProperty">
   <span class="name "><a href="../rdf_mapper_annotations/RdfProperty-class.html">RdfProperty</a></span> 
 
 </dt>
 <dd>
-  Marks a property to be mapped to/from an RDF predicate.
+  Maps a Dart class property to an RDF predicate.
 </dd>
 
           <dt id="RdfProvides">
@@ -338,7 +346,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 </dt>
 <dd>
   Marks a property as providing a named value that can be referenced in
-IRI templates throughout the data model.
+IRI templates in the RDF mapping system.
 </dd>
 
           <dt id="RdfValue">
@@ -361,7 +369,7 @@ conversion.
 
 </dt>
 <dd>
-  The type of collection to use for RDF property serialization.
+  Specifies how Dart collection properties are represented in the RDF graph.
 </dd>
 
       </dl>
@@ -401,7 +409,7 @@ conversion.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

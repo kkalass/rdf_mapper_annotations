@@ -65,8 +65,13 @@ by a corresponding mapper - either a mapper generated automatically from this
 annotation, or a mapper that you implement manually and register with <code>rdf_mapper</code>.</p>
 <p>When using the standard constructor (<code>@RdfLocalResource(classIri)</code>), a mapper is
 automatically generated based on the property annotations (like <code>@RdfProperty</code>)
-in your class and registered within initRdfMapper. This generated mapper will
-create RDF triples with the blank node as the subject for each annotated property.</p>
+in your class. By default, this mapper is registered within <code>initRdfMapper</code>
+(when <a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> is true). This generated mapper will create RDF triples
+with the blank node as the subject for each annotated property.</p>
+<p>Set <a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> to <code>false</code> if this mapper should not be registered
+automatically. This is useful when the mapper requires constructor parameters
+that are only available at runtime and should be provided via <code>@Provider</code>
+annotations in the parent class.</p>
 <p>Unlike <code>@RdfGlobalResource</code>, instances with this annotation will be mapped to
 blank nodes (anonymous resources) rather than resources with IRIs.</p>
 <p>With custom mappers, the actual RDF triple generation depends on your mapper
@@ -76,7 +81,8 @@ their parent entity.</p>
 <p>You can use this annotation in several ways, depending on your mapping needs:</p>
 <ol>
 <li>Standard: With a class IRI (<code>@RdfLocalResource(classIri)</code>) - the mapper is
-automatically generated and registered within initRdfMapper</li>
+automatically generated and registered within <code>initRdfMapper</code> when
+<a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> is true, which is the default</li>
 <li>Named mapper: With <code>@RdfLocalResource.namedMapper()</code> - you must implement
 the mapper, instantiate it, and provide it to <code>initRdfMapper</code> as a named
 parameter</li>
@@ -120,7 +126,8 @@ class Chapter {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">LocalResourceMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">LocalResourceMapper</span>&gt;</span></li>
       <li>RdfLocalResource</li>
     </ul>
   </dd>
@@ -147,10 +154,11 @@ class Chapter {
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfLocalResource" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.html">RdfLocalResource</a></span><span class="signature">(<span class="parameter" id="-param-classIri"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">classIri</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.html">RdfLocalResource</a></span><span class="signature">([<span class="parameter" id="-param-classIri"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">classIri</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>])</span>
         </dt>
         <dd>
-          Creates an annotation for a class to be mapped to a blank node.
+          Creates an annotation for a class whose instances will be mapped to RDF
+blank nodes.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLocalResource.mapper" class="callable">
@@ -161,7 +169,7 @@ class Chapter {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLocalResource.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.mapperInstance.html">RdfLocalResource.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.mapperInstance.html">RdfLocalResource.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">LocalResourceMapper</span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this local
@@ -172,7 +180,7 @@ resource.
           <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.namedMapper.html">RdfLocalResource.namedMapper</a></span><span class="signature">(<span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>)</span>
         </dt>
         <dd>
-          Creates a reference to a named mapper that will be injected at runtime.
+          Creates a reference to a named mapper for this local resource.
             <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
@@ -209,13 +217,26 @@ resource.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">LocalResourceMapper</span>&gt;</span>?</span>
   
 
 </dt>
 <dd class="inherited">
   Provides a <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a> if a custom mapper is specified.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="registerGlobally" class="property inherited">
+  <span class="name"><a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Controls whether the generated mapper should be registered globally
+in the <code>initRdfMapper</code> function.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -316,7 +337,7 @@ resource.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

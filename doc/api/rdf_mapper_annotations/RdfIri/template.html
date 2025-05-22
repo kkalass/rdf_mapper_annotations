@@ -78,11 +78,13 @@ mapper to handle complex multi-part IRIs</li>
 </ul>
 </li>
 <li>
-<p><strong>External variables</strong>: Variables like <code>{baseUri}</code> or <code>{storageRoot}</code> that are provided
-at runtime through the generated <code>initRdfMapper</code> method</p>
+<p><strong>Context variables</strong>: Variables like <code>{baseUri}</code> or <code>{storageRoot}</code> that are provided
+through one of two methods:</p>
 <ul>
-<li>Example: <code>@RdfIri('{baseUri}/books/{id}')</code> would require a parameter like
-<code>String Function() baseUriProvider</code> in the <code>initRdfMapper</code> method</li>
+<li>Via global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>).
+The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
+<li>Via other properties in the same class annotated with <code>@RdfProvides('baseUri')</code>.
+This is preferred for context variables that are already available in the class.</li>
 </ul>
 </li>
 </ol>
@@ -122,7 +124,7 @@ will be used as the complete IRI value.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

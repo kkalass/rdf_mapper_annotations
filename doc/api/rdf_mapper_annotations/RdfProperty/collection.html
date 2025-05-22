@@ -65,34 +65,127 @@
       </section>
       
 <section class="desc markdown">
-  <p>Optional specification for collection handling.</p>
-<p>This hint helps the generator understand how to serialize and deserialize
-collections (e.g., <code>List</code>, <code>Set</code>, <code>Map</code>).</p>
-<p>Use this parameter to control how the RDF mapper should handle properties that contain
-multiple values. By default (with <code>auto</code>), the mapper automatically detects collection
-types like <code>List</code> or <code>Set</code> and serializes each element as a separate RDF triple with
-the same predicate.</p>
-<p>When to use specific collection types:</p>
+  <p>Controls how collection properties are serialized to RDF.</p>
+<p>This parameter guides the serialization and deserialization of
+collections like <code>List</code>, <code>Set</code>, and <code>Map</code>.</p>
+<p>IMPORTANT: By default, collections are serialized as multiple separate triples
+with the same predicate, NOT as RDF Collection structures (rdf:first/rdf:rest/rdf:nil).
+This means:</p>
 <ul>
-<li><code>auto</code>: Default behavior - automatically detects and handles collections based on Dart type</li>
-<li><code>none</code>: Forces a collection property to be treated as a single value, even if it's a List or Set</li>
+<li>List order is not preserved in the RDF representation</li>
+<li>Each item generates its own triple with the same subject and predicate</li>
+<li>Duplicate values may be lost during round-trips if a <code>Set</code> is used for deserialization
+(since Sets don't allow duplicates, unlike Lists)</li>
+</ul>
+<p>Consider using <code>Iterable&lt;T&gt;</code> instead
+of <code>List&lt;T&gt;</code> as the property type. This makes it clearer to consumers of your code
+that they should not rely on any specific order being maintained after deserialization.</p>
+<p>The mapping configurations (iri, literal, globalResource, localResource) apply
+to the item type for collections. For Lists and Sets, this means the element type;
+for Maps, it applies to the MapEntry&lt;K,V&gt; type. This allows direct handling of
+collections without additional annotations in many cases.</p>
+<p>For <code>Map</code> collections, you have two approaches:</p>
+<ol>
+<li>
+<p><strong>Direct mapping with configurations</strong>: Provide mapping configurations that work
+directly with MapEntry&lt;K,V&gt;. This is useful for simple key-value pairs or when using
+a custom mapper that handles the MapEntry type directly:</p>
+<pre class="language-dart"><code class="language-dart">// Using a custom literal mapper for language-tagged text
+@RdfProperty(
+  SchemaBook.title,
+  literal: LiteralMapping.mapperInstance(const LocalizedEntryMapper())
+)
+final Map&lt;String, String&gt; translations; // Keys are language codes
+</code></pre>
+</li>
+<li>
+<p><strong>Structured mapping with annotations</strong>: For complex map entries, use the <a href="../../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a>
+annotation on the property along with <a href="../../rdf_mapper_annotations/RdfMapKey-class.html">RdfMapKey</a> and <a href="../../rdf_mapper_annotations/RdfMapValue-class.html">RdfMapValue</a> annotations in the
+entry class to define the key-value structure.</p>
+</li>
+</ol>
+<p>Available collection types:</p>
+<ul>
+<li><code>auto</code>: Default - automatically handles collections based on Dart type,
+creating multiple triples with the same predicate</li>
+<li><code>none</code>: Treats a collection as a single value, even for List or Set types</li>
 </ul>
 <p>Example with default auto collection handling:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.author)
-final List&lt;Person&gt; authors; // Generates multiple SchemaBook.author triples, one for each author
+final Iterable&lt;Person&gt; authors; // Each Person becomes a separate triple
 </code></pre>
-<p>Example forcing a collection to be treated as a single value:</p>
-<pre class="language-dart"><code class="language-dart">@RdfProperty(
+<p>Example treating a collection as a single value with a concrete mapper:</p>
+<pre class="language-dart"><code class="language-dart">// First, create a mapper that handles the conversion between List&lt;String&gt; and a single string literal
+class StringListMapper implements LiteralTermMapper&lt;List&lt;String&gt;&gt; {
+  const StringListMapper();
+
+  @override
+  List&lt;String&gt; fromRdfTerm(LiteralTerm term, DeserializationContext context) =&gt;
+      term.value.split(',').map((s) =&gt; s.trim()).where((s) =&gt; s.isNotEmpty).toList();
+
+  @override
+  LiteralTerm toRdfTerm(List&lt;String&gt; value, SerializationContext context) =&gt;
+      LiteralTerm(value.join(', '));
+}
+
+// Then use it with RdfCollectionType.none to treat the list as a single value
+@RdfProperty(
   SchemaBook.keywords,
-  collection: RdfCollectionType.none
+  collection: RdfCollectionType.none,
+  literal: LiteralMapping.mapperInstance(const StringListMapper())
 )
-final List&lt;String&gt; tags; // Generates a single triple with the entire list as one value
+final List&lt;String&gt; tags; // Generates one triple with comma-separated values: "tag1, tag2, tag3"
 </code></pre>
-<p>This parameter is particularly important when:</p>
+<p>Example using a Map with direct mapping:</p>
+<pre class="language-dart"><code class="language-dart">// A custom mapper that handles language-tagged literals directly
+class LocalizedEntryMapper implements LiteralTermMapper&lt;MapEntry&lt;String, String&gt;&gt; {
+  const LocalizedEntryMapper();
+
+  @override
+  MapEntry&lt;String, String&gt; fromRdfTerm(LiteralTerm term, DeserializationContext context) =&gt;
+      MapEntry(term.language ?? 'en', term.value);
+
+  @override
+  LiteralTerm toRdfTerm(MapEntry&lt;String, String&gt; value, SerializationContext context) =&gt;
+      LiteralTerm.withLanguage(value.value, value.key);
+}
+
+// Using the direct mapping approach
+@RdfProperty(
+  SchemaBook.title,
+  literal: LiteralMapping.mapperInstance(const LocalizedEntryMapper())
+)
+final Map&lt;String, String&gt; translations; // Will generate literals with language tags
+</code></pre>
+<p>Example using a Map collection with <a href="../../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a> for more complex structures:</p>
+<pre class="language-dart"><code class="language-dart">// First define a resource class for map entries
+@RdfLocalResource() // This class will be serialized as a resource (blank node)
+class ConfigSetting {
+  @RdfProperty(ExampleVocab.settingKey)
+  @RdfMapKey() // Marks this property as the key in the map
+  final String key;
+
+  @RdfProperty(ExampleVocab.settingValue)
+  @RdfMapValue() // Marks this property as the value in the map
+  final String value;
+
+  ConfigSetting(this.key, this.value);
+}
+
+// Then use the Map property in your class with the @RdfMapEntry annotation
+class ApplicationConfig {
+  @RdfProperty(ExampleVocab.settings)
+  @RdfMapEntry(ConfigSetting) // Specifies the entry class for this map
+  final Map&lt;String, String&gt; settings; // Maps to a collection of ConfigSetting resources
+
+  ApplicationConfig(this.settings);
+}
+</code></pre>
+<p>Use this parameter when:</p>
 <ul>
-<li>You need to override automatic collection detection</li>
-<li>You want to control whether multiple values are serialized individually or as a single unit</li>
-<li>You're working with custom collection types that need specific handling</li>
+<li>Overriding automatic collection detection</li>
+<li>Controlling whether values are serialized individually or as one unit</li>
+<li>Working with collections that need specific serialization for compatibility</li>
 </ul>
 </section>
 
@@ -128,7 +221,7 @@ final List&lt;String&gt; tags; // Generates a single triple with the entire list
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

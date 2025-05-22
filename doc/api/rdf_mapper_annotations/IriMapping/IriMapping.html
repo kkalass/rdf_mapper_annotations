@@ -75,7 +75,7 @@ that needs to be formatted in a specific way to create valid IRIs.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(
   Dcterms.source,
-  iri: IriMapping('urn:isbn:{value}')
+  iri: IriMapping('urn:isbn:{isbn}')
 )
 final String isbn; // Will be mapped to an IRI like "urn:isbn:9780123456789"
 </code></pre>
@@ -113,7 +113,7 @@ final String isbn; // Will be mapped to an IRI like "urn:isbn:9780123456789"
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

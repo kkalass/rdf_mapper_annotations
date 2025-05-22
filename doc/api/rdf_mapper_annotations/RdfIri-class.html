@@ -83,12 +83,17 @@ is used directly as the complete IRI</li>
 <li><strong>Direct value</strong> - <code>@RdfIri()</code> (uses the <code>@RdfIriPart</code> property value as-is)</li>
 <li><strong>External mappers</strong> - <code>.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code></li>
 </ol>
+<p>By default, the generated mapper is registered globally in <code>initRdfMapper</code>. Set
+<a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> to <code>false</code> if this mapper should not be registered
+automatically. This is useful when the mapper requires constructor parameters
+that are only available at runtime and should be provided via <code>@Provider</code>
+annotations in the parent class.</p>
 <h2 id="property-level-usage">Property-Level Usage</h2>
 <p>You can also apply this as part of an <code>@RdfProperty</code> annotation to override
 IRI mapping for a specific property:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(
   Dcterms.creator,
-  iri: IriMapping('https://example.org/users/{value}')
+  iri: IriMapping('https://example.org/users/{userId}')
 )
 final String userId;
 </code></pre>
@@ -123,7 +128,8 @@ class AbsoluteUri {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
       <li>RdfIri</li>
     </ul>
   </dd>
@@ -150,7 +156,7 @@ class AbsoluteUri {
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfIri" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.html">RdfIri</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span></span>])</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.html">RdfIri</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>])</span>
         </dt>
         <dd>
           Creates an annotation for a class to be mapped to an IRI term.
@@ -164,7 +170,7 @@ class AbsoluteUri {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfIri.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -199,13 +205,26 @@ class AbsoluteUri {
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.6.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span>?</span>
   
 
 </dt>
 <dd class="inherited">
   Provides a <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a> if a custom mapper is specified.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="registerGlobally" class="property inherited">
+  <span class="name"><a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Controls whether the generated mapper should be registered globally
+in the <code>initRdfMapper</code> function.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -318,7 +337,7 @@ class AbsoluteUri {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

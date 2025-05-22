@@ -65,9 +65,13 @@
       </section>
       
 <section class="desc markdown">
-  <p>Optional specification for treating the property's value as a blank node.</p>
-<p>Use this when the property's value is a nested resource that should not
-have its own global IRI.</p>
+  <p>Specifies how to treat the property's value as a nested anonymous resource.</p>
+<p>Use this when the property represents a nested object that shouldn't have its own
+persistent identifier (IRI). The object will be serialized as a set of triples
+with an anonymous identifier (internally implemented as an RDF blank node).</p>
+<p>Only needed when there is no LocalResourceMapper already registered globally for the
+property value's type, or when you need to override the standard mapping behavior for
+this specific relationship.</p>
 </section>
 
       
@@ -102,7 +106,7 @@ have its own global IRI.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

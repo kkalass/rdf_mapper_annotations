@@ -71,31 +71,27 @@
 <li>
 <p><strong>Property variables</strong>: Correspond to values from the property this mapping is applied to</p>
 <ul>
-<li>Example: In <code>IriMapping('urn:isbn:{value}')</code>, the <code>{value}</code> variable will be replaced with
+<li>Example: In <code>IriMapping('urn:isbn:{userId}')</code>, the <code>{userId}</code> variable will be replaced with
 the value of the property it's applied to</li>
-<li>The template can reference a property directly without needing additional <code>@RdfIriPart</code> annotations</li>
-<li>Multiple property variables can be used like: <code>{baseUrl}/users/{userId}/profile</code></li>
+<li>The actual property name is used as the placeholder, creating a clear connection between
+the template and the property</li>
+<li>The property itself doesn't need additional <code>@RdfIriPart</code> annotations</li>
 </ul>
 </li>
 <li>
-<p><strong>External variables</strong>: Variables like <code>{baseUri}</code> or <code>{storageRoot}</code> that are provided
-at runtime through the generated <code>initRdfMapper</code> method</p>
+<p><strong>Context variables</strong>: Variables like <code>{baseUri}</code> or <code>{storageRoot}</code> that are provided
+through one of two methods:</p>
 <ul>
-<li>Example: <code>'{baseUrl}/books/{id}'</code> would require a parameter like
-<code>String Function() baseUrl</code> in the <code>initRdfMapper</code> method</li>
+<li>Via global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>).
+The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
+<li>Via other properties in the same class annotated with <code>@RdfProvides('baseUri')</code>.
+This is preferred for context variables that are already available in the class.</li>
+<li>Example: <code>IriMapping('{baseUri}/users/{userId}')</code></li>
 </ul>
 </li>
 </ol>
-<p>If no template is provided (<code>template == null</code>), the property value will be
-used as the complete IRI value, which is useful for properties that already contain
-fully qualified URIs.
-   at runtime through the generated <code>initRdfMapper</code> method</p>
-<ul>
-<li>Example: <code>IriMapping('{baseUri}/users/{value}')</code> would require a parameter like
-<code>String Function() baseUri</code> in the <code>initRdfMapper</code> method</li>
-</ul>
 <p>If no template is provided (<code>template == null</code>), the property value will be used directly
-as the complete IRI.</p>
+as the complete IRI, which is useful for properties that already contain fully qualified URIs.</p>
 </section>
 
       
@@ -130,7 +126,7 @@ as the complete IRI.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

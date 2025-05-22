@@ -57,7 +57,8 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfLiteral.custom</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="custom-param-toLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">toLiteralTermMethod</span>, </span></li>
+      <span class="name ">RdfLiteral.custom</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="custom-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">datatype</span>, </span></li>
+<li><span class="parameter" id="custom-param-toLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">toLiteralTermMethod</span>, </span></li>
 <li><span class="parameter" id="custom-param-fromLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fromLiteralTermMethod</span>, </span></li>
 </ol>})
     </section>
@@ -67,8 +68,8 @@
 <p>This approach allows you to define how your class is converted to/from RDF literals
 by specifying methods in your class:</p>
 <ul>
-<li><code>toLiteralTermMethod</code>: An instance method that converts your object to a <code>LiteralTerm</code></li>
-<li><code>fromLiteralTermMethod</code>: A static method that creates your object from a <code>LiteralTerm</code></li>
+<li><code>toLiteralTermMethod</code>: An instance method that converts your object to a <code>String</code></li>
+<li><code>fromLiteralTermMethod</code>: A static method that creates your object from a <code>String</code></li>
 </ul>
 <p>This is ideal for classes that need special formatting or validation during
 serialization, such as formatted values with specific string representations
@@ -84,11 +85,11 @@ class Temperature {
   Temperature(this.celsius);
 
   // Instance method for serialization
-  LiteralTerm formatCelsius() =&gt; LiteralTerm('$celsius°C');
+  String formatCelsius() =&gt; '$celsius°C';
 
   // Static method for deserialization
-  static Temperature parse(LiteralTerm term) =&gt;
-    Temperature(double.parse(term.value.replaceAll('°C', '')));
+  static Temperature parse(String value) =&gt;
+    Temperature(double.parse(value.replaceAll('°C', '')));
 }
 </code></pre>
 </section>
@@ -97,10 +98,11 @@ class Temperature {
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfLiteral.custom({
-  required String toLiteralTermMethod,
-  required String fromLiteralTermMethod,
-})  : toLiteralTermMethod = toLiteralTermMethod,
+  <pre class="language-dart"><code class="language-dart">const RdfLiteral.custom(
+    {this.datatype,
+    required String toLiteralTermMethod,
+    required String fromLiteralTermMethod})
+    : toLiteralTermMethod = toLiteralTermMethod,
       fromLiteralTermMethod = fromLiteralTermMethod,
       super();</code></pre>
 </section>
@@ -130,7 +132,7 @@ class Temperature {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>

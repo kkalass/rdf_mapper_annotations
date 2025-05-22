@@ -77,11 +77,13 @@ the value of the property marked with <code>@RdfIriPart('isbn')</code></li>
 </ul>
 </li>
 <li>
-<p><strong>External variables</strong>: Variables like <code>{baseUrl}</code> or <code>{storageRoot}</code> that are provided
-at runtime through the generated <code>initRdfMapper</code> method</p>
+<p><strong>Context variables</strong>: Variables like <code>{baseUrl}</code> or <code>{storageRoot}</code> that can be provided
+through one of two methods:</p>
 <ul>
-<li>Example: <code>'{baseUrl}/books/{id}'</code> would require a parameter like
-<code>String Function() baseUrl</code> in the <code>initRdfMapper</code> method</li>
+<li>Via global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUrlProvider: () =&gt; 'https://example.com'</code>).
+The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
+<li>Via properties in the same class annotated with <code>@RdfProvides('baseUrl')</code>, which is
+preferred for context variables already available in the class.</li>
 </ul>
 </li>
 </ol>
@@ -121,7 +123,7 @@ will be used as the complete IRI value.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.4.1-dev
+      0.1.0-dev
   </span>
   
 </footer>
