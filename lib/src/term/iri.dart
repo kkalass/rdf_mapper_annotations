@@ -15,6 +15,18 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// When you annotate a class with `@RdfIri`, a mapper is created that handles
 /// the conversion between your Dart class and IRI terms.
 ///
+/// ## Property Requirements
+///
+/// For classes with `@RdfIri` using the default constructor:
+/// - All properties used for serialization/deserialization **must** be annotated with `@RdfIriPart`
+/// - Any property without `@RdfIriPart` will be ignored during mapping
+/// - The class must be fully serializable/deserializable using only the `@RdfIriPart` properties
+/// - Derived or computed properties (not needed for serialization) don't need annotations
+///
+/// **Important:** When using external mappers (via `.namedMapper()`, `.mapper()`, or `.mapperInstance()`),
+/// the `@RdfIriPart` annotations are ignored. In this case, your custom mapper implementation is fully
+/// responsible for the serialization/deserialization logic.
+///
 /// ## IRI Generation
 ///
 /// The IRI is computed using:
@@ -37,19 +49,6 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// automatically. This is useful when the mapper requires constructor parameters
 /// that are only available at runtime and should be provided via `@Provider`
 /// annotations in the parent class.
-///
-/// ## Property-Level Usage
-///
-/// You can also apply this as part of an `@RdfProperty` annotation to override
-/// IRI mapping for a specific property:
-///
-/// ```dart
-/// @RdfProperty(
-///   Dcterms.creator,
-///   iri: IriMapping('https://example.org/users/{userId}')
-/// )
-/// final String userId;
-/// ```
 ///
 /// ## Examples
 ///
@@ -252,13 +251,42 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
 /// - Properties that must be serialized as IRIs rather than literals
 /// - Customizing resource references for specific relationship contexts
 ///
-/// Example:
+/// ## Property Type Support
+///
+/// The default constructor (`IriMapping([template])`) only supports `String` properties.
+/// For non-String types like value objects (e.g., `UserId` or `ISBN` classes), you have
+/// two options:
+///
+/// 1. Use one of the mapper constructors:
+///    - `.namedMapper()` - Reference a named mapper provided at runtime
+///    - `.mapper()` - Instantiate a mapper from a type
+///    - `.mapperInstance()` - Use a pre-configured mapper instance
+///
+/// 2. Annotate the class of the property value with `@RdfIri` and implement the
+///    template logic based on fields of that class there. This approach leverages
+///    automatic mapper registration and is often cleaner when the value class
+///    is fully under your control.
+///
+/// These approaches ensure proper serialization and deserialization for complex types.
+///
+/// ## Examples
+///
+/// For String properties:
 /// ```dart
 /// @RdfProperty(
 ///   Dcterms.creator,
 ///   iri: IriMapping('https://example.org/users/{userId}')
 /// )
 /// final String userId;
+/// ```
+///
+/// For value objects:
+/// ```dart
+/// @RdfProperty(
+///   SchemaPerson.identifier,
+///   iri: IriMapping.mapper(UserIdMapper)
+/// )
+/// final UserId userId;
 /// ```
 class IriMapping extends BaseMapping<IriTermMapper> {
   /// An optional template string for constructing the IRI.
@@ -270,7 +298,6 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///      the value of the property it's applied to
   ///    - The actual property name is used as the placeholder, creating a clear connection between
   ///      the template and the property
-  ///    - The property itself doesn't need additional `@RdfIriPart` annotations
   ///
   /// 2. **Context variables**: Variables like `{baseUri}` or `{storageRoot}` that are provided
   ///    through one of two methods:
@@ -282,12 +309,23 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///
   /// If no template is provided (`template == null`), the property value will be used directly
   /// as the complete IRI, which is useful for properties that already contain fully qualified URIs.
+  ///
+  /// **Note:** When using the default constructor with a template, the property must be of type
+  /// `String`. For non-String types like value objects (e.g., `UserId`), either:
+  /// 1. Use one of the mapper constructors (`.namedMapper()`, `.mapper()`, or `.mapperInstance()`)
+  ///    to provide explicit conversion logic, or
+  /// 2. Annotate the value class itself with `@RdfIri` and implement the template logic there.
   final String? template;
 
   /// Creates an IRI mapping template for property-specific IRI generation.
   ///
   /// Use this constructor to customize how a specific property should be
   /// transformed into an IRI term in the RDF graph.
+  ///
+  /// **Important:** This constructor is only designed for properties of type `String`.
+  /// For non-String types (like value objects or domain-specific types), you have two options:
+  /// 1. Use one of the mapper constructors: `.namedMapper()`, `.mapper()`, or `.mapperInstance()`
+  /// 2. Annotate the value class itself with `@RdfIri` and implement the template logic there
   ///
   /// The [template] defines the pattern for constructing IRIs from the property value:
   /// - With a template: `IriMapping('http://example.org/users/{value}')`
@@ -296,13 +334,34 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// This is particularly useful when the property contains identifier information
   /// that needs to be formatted in a specific way to create valid IRIs.
   ///
-  /// Example:
+  /// Examples:
   /// ```dart
+  /// // For String properties - using template is fine:
   /// @RdfProperty(
   ///   Dcterms.source,
   ///   iri: IriMapping('urn:isbn:{isbn}')
   /// )
   /// final String isbn; // Will be mapped to an IRI like "urn:isbn:9780123456789"
+  ///
+  /// // Option 1: For value types - use custom mapper:
+  /// @RdfProperty(
+  ///   SchemaPerson.identifier,
+  ///   iri: IriMapping.mapper(UserIdMapper)
+  /// )
+  /// final UserId userId; // Will use UserIdMapper for conversion
+  ///
+  /// // Option 2: For value types - annotate the value class with @RdfIri:
+  /// @RdfProperty(SchemaPerson.identifier)
+  /// final UserId userId; // The UserId class is annotated with @RdfIri
+  ///
+  /// // Definition of the UserId class:
+  /// @RdfIri('https://example.org/users/{value}')
+  /// class UserId {
+  ///   @RdfIriPart()
+  ///   final String value;
+  ///
+  ///   UserId(this.value);
+  /// }
   /// ```
   const IriMapping([this.template]) : super();
 
@@ -321,19 +380,29 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///
   /// Example:
   /// ```dart
-  /// @RdfIri.namedMapper('userReferenceMapper')
-  /// class UserReference {
-  ///   final String username;
-  ///   UserReference(this.username);
-  /// }
+  /// // Property with a complex type that requires custom IRI mapping:
+  /// @RdfProperty(
+  ///   SchemaPerson.identifier,
+  ///   iri: IriMapping.namedMapper('userReferenceMapper')
+  /// )
+  /// final UserReference userRef;
   ///
   /// // You must implement the mapper:
-  /// class MyUserReferenceMapper implements IriTermMapper<UserReference> {
-  ///   // Your implementation...
+  /// class UserReferenceMapper implements IriTermMapper<UserReference> {
+  ///   @override
+  ///   IriTerm toRdfTerm(UserReference value, SerializationContext context) {
+  ///     return IriTerm('https://example.org/users/${value.username}');
+  ///   }
+  ///
+  ///   @override
+  ///   UserReference fromRdfTerm(IriTerm term, DeserializationContext context) {
+  ///     final segments = Uri.parse(term.iri).pathSegments;
+  ///     return UserReference(segments.last);
+  ///   }
   /// }
   ///
   /// // In initialization code:
-  /// final userRefMapper = MyUserReferenceMapper();
+  /// final userRefMapper = UserReferenceMapper();
   /// final rdfMapper = initRdfMapper(userReferenceMapper: userRefMapper);
   /// ```
   const IriMapping.namedMapper(String name)
@@ -350,14 +419,15 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///
   /// Example:
   /// ```dart
-  /// @RdfIri.mapper(StandardIsbnMapper)
-  /// class ISBN {
-  ///   final String value;
-  ///   ISBN(this.value);
-  /// }
+  /// // Property with a complex type that requires custom IRI mapping:
+  /// @RdfProperty(
+  ///   Dcterms.source,
+  ///   iri: IriMapping.mapper(IsbnMapper)
+  /// )
+  /// final ISBN isbn;
   ///
   /// // The mapper implementation must be accessible to the generator:
-  /// class StandardIsbnMapper implements IriTermMapper<ISBN> {
+  /// class IsbnMapper implements IriTermMapper<ISBN> {
   ///   @override
   ///   IriTerm toRdfTerm(ISBN isbn, SerializationContext context) {
   ///     return IriTerm('urn:isbn:${isbn.value}');
@@ -393,11 +463,12 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///   format: UriFormat.pretty,
   /// );
   ///
-  /// @RdfIri.mapperInstance(catalogMapper)
-  /// class ProductReference {
-  ///   final String sku;
-  ///   ProductReference(this.sku);
-  /// }
+  /// // Use the pre-configured mapper for a property:
+  /// @RdfProperty(
+  ///   Schema.product,
+  ///   iri: IriMapping.mapperInstance(catalogMapper)
+  /// )
+  /// final ProductReference product;
   /// ```
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,
@@ -684,6 +755,18 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
 /// Used in classes annotated with `@RdfIri` or `@RdfGlobalResource` to designate
 /// properties that contribute to IRI construction. This annotation creates a binding
 /// between template variables and property values.
+///
+/// ## Supported Property Types
+///
+/// This annotation works with:
+///
+/// - **Instance fields**: Compatible with all type-annotated fields (mutable, `final`, and `late`)
+/// - **Getters and setters**: Both getter and setter must be provided.
+/// - **Only public properties**: Private properties (with underscore prefix) are not supported.
+///
+/// For classes with `@RdfIri` (or indirectly with @IriMapping), all properties necessary for complete serialization/deserialization
+/// must be annotated with `@RdfIriPart`. The instance must be fully reconstructable from just
+/// these annotated properties.
 ///
 /// ## Usage with IriStrategy
 ///
