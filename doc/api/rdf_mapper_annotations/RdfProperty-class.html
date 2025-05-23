@@ -118,8 +118,11 @@ cannot be used with RDF mapping.</p>
 final String title;
 
 // Optional property (nullable type makes it not required during deserialization)
-@RdfProperty(SchemaBook.author)
-String? author;
+@RdfProperty(
+  SchemaBook.author,
+  iri: IriMapping('http://example.org/author/{authorId}')
+)
+String? authorId;
 
 // Property that will be read from RDF but not written back during serialization
 @RdfProperty(SchemaBook.modified, include: false)
@@ -475,7 +478,7 @@ final List&lt;String&gt; tags;
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

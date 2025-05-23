@@ -62,17 +62,24 @@
     </section>
     
 <section class="desc markdown">
-  <p>Specifies a language tag for string literals.</p>
+  <p>Specifies a language tag for string literals at the property level.</p>
 <p>This constructor creates a mapping that will apply the given language tag
 to string values when serialized as RDF literals. This is particularly useful
 for human-readable text that appears in a specific language.</p>
+<p>Important: This mapping is NOT registered globally and is only used for the specific
+property that is annotated with it.</p>
 <p>The <code>language</code> parameter must be a valid BCP47 language tag (e.g., 'en', 'de-DE').</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfProperty(
-  SchemaBook.description,
-  literal: LiteralMapping.withLanguage('en')
-)
-final String description; // Will be serialized as "description"@en
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class TravelGuide {
+  @RdfProperty(
+    TourismSchema.description,
+    literal: LiteralMapping.withLanguage('en')
+  )
+  final String description; // Will be serialized as "description"@en
+
+  // Without this override, the description would be serialized without a language tag
+}
 </code></pre>
 <p>Note: While language tags are primarily intended for string properties, this constructor
 can also be used with non-string properties. In such cases, the mapper first converts
@@ -117,7 +124,7 @@ descriptions, or any text that should be associated with a specific language.</p
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

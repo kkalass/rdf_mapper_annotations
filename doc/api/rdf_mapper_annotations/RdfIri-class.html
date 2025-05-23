@@ -68,6 +68,17 @@ in RDF graphs:</p>
 </ul>
 <p>When you annotate a class with <code>@RdfIri</code>, a mapper is created that handles
 the conversion between your Dart class and IRI terms.</p>
+<h2 id="property-requirements">Property Requirements</h2>
+<p>For classes with <code>@RdfIri</code> using the default constructor:</p>
+<ul>
+<li>All properties used for serialization/deserialization <strong>must</strong> be annotated with <code>@RdfIriPart</code></li>
+<li>Any property without <code>@RdfIriPart</code> will be ignored during mapping</li>
+<li>The class must be fully serializable/deserializable using only the <code>@RdfIriPart</code> properties</li>
+<li>Derived or computed properties (not needed for serialization) don't need annotations</li>
+</ul>
+<p><strong>Important:</strong> When using external mappers (via <code>.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code>),
+the <code>@RdfIriPart</code> annotations are ignored. In this case, your custom mapper implementation is fully
+responsible for the serialization/deserialization logic.</p>
 <h2 id="iri-generation">IRI Generation</h2>
 <p>The IRI is computed using:</p>
 <ol>
@@ -86,17 +97,8 @@ is used directly as the complete IRI</li>
 <p>By default, the generated mapper is registered globally in <code>initRdfMapper</code>. Set
 <a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> to <code>false</code> if this mapper should not be registered
 automatically. This is useful when the mapper requires constructor parameters
-that are only available at runtime and should be provided via <code>@Provider</code>
+that are only available at runtime and should be provided via <code>@RdfProvides</code>
 annotations in the parent class.</p>
-<h2 id="property-level-usage">Property-Level Usage</h2>
-<p>You can also apply this as part of an <code>@RdfProperty</code> annotation to override
-IRI mapping for a specific property:</p>
-<pre class="language-dart"><code class="language-dart">@RdfProperty(
-  Dcterms.creator,
-  iri: IriMapping('https://example.org/users/{userId}')
-)
-final String userId;
-</code></pre>
 <h2 id="examples">Examples</h2>
 <p><strong>Template-based IRI:</strong></p>
 <pre class="language-dart"><code class="language-dart">@RdfIri('urn:isbn:{value}')
@@ -128,8 +130,8 @@ class AbsoluteUri {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>RdfIri</li>
     </ul>
   </dd>
@@ -170,7 +172,7 @@ class AbsoluteUri {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfIri.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -205,7 +207,7 @@ class AbsoluteUri {
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -337,7 +339,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

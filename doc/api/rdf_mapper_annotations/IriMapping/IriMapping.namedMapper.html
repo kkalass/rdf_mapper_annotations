@@ -70,26 +70,38 @@ implementation via dependency injection. When using this approach, you must:</p>
 <li>Instantiate the mapper (outside of the generated code)</li>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
-<p>The <code>name</code> will be used as a parameter name in the generated <code>initRdfMapper</code> function.</p>
+<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function,
+but the mapper will <em>not</em> be registered globally in the <code>RdfMapper</code> instance
+but only used for the Resource Mapper whose property is annotated with this mapping.</p>
 <p>This approach is particularly useful for IRIs that require complex logic or
 external context (like base URLs) that might vary between deployments.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfIri.namedMapper('userReferenceMapper')
-class UserReference {
-  final String username;
-  UserReference(this.username);
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Using a custom mapper for a UserReference object
+  @RdfProperty(
+    SchemaPerson.identifier,
+    iri: IriMapping.namedMapper('userReferenceMapper')
+  )
+  final UserReference userRef;
 }
 
 // You must implement the mapper:
-class MyUserReferenceMapper implements IriTermMapper&lt;UserReference&gt; {
-  // Your implementation...
+class UserReferenceMapper implements IriTermMapper&lt;UserReference&gt; {
+  @override
+  IriTerm toRdfTerm(UserReference value, SerializationContext context) {
+    return IriTerm('https://example.org/users/${value.username}');
+  }
+
+  @override
+  UserReference fromRdfTerm(IriTerm term, DeserializationContext context) {
+    final segments = Uri.parse(term.iri).pathSegments;
+    return UserReference(segments.last);
+  }
 }
 
 // In initialization code:
-final userRefMapper = MyUserReferenceMapper();
-initRdfMapper({
-  required IriTermMapper&lt;UserReference&gt; userReferenceMapper: userRefMapper
-}) { ... }
+final userRefMapper = UserReferenceMapper();
+final rdfMapper = initRdfMapper(userReferenceMapper: userRefMapper);
 </code></pre>
 </section>
 
@@ -127,7 +139,7 @@ initRdfMapper({
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

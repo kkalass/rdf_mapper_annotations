@@ -108,7 +108,7 @@ class Person {
   Person({required this.id, required this.name, required this.age});
 }
 
-// The mapper is automatically generated and registered within initRdfMapper
+// The initRdfMapper function is automatically generated, lets use it to get an rdfMapper facade.
 final rdfMapper = initRdfMapper();
 final personTurtle = rdfMapper.encodeObject(person);
 final decodedPerson = rdfMapper.decodeObject&lt;Person&gt;(personTurtle);
@@ -119,7 +119,7 @@ class PersonMapper implements GlobalResourceMapper&lt;Person&gt; {
   @override
   (IriTerm, List&lt;Triple&gt;) toRdfResource(Person instance, SerializationContext context, {RdfSubject? parentSubject}) {
     return context.resourceBuilder(IriTerm(instance.id))
-      .literal(FoafPerson.name, instance.name)
+      .addValue(FoafPerson.name, instance.name)
       .build();
   }
 
@@ -189,7 +189,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
       <h2>Classes</h2>
       <dl>
           <dt id="BaseMapping">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends Mapper</span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
@@ -197,7 +197,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 </dd>
 
           <dt id="BaseMappingAnnotation">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends Mapper</span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
@@ -209,7 +209,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 
 </dt>
 <dd>
-  Configures mapping details for global resources (resources with IRIs).
+  Configures mapping details for global resources (resources with IRIs) at the property level.
 </dd>
 
           <dt id="IriMapping">
@@ -217,7 +217,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 
 </dt>
 <dd>
-  Configures mapping details for IRI terms in RDF.
+  Configures mapping details for IRI terms in RDF at the property level.
 </dd>
 
           <dt id="IriStrategy">
@@ -233,7 +233,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 
 </dt>
 <dd>
-  Configures mapping details for literal values in RDF.
+  Configures mapping details for literal values in RDF at the property level.
 </dd>
 
           <dt id="LocalResourceMapping">
@@ -241,7 +241,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 
 </dt>
 <dd>
-  Configures mapping details for local resources (blank nodes).
+  Configures mapping details for local resources (blank nodes) at the property level.
 </dd>
 
           <dt id="MapperRef">
@@ -409,7 +409,7 @@ conversion.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

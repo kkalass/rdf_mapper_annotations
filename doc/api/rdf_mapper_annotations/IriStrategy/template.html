@@ -65,30 +65,42 @@
       </section>
       
 <section class="desc markdown">
-  <p>An optional template string for constructing the IRI.</p>
-<p>Template variables are enclosed in curly braces and can be of two types:</p>
+  <p>An optional template string for constructing IRIs from resource properties.</p>
+<p>The template can contain static text combined with variables in curly braces (<code>{variable}</code>).
+Variables are resolved in the following order:</p>
 <ol>
 <li>
-<p><strong>Class property variables</strong>: Correspond to properties in the class marked with <code>@RdfIriPart</code></p>
+<p><strong>Class property variables</strong>: Bound to properties marked with <code>@RdfIriPart</code></p>
 <ul>
-<li>Example: In <code>IriStrategy('urn:isbn:{isbn}')</code>, the <code>{isbn}</code> variable will be replaced with
-the value of the property marked with <code>@RdfIriPart('isbn')</code></li>
-<li>You can use multiple properties to create complex IRIs like <code>{baseUrl}/users/{userId}/profiles/{profileId}</code></li>
+<li>Example: <code>IriStrategy('urn:isbn:{isbn}')</code> where <code>{isbn}</code> is replaced with
+the value of a property marked with <code>@RdfIriPart('isbn')</code></li>
+<li>Multiple properties can be combined: <code>{baseUrl}/users/{userId}/profiles/{profileId}</code></li>
 </ul>
 </li>
 <li>
-<p><strong>Context variables</strong>: Variables like <code>{baseUrl}</code> or <code>{storageRoot}</code> that can be provided
-through one of two methods:</p>
+<p><strong>Context variables</strong>: Any variable not bound to a property (e.g., <code>{baseUri}</code>)</p>
 <ul>
-<li>Via global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUrlProvider: () =&gt; 'https://example.com'</code>).
-The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
-<li>Via properties in the same class annotated with <code>@RdfProvides('baseUrl')</code>, which is
-preferred for context variables already available in the class.</li>
+<li>When used with <code>registerGlobally = true</code> (default):
+<ul>
+<li>The generator adds provider parameters to <code>initRdfMapper</code></li>
+<li>Example: <code>{baseUri}</code> creates <code>required baseUriProvider: () =&gt; 'https://example.org'</code></li>
+</ul>
+</li>
+<li>When used with <code>registerGlobally = false</code>:
+<ul>
+<li>The mapper looks for:
+<ul>
+<li>Properties in the parent class with <code>@RdfProvides('variableName')</code></li>
+<li>Or adds the provider as a required constructor parameter</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
 <p>If no template is provided (<code>template == null</code>), the property marked with <code>@RdfIriPart</code>
-will be used as the complete IRI value.</p>
+will be used directly as the complete IRI value.</p>
 </section>
 
       
@@ -123,7 +135,7 @@ will be used as the complete IRI value.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

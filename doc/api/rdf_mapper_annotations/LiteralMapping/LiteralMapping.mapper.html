@@ -65,15 +65,20 @@
   <p>Creates a reference to a mapper that will be instantiated from the given type.</p>
 <p>The generator will create an instance of <code>mapperType</code> to handle literal
 term mapping for this class. The type must implement <code>LiteralTermMapper&lt;T&gt;</code>
-where T is the annotated class.</p>
+where T is the annotated class and it must have a no-argument default constructor.</p>
+<p>It will only be used for the Resource Mapper whose property is annotated with this mapping,
+not automatically be registered globally.</p>
 <p>This approach is useful when the mapper has a default constructor and doesn't
 require additional configuration parameters.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfLiteral.mapper(TemperatureMapper)
-class Temperature {
-  final double celsius;
-  Temperature(this.celsius);
-  // ...
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class WeatherStation {
+  // Using a custom mapper for a Temperature object
+  @RdfProperty(
+    WeatherSchema.temperature,
+    literal: LiteralMapping.mapper(TemperatureMapper)
+  )
+  final Temperature temperature;
 }
 
 // The mapper implementation must be accessible to the generator:
@@ -126,7 +131,7 @@ class TemperatureMapper implements LiteralTermMapper&lt;Temperature&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

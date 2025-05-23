@@ -75,7 +75,6 @@
 the value of the property it's applied to</li>
 <li>The actual property name is used as the placeholder, creating a clear connection between
 the template and the property</li>
-<li>The property itself doesn't need additional <code>@RdfIriPart</code> annotations</li>
 </ul>
 </li>
 <li>
@@ -92,6 +91,13 @@ This is preferred for context variables that are already available in the class.
 </ol>
 <p>If no template is provided (<code>template == null</code>), the property value will be used directly
 as the complete IRI, which is useful for properties that already contain fully qualified URIs.</p>
+<p><strong>Note:</strong> When using the default constructor with a template, the property must be of type
+<code>String</code>. For non-String types like value objects (e.g., <code>UserId</code>), either:</p>
+<ol>
+<li>Use one of the mapper constructors (<code>.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code>)
+to provide explicit conversion logic, or</li>
+<li>Annotate the value class itself with <code>@RdfIri</code> and implement the template logic there.</li>
+</ol>
 </section>
 
       
@@ -126,7 +132,7 @@ as the complete IRI, which is useful for properties that already contain fully q
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

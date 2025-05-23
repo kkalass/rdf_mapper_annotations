@@ -72,21 +72,27 @@ RDF subjects. When using this approach, you must:</p>
 <li>Instantiate the mapper (outside of the generated code)</li>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
-<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function.</p>
+<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function,
+but the mapper will <em>not</em> be registered globally in the <code>RdfMapper</code> instance
+but only used for the Resource Mapper whose property is annotated with this mapping.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfGlobalResource.namedMapper('customBookMapper')
-class Book {
-  // ...
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Using a custom mapper for a nested Publisher object
+  @RdfProperty(
+    SchemaBook.publisher,
+    globalResource: GlobalResourceMapping.namedMapper('customPublisherMapper')
+  )
+  final Publisher publisher;
 }
 
 // You must implement the mapper:
-class MyBookMapper implements GlobalResourceMapper&lt;Book&gt; {
+class MyPublisherMapper implements GlobalResourceMapper&lt;Publisher&gt; {
   // Your implementation...
 }
 
 // In initialization code:
-final bookMapper = MyBookMapper();
-final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
+final publisherMapper = MyPublisherMapper();
+final rdfMapper = initRdfMapper(customPublisherMapper: publisherMapper);
 </code></pre>
 </section>
 
@@ -123,7 +129,7 @@ final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

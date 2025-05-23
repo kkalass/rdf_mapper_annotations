@@ -60,9 +60,13 @@
   <p>Marks a Dart class as a local RDF resource (referred to via a blank node).</p>
 <p>Local resources represent embedded entities that don't need globally unique
 identifiers and whose identity depends on the context of their parent resource.</p>
-<p>Instances of the annotated class will be mapped to blank nodes in RDF triples
+<p>Unlike <code>@RdfGlobalResource</code>, instances with this annotation will be mapped to
+blank nodes (anonymous resources) rather than resources with IRIs.
+Instances of the annotated class will be mapped to blank nodes in RDF triples
 by a corresponding mapper - either a mapper generated automatically from this
 annotation, or a mapper that you implement manually and register with <code>rdf_mapper</code>.</p>
+<p>With custom (i.e. manually implemented) mappers, the actual RDF triple generation depends on your mapper
+implementation, regardless of any property annotations.</p>
 <p>When using the standard constructor (<code>@RdfLocalResource(classIri)</code>), a mapper is
 automatically generated based on the property annotations (like <code>@RdfProperty</code>)
 in your class. By default, this mapper is registered within <code>initRdfMapper</code>
@@ -70,12 +74,8 @@ in your class. By default, this mapper is registered within <code>initRdfMapper<
 with the blank node as the subject for each annotated property.</p>
 <p>Set <a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> to <code>false</code> if this mapper should not be registered
 automatically. This is useful when the mapper requires constructor parameters
-that are only available at runtime and should be provided via <code>@Provider</code>
+that are only available at runtime and should be provided via <code>@RdfProvides</code>
 annotations in the parent class.</p>
-<p>Unlike <code>@RdfGlobalResource</code>, instances with this annotation will be mapped to
-blank nodes (anonymous resources) rather than resources with IRIs.</p>
-<p>With custom mappers, the actual RDF triple generation depends on your mapper
-implementation, regardless of any property annotations.</p>
 <p>Use this for value objects or components that only make sense in the context of
 their parent entity.</p>
 <p>You can use this annotation in several ways, depending on your mapping needs:</p>
@@ -93,11 +93,6 @@ automatically</li>
 implement the mapper, your instance will be registered within initRdfMapper
 automatically</li>
 </ol>
-<p>Note: Besides using this annotation at the class level, you can also use it as
-a parameter in the <code>@RdfProperty</code> annotation with the <code>localResource</code> parameter.
-This allows you to specify custom mappers for specific relationships, which is
-especially useful when you need different mapping behaviors for the same type
-depending on the context. See <code>RdfProperty.localResource</code> for more details.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/book/{id}'))
 class Book {
@@ -126,8 +121,8 @@ class Chapter {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">LocalResourceMapper</span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">LocalResourceMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span>&gt;</span></li>
       <li>RdfLocalResource</li>
     </ul>
   </dd>
@@ -169,7 +164,7 @@ blank nodes.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLocalResource.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.mapperInstance.html">RdfLocalResource.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">LocalResourceMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLocalResource/RdfLocalResource.mapperInstance.html">RdfLocalResource.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this local
@@ -217,7 +212,7 @@ resource.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">LocalResourceMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LocalResourceMapper-class.html">LocalResourceMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -337,7 +332,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

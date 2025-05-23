@@ -62,35 +62,56 @@
     </section>
     
 <section class="desc markdown">
-  <p>Creates a reference to a named mapper for this IRI term.</p>
+  <p>Creates a reference to a named mapper for this IRI strategy.</p>
 <p>Use this constructor when you want to provide a custom <code>IriTermMapper</code>
-implementation via dependency injection. When using this approach, you must:</p>
+implementation via dependency injection. With this approach, you must:</p>
 <ol>
-<li>Implement the mapper yourself</li>
+<li>Implement the mapper yourself that works with a <strong>record type</strong></li>
 <li>Instantiate the mapper (outside of the generated code)</li>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
-<p>The <code>name</code> will be used as a parameter name in the generated <code>initRdfMapper</code> function.</p>
-<p>This approach is particularly useful for IRIs that require complex logic or
-external context (like base URLs) that might vary between deployments.</p>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfIri.namedMapper('userReferenceMapper')
-class UserReference {
-  final String username;
-  UserReference(this.username);
+<p>Note that - unlike similar constructors like <code>RdfIri.namedMapper</code> - the
+named mapper will not be registered globally, it will only be used
+for the class annotated with <code>@RdfGlobalResource</code>.</p>
+<p>Unlike the default constructor which generates a mapper, this requires you to
+implement a mapper that works with a record of the property values from fields
+marked with <code>@RdfIriPart</code>.</p>
+<p><strong>Important:</strong> When using custom mappers with multiple IRI part properties,
+use <code>@RdfIriPart.position(index)</code> to specify the order of fields in the record:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(Product.classIri, IriStrategy.namedMapper('productIdMapper'))
+class Product {
+  @RdfIriPart.position(1) // First field in the record
+  final String category;
+
+  @RdfIriPart.position(2) // Second field in the record
+  final String id;
+  // ...
 }
 
-// You must implement the mapper:
-class MyUserReferenceMapper implements IriTermMapper&lt;UserReference&gt; {
-  // Your implementation...
+// Implement mapper for the (String, String) record:
+class ProductIdMapper implements IriTermMapper&lt;(String, String)&gt; {
+  @override
+  IriTerm toRdfTerm((String, String) record, SerializationContext context) {
+    final (category, id) = record;
+    return IriTerm('https://example.org/products/$category/$id');
+  }
+
+  @override
+  (String, String) fromRdfTerm(IriTerm term, DeserializationContext context) {
+    final parts = term.iri.split('/').takeLast(2).toList();
+    return (parts[0], parts[1]);
+  }
 }
 
 // In initialization code:
-final userRefMapper = MyUserReferenceMapper();
-initRdfMapper({
-  required IriTermMapper&lt;UserReference&gt; userReferenceMapper: userRefMapper
-}) { ... }
+final productMapper = ProductIdMapper();
+final rdfMapper = initRdfMapper(productIdMapper: productMapper);
 </code></pre>
+<p>The resource mapper will:</p>
+<ul>
+<li>During serialization: Extract the properties into a record to pass to your mapper</li>
+<li>During deserialization: Take the record your mapper produces and set the properties</li>
+</ul>
 </section>
 
 
@@ -127,7 +148,7 @@ initRdfMapper({
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

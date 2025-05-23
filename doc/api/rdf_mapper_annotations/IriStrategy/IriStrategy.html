@@ -62,11 +62,31 @@
     </section>
     
 <section class="desc markdown">
-  <p>Creates an annotation for a class to be mapped to an IRI term.</p>
-<p>An optional <code>template</code> can be provided to define how the IRI is constructed.
-If no template is provided, the property value marked with <code>@RdfIriPart</code>
-will be used directly as the complete IRI. When using this standard constructor,
-the mapper is automatically generated and registered within initRdfMapper.</p>
+  <p>Creates a strategy for generating IRIs from resource properties.</p>
+<p>Use this constructor with <code>@RdfGlobalResource</code> to have the generator create
+an IRI mapper automatically. The generator will:</p>
+<ol>
+<li>Create a record type from all properties marked with <code>@RdfIriPart</code></li>
+<li>Generate an <code>IriTermMapper&lt;RecordType&gt;</code> implementation</li>
+<li>Extract values from the resource into this record during serialization</li>
+<li>Set properties in the resource from the record during deserialization
+(unless they are also annotated with <code>@RdfProperty</code>, in which case the
+ value from @RdfProperty takes precedence)</li>
+</ol>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  Person.classIri,
+  IriStrategy('{baseUri}/people/{id}')
+)
+class Person {
+  @RdfIriPart('id')  // Standard form works with generated mappers
+  final String id;
+  // ...
+}
+</code></pre>
+<p>When the <code>template</code> contains unbound variables (not matching any property with <code>@RdfIriPart</code>),
+the generator will automatically create provider parameters. With <code>registerGlobally = true</code>
+(the default), these providers become required parameters in the <code>initRdfMapper</code> function.</p>
 </section>
 
 
@@ -101,7 +121,7 @@ the mapper is automatically generated and registered within initRdfMapper.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

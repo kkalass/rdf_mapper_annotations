@@ -65,6 +65,12 @@
   <p>Creates an IRI mapping template for property-specific IRI generation.</p>
 <p>Use this constructor to customize how a specific property should be
 transformed into an IRI term in the RDF graph.</p>
+<p><strong>Important:</strong> This constructor is only designed for properties of type <code>String</code>.
+For non-String types (like value objects or domain-specific types), you have two options:</p>
+<ol>
+<li>Use one of the mapper constructors: <code>.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code></li>
+<li>Annotate the value class itself with <code>@RdfIri</code> and implement the template logic there</li>
+</ol>
 <p>The <code>template</code> defines the pattern for constructing IRIs from the property value:</p>
 <ul>
 <li>With a template: <code>IriMapping('http://example.org/users/{value}')</code></li>
@@ -72,12 +78,33 @@ transformed into an IRI term in the RDF graph.</p>
 </ul>
 <p>This is particularly useful when the property contains identifier information
 that needs to be formatted in a specific way to create valid IRIs.</p>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfProperty(
+<p>Examples:</p>
+<pre class="language-dart"><code class="language-dart">// For String properties - using template is fine:
+@RdfProperty(
   Dcterms.source,
   iri: IriMapping('urn:isbn:{isbn}')
 )
 final String isbn; // Will be mapped to an IRI like "urn:isbn:9780123456789"
+
+// Option 1: For value types - use custom mapper:
+@RdfProperty(
+  SchemaPerson.identifier,
+  iri: IriMapping.mapper(UserIdMapper)
+)
+final UserId userId; // Will use UserIdMapper for conversion
+
+// Option 2: For value types - annotate the value class with @RdfIri:
+@RdfProperty(SchemaPerson.identifier)
+final UserId userId; // The UserId class is annotated with @RdfIri
+
+// Definition of the UserId class:
+@RdfIri('https://example.org/users/{value}')
+class UserId {
+  @RdfIriPart()
+  final String value;
+
+  UserId(this.value);
+}
 </code></pre>
 </section>
 
@@ -113,7 +140,7 @@ final String isbn; // Will be mapped to an IRI like "urn:isbn:9780123456789"
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

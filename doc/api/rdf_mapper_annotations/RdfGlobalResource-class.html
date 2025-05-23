@@ -72,7 +72,7 @@ a mapper is automatically generated based on the property annotations (like
 create RDF triples with the instance's IRI as the subject for each annotated property.</p>
 <p>Set <a href="../rdf_mapper_annotations/BaseMappingAnnotation/registerGlobally.html">registerGlobally</a> to <code>false</code> if this mapper should not be registered
 automatically. This is useful when the mapper requires constructor parameters
-that are only available at runtime and should be provided via <code>@Provider</code>
+that are only available at runtime and should be provided via <code>@RdfProvides</code>
 annotations in the parent class.</p>
 <p>The instance's IRI is computed using the provided iriStrategy (please refer to
 the <code>@RdfIri</code> documentation for details on how IRIs are constructed).</p>
@@ -94,8 +94,8 @@ by other entities in the RDF graph.</p>
 <li>Top-level objects in your data model</li>
 <li>Entities that might be referenced by external systems</li>
 </ul>
-<p>Note: Besides using this annotation at the class level, you can also use it as a parameter
-in the <code>@RdfProperty</code> annotation with the <code>globalResource</code> parameter. This primarily allows you to
+<p>Note: Besides using this annotation at the class level, you can also use <a href="../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a> as a parameter
+in the <code>@RdfProperty</code> annotation with the <code>globalResource</code> parameter. This allows you to
 specify custom mappers for specific relationships, overriding the globally registered mapper.
 This is especially useful when you need different mapping behaviors for the same type depending
 on the context where it's used. See <code>RdfProperty.globalResource</code> for more details and examples.</p>
@@ -120,8 +120,11 @@ class Book {
   // ...
 }
 
-// In initialization code:
-initRdfMapper({required GlobalResourceMapper&lt;Book&gt; customBookMapper}) { ... }
+// Generated initRdfMapper function will have a parameter:
+initRdfMapper({
+  required GlobalResourceMapper&lt;Book&gt; customBookMapper,
+  // other parameters...
+}) { ... }
 </code></pre>
 </section>
 
@@ -133,8 +136,8 @@ initRdfMapper({required GlobalResourceMapper&lt;Book&gt; customBookMapper}) { ..
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">GlobalResourceMapper</span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">GlobalResourceMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/GlobalResourceMapper-class.html">GlobalResourceMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/GlobalResourceMapper-class.html">GlobalResourceMapper</a></span>&gt;</span></li>
       <li>RdfGlobalResource</li>
     </ul>
   </dd>
@@ -176,7 +179,7 @@ subjects with specific IRIs.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfGlobalResource.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfGlobalResource/RdfGlobalResource.mapperInstance.html">RdfGlobalResource.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">GlobalResourceMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfGlobalResource/RdfGlobalResource.mapperInstance.html">RdfGlobalResource.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/GlobalResourceMapper-class.html">GlobalResourceMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance.
@@ -235,7 +238,7 @@ subjects with specific IRIs.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">GlobalResourceMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/GlobalResourceMapper-class.html">GlobalResourceMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -355,7 +358,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

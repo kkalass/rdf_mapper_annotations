@@ -64,30 +64,36 @@
 <section class="desc markdown">
   <p>Creates a reference to a mapper that will be instantiated from the given type.</p>
 <p>The generator will create an instance of <code>mapperType</code> to handle IRI mapping
-for this class. The type must implement <code>IriTermMapper</code>.</p>
-<p>This approach is useful when the mapper has a default constructor and doesn't
-require additional configuration parameters.</p>
+for this class. The type must implement <code>IriTermMapper</code> for a <strong>record type</strong>
+composed of the <code>@RdfIriPart</code> property values.</p>
+<p>Note that - unlike similar constructors like <code>RdfIri.namedMapper</code> - the
+mapper will not be registered globally, it will only be used
+for the class annotated with <code>@RdfGlobalResource</code>.</p>
+<p>When implementing the mapper for multiple IRI parts, use <code>@RdfIriPart.position(index)</code>
+to define the position of each property in the record that will be passed to your mapper.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfIri.mapper(StandardIsbnMapper)
-class ISBN {
-  final String value;
-  ISBN(this.value);
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(Product.classIri, IriStrategy.mapper(ProductIdMapper))
+class Product {
+  @RdfIriPart.position(1) // First field in record
+  final String category;
+
+  @RdfIriPart.position(2) // Second field in record
+  final String id;
+  // ...
 }
 
-// The mapper implementation must be accessible to the generator:
-class StandardIsbnMapper implements IriTermMapper&lt;ISBN&gt; {
+// Mapper must work with the record type defined by the RdfIriPart positions:
+class ProductIdMapper implements IriTermMapper&lt;(String, String)&gt; {
   @override
-  IriTerm toRdfTerm(ISBN isbn, SerializationContext context) {
-    return IriTerm('urn:isbn:${isbn.value}');
+  IriTerm toRdfTerm((String, String) record, SerializationContext context) {
+    final (category, id) = record;
+    return IriTerm('https://example.org/products/$category/$id');
   }
 
   @override
-  ISBN fromRdfTerm(IriTerm term, DeserializationContext context) {
-    final iri = term.iri;
-    if (!iri.startsWith('urn:isbn:')) {
-      throw ArgumentError('Invalid ISBN IRI: $iri');
-    }
-    return ISBN(iri.substring(9));
+  (String, String) fromRdfTerm(IriTerm term, DeserializationContext context) {
+    final parts = term.iri.split('/').takeLast(2).toList();
+    return (parts[0], parts[1]);
   }
 }
 </code></pre>
@@ -127,7 +133,7 @@ class StandardIsbnMapper implements IriTermMapper&lt;ISBN&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

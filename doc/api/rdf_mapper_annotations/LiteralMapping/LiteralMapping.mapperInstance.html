@@ -57,7 +57,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">LiteralMapping.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">LiteralTermMapper</span> <span class="parameter-name">instance</span></span></li>
+      <span class="name ">LiteralMapping.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span></li>
 </ol>)
     </section>
     
@@ -67,8 +67,9 @@ term.</p>
 <p>This allows you to supply a pre-existing instance of a <code>LiteralTermMapper</code>
 for this class. Useful when your mapper requires constructor parameters
 or complex setup that cannot be handled by simple instantiation.</p>
-<p>This is the most direct method for providing custom serialization logic,
-especially when the mapper needs configuration or context from the
+<p>It will only be used for the Resource Mapper whose property is annotated with this mapping,
+not automatically be registered globally.</p>
+<p>This approach is particularly useful when the mapper needs configuration or context from the
 application.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">// Create a pre-configured mapper with const constructor:
@@ -78,10 +79,14 @@ const tempMapper = TemperatureMapper(
   locale: 'en_US',
 );
 
-@RdfLiteral.mapperInstance(tempMapper)
-class Temperature {
-  final double value;
-  Temperature(this.value);
+@RdfGlobalResource(...)
+class WeatherStation {
+  // Using a custom pre-configured mapper for a Temperature object
+  @RdfProperty(
+    WeatherSchema.temperature,
+    literal: LiteralMapping.mapperInstance(tempMapper)
+  )
+  final Temperature temperature;
 }
 </code></pre>
 <p>Note: Since annotations in Dart must be evaluated at compile-time,
@@ -123,7 +128,7 @@ the mapper instance must be a compile-time constant.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

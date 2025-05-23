@@ -79,11 +79,16 @@ Well-known datatypes are available as constants in the Xsd class in the
 <li>Xsd.time</li>
 </ul>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfProperty(
-  SchemaBook.publicationYear,
-  literal: LiteralMapping.withType(Xsd.gYear)
-)
-final int year; // Will be serialized with a specific year datatype
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class HistoricalEvent {
+  @RdfProperty(
+    HistorySchema.occurredIn,
+    literal: LiteralMapping.withType(Xsd.gYear)
+  )
+  final int year; // Will be serialized with a specific year datatype
+
+  // Without this override, the year would be serialized with the default xsd:integer datatype
+}
 </code></pre>
 <p>Note: This constructor can be used with both string and non-string properties. For non-string
 properties, the mapper first converts the value to a string representation using the
@@ -127,7 +132,7 @@ type that has a registered mapper, while preserving the semantics of the origina
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

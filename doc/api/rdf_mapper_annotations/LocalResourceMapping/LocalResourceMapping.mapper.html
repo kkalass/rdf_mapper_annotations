@@ -68,11 +68,16 @@ rather than using the automatic generator. The mapper you provide will determine
 how instances of the class are mapped to RDF subjects.</p>
 <p>The generator will create an instance of <code>mapperType</code> to handle mapping
 for instances of this class. The type must implement <code>LocalResourceMapper&lt;T&gt;</code> where T
-is the annotated class and it must have a no-argument default constructor.</p>
+is the annotated class and it must have a no-argument default constructor.
+It will only be used for the Resource Mapper whose property is annotated with this mapping, not automatically be registered globally.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfLocalResource.mapper(CustomChapterMapper)
-class Chapter {
-  // ...
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Using a custom mapper for a nested Chapter object
+  @RdfProperty(
+    SchemaBook.chapter,
+    localResource: LocalResourceMapping.mapper(CustomChapterMapper)
+  )
+  final Chapter chapter;
 }
 
 // The mapper implementation must be accessible to the generator:
@@ -114,7 +119,7 @@ class CustomChapterMapper implements LocalResourceMapper&lt;Chapter&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

@@ -63,24 +63,27 @@
     
 <section class="desc markdown">
   <p>Creates a reference to a named mapper for this literal term.</p>
-<p>This constructor is used when you want to provide a custom <code>LiteralTermMapper</code>
-implementation for this class via dependency injection. When using this
-approach, you must:</p>
+<p>Use this constructor when you want to provide a custom <code>LiteralTermMapper</code>
+implementation via dependency injection. When using this approach, you must:</p>
 <ol>
 <li>Implement the mapper yourself</li>
 <li>Instantiate the mapper (outside of the generated code)</li>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
-<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code>
-function.</p>
+<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function,
+but the mapper will <em>not</em> be registered globally in the <code>RdfMapper</code> instance
+but only used for the Resource Mapper whose property is annotated with this mapping.</p>
 <p>This approach is particularly useful for complex value objects that require
 special serialization logic or context-dependent conversions.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfLiteral.namedMapper('temperatureMapper')
-class Temperature {
-  final double celsius;
-  Temperature(this.celsius);
-  // ...
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class WeatherStation {
+  // Using a custom mapper for a Temperature object
+  @RdfProperty(
+    WeatherSchema.temperature,
+    literal: LiteralMapping.namedMapper('temperatureMapper')
+  )
+  final Temperature temperature;
 }
 
 // You must implement the mapper:
@@ -90,7 +93,7 @@ class MyTemperatureMapper implements LiteralTermMapper&lt;Temperature&gt; {
 
 // In initialization code:
 final tempMapper = MyTemperatureMapper();
-initRdfMapper({required LiteralTermMapper&lt;Temperature&gt; temperatureMapper: tempMapper}) { ... }
+final rdfMapper = initRdfMapper(temperatureMapper: tempMapper);
 </code></pre>
 </section>
 
@@ -129,7 +132,7 @@ initRdfMapper({required LiteralTermMapper&lt;Temperature&gt; temperatureMapper: 
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

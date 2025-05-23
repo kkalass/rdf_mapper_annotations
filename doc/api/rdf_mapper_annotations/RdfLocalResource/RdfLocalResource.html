@@ -70,12 +70,25 @@ instances of the annotated class, with each instance represented as a blank
 node. The generated mapper is automatically registered within <code>initRdfMapper</code>
 when <code>registerGlobally</code> is <code>true</code> (the default).</p>
 <p>Set <code>registerGlobally</code> to <code>false</code> if this mapper should not be registered
-automatically. This is useful when:</p>
+automatically. This is required when the generated mapper needs providers
+injected in its constructor which should be provided by a parent class and not
+globally in <code>initRdfMapper</code>. This can happen in these cases:</p>
+<ol>
+<li>
+<p>Any <code>@RdfProperty</code> annotation in this class has an <a href="../../rdf_mapper_annotations/IriMapping-class.html">IriMapping</a> that
+contains a template variable not provided by this resource class
+via an <code>@RdfProvides</code> annotation.</p>
+</li>
+<li>
+<p>The <code>@RdfIri</code> annotation of any <code>@RdfProperty</code>'s value class contains <code>registerGlobally: false</code> (so it will be instantiated by this resource mapper instead of using the globally registered mapper) and contains
+a template variable not provided by either:</p>
 <ul>
-<li>The mapper requires constructor parameters that are only available at runtime</li>
-<li>The mapper is only used in specific contexts via <code>@Provider</code> annotations</li>
-<li>You want to manually manage the mapper registration when <code>registerGlobally</code> is true.</li>
+<li>The value class's own <code>@RdfIriPart</code> annotations</li>
+<li>This resource class via <code>@RdfProvides</code> annotations</li>
 </ul>
+</li>
+</ol>
+<p>Also set to <code>false</code> if you want to manually manage the mapper registration.</p>
 <p><code>classIri</code> specifies the <code>rdf:type</code> for the blank node, which defines what kind
 of entity this is in RDF terms. It is optional, but it's highly recommended to
 provide a class IRI to ensure proper typing in the RDF graph.</p>
@@ -131,7 +144,7 @@ class Chapter {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

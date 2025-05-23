@@ -57,7 +57,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">GlobalResourceMapping.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">GlobalResourceMapper</span> <span class="parameter-name">instance</span></span></li>
+      <span class="name ">GlobalResourceMapping.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/GlobalResourceMapper-class.html">GlobalResourceMapper</a></span> <span class="parameter-name">instance</span></span></li>
 </ol>)
     </section>
     
@@ -67,17 +67,23 @@
 implementation rather than using the automatic generator. The mapper you provide
 will determine how instances of the class are mapped to RDF subjects.</p>
 <p>This allows you to supply a pre-existing instance of a <code>GlobalResourceMapper</code>
-for this class.</p>
+for this class. Useful when your mapper requires constructor parameters
+or complex setup that cannot be handled by simple instantiation.</p>
+<p>It will only be used for the Resource Mapper whose property is annotated with this mapping, not automatically be registered globally.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">// Create a pre-configured mapper with const constructor:
-const bookMapper = CustomBookMapper(
+const publisherMapper = CustomPublisherMapper(
   includeMetadata: true,
   defaultLanguage: 'en',
 );
 
-@RdfGlobalResource.mapperInstance(bookMapper)
 class Book {
-  // ...
+  // Using a custom mapper for a nested Publisher object
+  @RdfProperty(
+    SchemaBook.publisher,
+    globalResource: GlobalResourceMapping.mapperInstance(publisherMapper)
+  )
+  final Publisher publisher;
 }
 </code></pre>
 <p>Note: Since annotations in Dart must be evaluated at compile-time,
@@ -117,7 +123,7 @@ the mapper instance must be a compile-time constant.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

@@ -47,27 +47,77 @@
       
 <section class="desc markdown">
   <h1 id="rdf-mapper-annotations-for-dart">RDF Mapper Annotations for Dart</h1>
+<blockquote>
+<p><strong>⚠️ ALPHA PREVIEW VERSION ⚠️</strong><br>
+This library is currently in alpha development stage. The <code>rdf_mapper_generator</code> package is still being actively developed.
+Breaking changes may occur between versions. We're publishing this library to pub.dev to support our cloud builds for the generator project.
+While the annotation API is relatively stable, the generated code may change significantly.</p>
+</blockquote>
 <p><a href="https://pub.dev/packages/rdf_mapper_annotations"><img src="https://img.shields.io/pub/v/rdf_mapper_annotations.svg" alt="pub package"></a>
 <a href="https://github.com/kkalass/rdf_mapper_annotations/actions"><img src="https://github.com/kkalass/rdf_mapper_annotations/actions/workflows/ci.yml/badge.svg" alt="build"></a>
 <a href="https://codecov.io/gh/kkalass/rdf_mapper_annotations"><img src="https://codecov.io/gh/kkalass/rdf_mapper_annotations/branch/main/graph/badge.svg" alt="codecov"></a>
 <a href="https://github.com/kkalass/rdf_mapper_annotations/blob/main/LICENSE"><img src="https://img.shields.io/github/license/kkalass/rdf_mapper_annotations.svg" alt="license"></a></p>
-<p>Dart annotations for declarative RDF graph mapping and code generation.</p>
+<p>A powerful, declarative annotation system for seamless mapping between Dart objects and RDF graphs.</p>
 <h2 id="overview">Overview</h2>
 <p><a href="https://kkalass.github.io/rdf_mapper_annotations/">🌐 <strong>Official Homepage</strong></a></p>
-<p><code>rdf_mapper_annotations</code> provides an elegant solution for transforming between Dart object models and RDF graphs, similar to an ORM for databases. This enables developers to work with semantic data in an object-oriented manner without manually managing the complexity of transforming between dart objects and RDF triples.</p>
+<p><code>rdf_mapper_annotations</code> provides the annotation system for declaring how to map between Dart objects and RDF data, similar to how an ORM works for databases. These annotations are used by the <code>rdf_mapper_generator</code> package to generate the actual mapping code. With this concise annotation system, you can define how your domain model maps to RDF without writing boilerplate serialization code.</p>
+<h3 id="key-features">Key Features</h3>
+<ul>
+<li><strong>Declarative annotations</strong> for clean, maintainable code</li>
+<li><strong>Type-safe mapping</strong> between Dart classes and RDF resources</li>
+<li><strong>Support for code generation</strong> (via rdf_mapper_generator)</li>
+<li><strong>Flexible IRI generation strategies</strong> for resource identification</li>
+<li><strong>Comprehensive collection support</strong> for lists, sets, and maps</li>
+<li><strong>Extensible architecture</strong> through custom mappers</li>
+</ul>
+<h2 id="part-of-a-family-of-projects">Part of a Family of Projects</h2>
+<p>This library is part of a comprehensive ecosystem for working with RDF in Dart:</p>
+<ul>
+<li><a href="https://github.com/kkalass/rdf_core">rdf_core</a> - Core graph classes and serialization (Turtle, JSON-LD, N-Triples)</li>
+<li><a href="https://github.com/kkalass/rdf_mapper">rdf_mapper</a> - Base mapping system between Dart objects and RDF</li>
+<li><a href="https://github.com/kkalass/rdf_mapper_generator">rdf_mapper_generator</a> - Code generator for this annotation library</li>
+<li><a href="https://github.com/kkalass/rdf_vocabularies">rdf_vocabularies</a> - Constants for common RDF vocabularies (Schema.org, FOAF, etc.)</li>
+<li><a href="https://github.com/kkalass/rdf_xml">rdf_xml</a> - RDF/XML format support</li>
+<li><a href="https://github.com/kkalass/rdf_vocabulary_to_dart">rdf_vocabulary_to_dart</a> - Generate constants for custom vocabularies</li>
+</ul>
+<h2 id="what-is-rdf">What is RDF?</h2>
+<p><a href="https://www.w3.org/RDF/">Resource Description Framework (RDF)</a> is a standard model for data interchange on the Web. RDF represents information as simple statements in the form of subject-predicate-object triples. This library lets you work with RDF data using familiar Dart objects without needing to manage triples directly.</p>
+<h3 id="key-rdf-terms">Key RDF Terms</h3>
+<p>To better understand this library, it's helpful to know these core RDF concepts:</p>
+<ul>
+<li>
+<p><strong>IRI</strong> (International Resource Identifier): A unique web address that identifies a resource (similar to a URL but more flexible). In RDF, IRIs serve as global identifiers for things.</p>
+</li>
+<li>
+<p><strong>Triple</strong>: The basic data unit in RDF, composed of subject-predicate-object. For example: "Book123 (subject) has-author (predicate) Person456 (object)".</p>
+</li>
+<li>
+<p><strong>Literal</strong>: A simple data value like a string, number, or date that appears as an object in a triple.</p>
+</li>
+<li>
+<p><strong>Blank Node</strong>: An anonymous resource that exists only in the context of other resources.</p>
+</li>
+<li>
+<p><strong>Subject</strong>: The resource a triple is describing (always an IRI or blank node).</p>
+</li>
+<li>
+<p><strong>Predicate</strong>: The property or relationship between the subject and object (always an IRI).</p>
+</li>
+<li>
+<p><strong>Object</strong>: The value or resource that relates to the subject (can be an IRI, blank node, or literal).</p>
+</li>
+</ul>
 <h2 id="quick-start">Quick Start</h2>
 <ol>
-<li>Add dependencies to your <code>pubspec.yaml</code>:</li>
+<li>Add dependencies to your project:</li>
 </ol>
-<pre class="language-yaml"><code class="language-yaml">dependencies:
-  rdf_core: ^latest
-  rdf_mapper: ^latest
-  rdf_mapper_annotations: ^latest
-  rdf_vocabularies: ^latest # Optional but recommended
+<pre class="language-bash"><code class="language-bash"># Add runtime dependencies
+dart pub add rdf_core rdf_mapper rdf_mapper_annotations
+dart pub add rdf_vocabularies  # Optional but recommended for standard vocabularies
 
-dev_dependencies:
-  build_runner: ^latest
-  rdf_mapper_generator: ^latest
+# Add development dependencies
+dart pub add build_runner --dev
+dart pub add rdf_mapper_generator --dev
 </code></pre>
 <ol start="2">
 <li>Define your data model with RDF annotations:</li>
@@ -76,24 +126,30 @@ dev_dependencies:
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 import 'package:rdf_vocabularies/schema.dart';
 
-@RdfGlobalResource(SchemaBook.classIri, RdfIri('http://example.org/book/{id}'))
+@RdfGlobalResource(
+  SchemaBook.classIri, 
+  IriStrategy('http://example.org/book/{id}')
+)
 class Book {
-  @RdfIriPart('id')
+  @RdfIriPart()
   final String id;
 
   @RdfProperty(SchemaBook.name)
   final String title;
 
-  @RdfProperty(SchemaBook.author)
-  final String author;
+  @RdfProperty(
+    SchemaBook.author,
+    iri: IriMapping('http://example.org/author/{authorId}')
+  )
+  final String authorId;
 
   @RdfProperty(SchemaBook.hasPart)
-  final List&lt;Chapter&gt; chapters;
+  final Iterable&lt;Chapter&gt; chapters;
 
   Book({
     required this.id,
     required this.title,
-    required this.author,
+    required this.authorId,
     required this.chapters,
   });
 }
@@ -112,12 +168,18 @@ class Chapter {
 <ol start="3">
 <li>Generate mappers:</li>
 </ol>
-<pre class="language-bash"><code class="language-bash">dart run build_runner build
+<pre class="language-bash"><code class="language-bash">dart run build_runner build --delete-conflicting-outputs
 </code></pre>
 <ol start="4">
 <li>Use the generated mappers:</li>
 </ol>
-<pre class="language-dart"><code class="language-dart">void main() {
+<pre class="language-dart"><code class="language-dart">import 'package:rdf_core/rdf_core.dart';
+import 'package:rdf_mapper/rdf_mapper.dart';
+import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
+// Import the generated mapper initialization file
+import 'package:your_package/rdf_mapper.g.dart';
+
+void main() {
   // Initialize the generated mapper
   final mapper = initRdfMapper();
   
@@ -125,33 +187,354 @@ class Chapter {
   final book = Book(
     id: '123',
     title: 'RDF Mapping with Dart',
-    author: 'Klas Kalaß',
+    authorId: 'k42',  // Will be mapped to http://example.org/author/k42
     chapters: [
       Chapter('Getting Started', 1),
       Chapter('Advanced Mapping', 2),
     ],
   );
   
-  // Convert to RDF graph
-  final graph = mapper.serialize(book);
-  print(graph.toString());
+  // Convert to serialized format (Turtle, JSON-LD, etc.)
+  final turtle = mapper.encodeObject(book);
+  print(turtle);
   
   // Parse back to Dart object
-  final parsedBook = mapper.deserialize&lt;Book&gt;(graph);
+  final parsedBook = mapper.decodeObject&lt;Book&gt;(turtle);
   print(parsedBook.title); // 'RDF Mapping with Dart'
 }
 </code></pre>
-<p>For more detailed examples, see the <a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">examples</a> directory.</p>
-<hr>
-<h2 id="part-of-a-whole-family-of-projects">Part of a whole family of projects</h2>
-<p>If you are looking for more rdf-related functionality, have a look at our companion projects:</p>
+<h2 id="key-concepts">Key Concepts</h2>
+<h3 id="class-annotations">Class Annotations</h3>
 <ul>
-<li>basic graph classes as well as turtle/jsonld/n-triple encoding and decoding: <a href="https://github.com/kkalass/rdf_core">rdf_core</a></li>
-<li>encode and decode rdf/xml format: <a href="https://github.com/kkalass/rdf_xml">rdf_xml</a></li>
-<li>easy-to-use constants for many well-known vocabularies: <a href="https://github.com/kkalass/rdf_vocabularies">rdf_vocabularies</a></li>
-<li>generate your own easy-to-use constants for other vocabularies with a build_runner: <a href="https://github.com/kkalass/rdf_vocabulary_to_dart">rdf_vocabulary_to_dart</a></li>
+<li><strong>@RdfGlobalResource</strong>: For primary entities with globally unique web addresses (IRIs). These become the "subjects" in RDF triples.</li>
+<li><strong>@RdfLocalResource</strong>: For child entities that only exist in relation to their parent. These become "blank nodes" in RDF.</li>
+<li><strong>@RdfIri</strong>: For classes representing web addresses (IRIs), used when you need a custom type for IRIs.</li>
+<li><strong>@RdfLiteral</strong>: For classes representing simple values like strings, numbers, or custom formats with validation.</li>
+</ul>
+<h3 id="property-annotations">Property Annotations</h3>
+<ul>
+<li><strong>@RdfProperty</strong>: Maps a Dart class property to an RDF relation (predicate). Defines how properties connect to other resources.</li>
+<li><strong>@RdfIriPart</strong>: Marks fields that help construct the resource's web address (IRI).</li>
+<li><strong>@RdfValue</strong>: Identifies which field provides the actual data value for a literal.</li>
+<li><strong>@RdfMapEntry</strong>: Specifies how key-value pairs are converted to RDF (since RDF has no native map concept).</li>
+</ul>
+<h3 id="iri-strategies">IRI Strategies</h3>
+<p>RDF Mapper provides flexible strategies for generating and parsing IRIs for resources.</p>
+<h4 id="simple-template-based-iris">Simple Template-based IRIs</h4>
+<p>The most common approach uses a template with placeholders:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  Person.classIri, 
+  IriStrategy('https://example.org/people/{id}')
+)
+class Person {
+  @RdfIriPart()  // Will be substituted into {id} in the template
+  final String id;
+  
+  // Other properties...
+}
+</code></pre>
+<h4 id="direct-iri-storage">Direct IRI Storage</h4>
+<p>For cases when you want to store the full IRI in the object:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  SchemaPerson.classIri, 
+  IriStrategy()  // Empty strategy means use the IRI field directly
+)
+class Person {
+  @RdfIriPart()  // Contains the complete IRI
+  final String iri;
+  
+  // Other properties...
+}
+</code></pre>
+<h4 id="multi-part-iris">Multi-part IRIs</h4>
+<p>For IRIs constructed from multiple fields:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  SchemaChapter.classIri,
+  IriStrategy('https://example.org/books/{bookId}/chapters/{chapterNumber}')
+)
+class Chapter {
+  @RdfIriPart()  // Maps to {bookId}
+  final String bookId;
+  
+  @RdfIriPart("chapterNumber")  // Maps to {chapterNumber}
+  final int number;
+  
+  // Other properties...
+}
+</code></pre>
+<h4 id="globally-injected-placeholders">Globally Injected Placeholders</h4>
+<p>Use globally injected placeholders for values that should be provided at runtime:</p>
+<pre class="language-dart"><code class="language-dart">// Define models with configurable base URIs
+@RdfGlobalResource(
+  SchemaPerson.classIri, 
+  IriStrategy('{baseUri}/persons/{id}')  // {baseUri} is not directly from a class field
+)
+class Person {
+  @RdfIriPart()
+  final String id;
+  
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+  
+  Person({required this.id, required this.name});
+}
+
+@RdfGlobalResource(
+  SchemaOrganization.classIri, 
+  IriStrategy('{baseUri}/organizations/{id}')  // Same placeholder across models
+)
+class Organization {
+  @RdfIriPart()
+  final String id;
+  
+  @RdfProperty(SchemaOrganization.name)
+  final String name;
+  
+  Organization({required this.id, required this.name});
+}
+
+// At runtime, provide values for the global placeholders
+void main() {
+  // The generated initRdfMapper function will require providers for global placeholders
+  final mapper = initRdfMapper(
+    // Provide a function that returns the baseUri value
+    baseUriProvider: () =&gt; 'https://user-specific-domain.com',
+  );
+  
+  // Now when you create and serialize objects, the baseUri will be injected
+  final person = Person(id: '123', name: 'Alice');
+  final org = Organization(id: 'acme', name: 'ACME Inc.');
+  
+  // IRI will be: https://user-specific-domain.com/persons/123
+  final personGraph = mapper.encodeObject(person);
+  
+  // IRI will be: https://user-specific-domain.com/organizations/acme
+  final orgGraph = mapper.encodeObject(org);
+}
+</code></pre>
+<p>This approach is particularly useful for:</p>
+<ul>
+<li>Multi-tenant applications where each tenant has their own domain</li>
+<li>Applications that need to switch between development/staging/production URLs</li>
+<li>Supporting user-specific or deployment-specific base URIs</li>
+<li>Maintaining a consistent IRI structure across your entire model</li>
+</ul>
+<h4 id="custom-mapper-for-complex-cases">Custom Mapper for Complex Cases</h4>
+<p>When you need complete control over IRI generation and parsing:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  SchemaChapter.classIri,
+  IriStrategy.namedMapper('chapterIdMapper')  // Reference to your custom mapper
+)
+class Chapter {
+  @RdfIriPart.position(1)  // Position in the record type used by the mapper
+  final String bookId;
+  
+  @RdfIriPart.position(2)  // Position matters for the record type
+  final int chapterNumber;
+  
+  // Other properties...
+}
+
+// Your custom IRI mapper implementation
+class ChapterIdMapper implements IriTermMapper&lt;(String bookId, int chapterId)&gt; {
+  final String baseUrl;
+  
+  ChapterIdMapper({required this.baseUrl});
+  
+  @override
+  IriTerm toRdfTerm((String, int) value, SerializationContext context) {
+    return IriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
+  }
+  
+  @override
+  (String, int) fromRdfTerm(IriTerm term, DeserializationContext context) {
+    // Parse the IRI and extract components
+    final uri = Uri.parse(term.iri);
+    final segments = uri.pathSegments;
+    
+    // Expected path: /books/{bookId}/chapters/{chapterId}
+    if (segments.length &gt;= 4 &amp;&amp; segments[0] == 'books' &amp;&amp; segments[2] == 'chapters') {
+      return (segments[1], int.parse(segments[3]));
+    }
+    
+    throw FormatException('Invalid Chapter IRI format: ${term.iri}');
+  }
+}
+</code></pre>
+<h3 id="iri-property-mapping">IRI Property Mapping</h3>
+<p>When a property should reference another resource (rather than contain a literal value), use <code>IriMapping</code> to generate proper IRIs from simple values:</p>
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Maps the string "k42" to the IRI "http://example.org/author/k42"
+  @RdfProperty(
+    SchemaBook.author,  // Expects an IRI to a Person
+    iri: IriMapping('http://example.org/author/{authorId}')
+  )
+  final String authorId;
+  
+  // ...
+}
+</code></pre>
+<p>This is especially valuable for:</p>
+<ul>
+<li>Referencing external resources with IRIs</li>
+<li>Creating semantic connections between objects</li>
+<li>Adhering to vocabulary specifications (like Schema.org)</li>
+<li>Maintaining proper RDF graph structure when a predicate expects an IRI rather than a literal</li>
 </ul>
 <hr>
+<h2 id="advanced-features">Advanced Features</h2>
+<h3 id="custom-types-and-literals">Custom Types and Literals</h3>
+<p>Create custom types with specialized serialization:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral()
+class Rating {
+  @RdfValue()
+  final int stars;
+  
+  Rating(this.stars) {
+    if (stars &lt; 0 || stars &gt; 5) {
+      throw ArgumentError('Rating must be between 0 and 5 stars');
+    }
+  }
+}
+
+@RdfLiteral.custom(
+  datatype: IriTerm.prevalidated('http://example.org/temperature'),
+  toLiteralTermMethod: 'formatCelsius',
+  fromLiteralTermMethod: 'parse',
+)
+class Temperature {
+  final double celsius;
+  
+  Temperature(this.celsius);
+  
+  String formatCelsius() =&gt; '$celsius°C';
+  
+  static Temperature parse(String value) {
+    return Temperature(double.parse(value.replaceAll('°C', '')));
+  }
+}
+</code></pre>
+<h3 id="internationalization-support">Internationalization Support</h3>
+<p>Handle localized texts with language tags:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral()
+class LocalizedText {
+  @RdfValue()
+  final String text;
+  
+  @RdfLanguageTag()
+  final String languageTag;
+  
+  LocalizedText(this.text, this.languageTag);
+  
+  // Convenience constructors
+  LocalizedText.en(String text) : this(text, 'en');
+  LocalizedText.de(String text) : this(text, 'de');
+}
+</code></pre>
+<h3 id="map-collections">Map Collections</h3>
+<p>RDF has no native concept of key-value pairs. This library provides two different approaches for mapping Map&lt;K,V&gt; collections:</p>
+<h4 id="1-using-a-dedicated-entry-class-most-common-approach">1. Using a dedicated entry class (Most common approach)</h4>
+<p>This approach uses a class with <code>@RdfMapKey</code> and <code>@RdfMapValue</code> annotations:</p>
+<pre class="language-dart"><code class="language-dart">// In your main class
+class Task {
+  @RdfProperty(TaskVocab.vectorClock)
+  @RdfMapEntry(VectorClockEntry)  // Specify the entry class
+  Map&lt;String, int&gt; vectorClock;  // clientId → version number
+}
+
+// The entry class with key and value properties
+@RdfLocalResource(VectorClockVocab.classIri)  
+class VectorClockEntry {
+  @RdfProperty(VectorClockVocab.clientId)
+  @RdfMapKey()  // This property provides the Map key
+  final String clientId;
+
+  @RdfProperty(VectorClockVocab.clockValue)
+  @RdfMapValue()  // This property provides the Map value 
+  final int clockValue;
+
+  VectorClockEntry(this.clientId, this.clockValue);
+}
+</code></pre>
+<p>Each map entry is represented as a separate resource in the RDF graph with its own properties.</p>
+<h4 id="2-using-a-custom-mapper-for-special-cases">2. Using a custom mapper (For special cases)</h4>
+<p>This approach handles map entries directly without separate resources:</p>
+<pre class="language-dart"><code class="language-dart">// Direct mapping using a custom mapper
+class Book {
+  @RdfProperty(
+    BookVocab.title,
+    literal: LiteralMapping.mapperInstance(const LocalizedEntryMapper())
+  )
+  final Map&lt;String, String&gt; translations;  // language → translated text
+  
+  Book({required this.translations});
+}
+
+// Custom mapper converts between Map entries and RDF literals
+class LocalizedEntryMapper implements LiteralTermMapper&lt;MapEntry&lt;String, String&gt;&gt; {
+  const LocalizedEntryMapper();
+
+  @override
+  MapEntry&lt;String, String&gt; fromRdfTerm(LiteralTerm term, DeserializationContext context) =&gt;
+    MapEntry(term.language ?? 'en', term.value);
+
+  @override
+  LiteralTerm toRdfTerm(MapEntry&lt;String, String&gt; value, SerializationContext context) =&gt;
+    LiteralTerm.withLanguage(value.value, value.key);
+}
+</code></pre>
+<p>In this example, map entries are serialized as language-tagged literals, where the key becomes the language tag and the value becomes the literal value.</p>
+<h3 id="using-custom-mappers">Using Custom Mappers</h3>
+<p>For special cases, you can implement custom mappers alongside generated ones:</p>
+<pre class="language-dart"><code class="language-dart">// Custom mapper implementation
+class EventMapper implements GlobalResourceMapper&lt;Event&gt; {
+  @override
+  final IriTerm typeIri = EventVocab.classIri;
+  
+  @override
+  RdfSubject toRdfResource(Event instance, SerializationContext context, {RdfSubject? parentSubject}) {
+    // Custom serialization logic here
+    return context.resourceBuilder(IriTerm('http://example.org/events/${instance.id}'))
+      .addValue(EventVocab.timestamp, instance.timestamp)
+      .addValues(instance.customData.entries.map(
+        (e) =&gt; MapEntry(IriTerm('http://example.org/property/${e.key}'), e.value)))
+      .build();
+  }
+  
+  @override
+  Event fromRdfResource(RdfSubject subject, DeserializationContext context) {
+    // Custom deserialization logic here
+    return Event(/* ... */);
+  }
+}
+
+// Register your custom mapper with the system
+final rdfMapper = initRdfMapper();
+rdfMapper.registerMapper&lt;Event&gt;(EventMapper());
+
+// Now use it alongside generated mappers
+final eventGraph = rdfMapper.encodeObject(event);
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<p>To get the most out of RDF Mapper:</p>
+<ul>
+<li>
+<p><strong>Use standard vocabularies</strong> - The <code>rdf_vocabularies</code> package provides ready-to-use constants for common vocabularies. Use the <a href="https://kkalass.github.io/rdf_vocabularies/api/index.html">online search tool</a> to discover terms.</p>
+</li>
+<li>
+<p><strong>Choose the right resource type</strong>:</p>
+<ul>
+<li><code>@RdfGlobalResource</code> for entities with independent identity</li>
+<li><code>@RdfLocalResource</code> for entities that only exist in context of a parent</li>
+<li><code>@RdfIri</code> for reference values with specialized formats</li>
+</ul>
+</li>
+<li>
+<p><strong>Model relationships correctly</strong> - Use IRI mapping for references to other resources rather than string literals</p>
+</li>
+</ul>
+<h2 id="learn-more">Learn More</h2>
+<p>For detailed examples, including complex mappings, vector clocks, IRI strategies, and more, see the <a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">examples</a> directory.</p>
 <h2 id="-contributing">🤝 Contributing</h2>
 <p>Contributions, bug reports, and feature requests are welcome!</p>
 <ul>
@@ -203,7 +586,7 @@ class Chapter {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

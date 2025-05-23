@@ -70,13 +70,17 @@ implementation via dependency injection. When using this approach, you must:</p>
 <li>Instantiate the mapper (outside of the generated code)</li>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
-<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function.</p>
-<p>Note: The mapper will be registered globally in the <code>RdfMapper</code> instance.
-If you need non-global registration, do not annotate your class with this annotation.</p>
+<p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function,
+but the mapper will <em>not</em> be registered globally in the <code>RdfMapper</code> instance
+but only used for the Resource Mapper whose property is annotated with this mapping.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfLocalResource.namedMapper('customChapterMapper')
-class Chapter {
-  // ...
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Using a custom mapper for a nested Chapter object
+  @RdfProperty(
+    SchemaBook.chapter,
+    localResource: LocalResourceMapping.namedMapper('customChapterMapper')
+  )
+  final Chapter chapter;
 }
 
 // You must implement the mapper:
@@ -86,7 +90,7 @@ class MyChapterMapper implements LocalResourceMapper&lt;Chapter&gt; {
 
 // In initialization code:
 final chapterMapper = MyChapterMapper();
-final rdfMapper = initRdfMapper({customChapterMapper: chapterMapper});
+final rdfMapper = initRdfMapper(customChapterMapper: chapterMapper);
 </code></pre>
 </section>
 
@@ -124,7 +128,7 @@ final rdfMapper = initRdfMapper({customChapterMapper: chapterMapper});
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

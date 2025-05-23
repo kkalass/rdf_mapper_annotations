@@ -77,11 +77,14 @@ the conversion between your Dart class and RDF literal values.</p>
 <h2 id="property-level-usage">Property-Level Usage</h2>
 <p>You can also apply this as part of an <code>@RdfProperty</code> annotation to override
 serialization for a specific property:</p>
-<pre class="language-dart"><code class="language-dart">@RdfProperty(
-  SchemaBook.price,
-  literal: LiteralMapping.namedMapper('priceMapper')
-)
-final Price price;
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class Product {
+  @RdfProperty(
+    ProductSchema.price,
+    literal: LiteralMapping.namedMapper('priceMapper')
+  )
+  final Price price;
+}
 </code></pre>
 <h2 id="examples">Examples</h2>
 <p><strong>Simple value with validation:</strong></p>
@@ -151,8 +154,8 @@ class Temperature {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">LiteralTermMapper</span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">LiteralTermMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
       <li>RdfLiteral</li>
     </ul>
   </dd>
@@ -200,7 +203,7 @@ class Temperature {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLiteral.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.mapperInstance.html">RdfLiteral.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">LiteralTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.mapperInstance.html">RdfLiteral.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this literal
@@ -261,7 +264,7 @@ the object type.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">LiteralTermMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -393,7 +396,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

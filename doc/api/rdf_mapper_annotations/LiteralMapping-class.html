@@ -57,10 +57,11 @@
 
     
 <section class="desc markdown">
-  <p>Configures mapping details for literal values in RDF.</p>
+  <p>Configures mapping details for literal values in RDF at the property level.</p>
 <p>This class is used within the <code>@RdfProperty</code> annotation to customize how objects
-are serialized as literal values in RDF, allowing property-specific mapping behavior
-that overrides the class-level configuration defined with <code>@RdfLiteral</code>.</p>
+are serialized as literal values in RDF. Unlike class-level mappings configured with
+<code>@RdfLiteral</code>, these mappings are scoped to the specific property where they
+are defined and are not registered globally.</p>
 <p>In RDF, literal values represent simple data values like strings, numbers, or dates.
 This mapping is typically used for:</p>
 <ul>
@@ -69,6 +70,10 @@ This mapping is typically used for:</p>
 <li>Properties that need different literal representation than their default type</li>
 <li>Context-specific formatting (e.g., currencies that need different formats in different contexts)</li>
 </ul>
+<p><strong>Important</strong>: Mappers configured through <code>LiteralMapping</code> are only used by
+the specific <code>ResourceMapper</code> whose property annotation references them. They are
+not registered in the global mapper registry and won't be available for use by
+other mappers or for direct lookup.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(
   SchemaBook.price,
@@ -76,6 +81,11 @@ This mapping is typically used for:</p>
 )
 final Price price;
 </code></pre>
+<p>Without this override, the property would use the default mapper registered for
+the <code>Price</code> class, which might be configured with <code>@RdfLiteral</code> at the class level.
+The key difference is that the class-level mapper is globally registered (unless
+<code>registerGlobally: false</code> is specified), while this property-level mapping is
+only used for this specific property.</p>
 </section>
 
 
@@ -86,7 +96,7 @@ final Price price;
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">LiteralTermMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
       <li>LiteralMapping</li>
     </ul>
   </dd>
@@ -114,7 +124,7 @@ final Price price;
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="LiteralMapping.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/LiteralMapping/LiteralMapping.mapperInstance.html">LiteralMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">LiteralTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/LiteralMapping/LiteralMapping.mapperInstance.html">LiteralMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this literal
@@ -132,7 +142,7 @@ term.
           <span class="name"><a href="../rdf_mapper_annotations/LiteralMapping/LiteralMapping.withLanguage.html">LiteralMapping.withLanguage</a></span><span class="signature">(<span class="parameter" id="withLanguage-param-language"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">language</span></span>)</span>
         </dt>
         <dd>
-          Specifies a language tag for string literals.
+          Specifies a language tag for string literals at the property level.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="LiteralMapping.withType" class="callable">
@@ -188,7 +198,7 @@ term.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">LiteralTermMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -295,7 +305,7 @@ term.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

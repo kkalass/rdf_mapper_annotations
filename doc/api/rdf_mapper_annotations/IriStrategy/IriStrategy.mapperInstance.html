@@ -57,27 +57,34 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">IriStrategy.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span></li>
+      <span class="name ">IriStrategy.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span></li>
 </ol>)
     </section>
     
 <section class="desc markdown">
   <p>Creates a reference to a directly provided mapper instance for this IRI term.</p>
 <p>This allows you to directly provide a pre-configured <code>IriTermMapper</code> instance
-to handle mapping for this class without dependency injection.</p>
-<p>This approach is ideal when your mapper requires configuration that must be
-provided at initialization time, such as base URLs or formatting parameters.</p>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">// Create a pre-configured mapper with const constructor:
-const catalogMapper = ProductCatalogMapper(
+that works with a <strong>record type</strong> composed of the values from properties marked
+with <code>@RdfIriPart</code>. Unlike <code>RdfIri</code> and <code>IriMapping</code> which work with whole objects,
+<code>IriStrategy</code> mappers must work with records of property values.</p>
+<p>For multiple IRI parts, use <code>@RdfIriPart.position(index)</code> to specify the order
+of each property in the record:</p>
+<pre class="language-dart"><code class="language-dart">// Create a pre-configured mapper for a record type:
+const productMapper = CustomProductMapper(
   baseUrl: 'https://shop.example.org/catalog/',
   format: UriFormat.pretty,
 );
 
-@RdfIri.mapperInstance(catalogMapper)
-class ProductReference {
+@RdfGlobalResource(Product.classIri, IriStrategy.mapperInstance(productMapper))
+class Product {
+  // First field in the record passed to productMapper
+  @RdfIriPart.position(0)
+  final String category;
+
+  // Second field in the record passed to productMapper
+  @RdfIriPart.position(1)
   final String sku;
-  ProductReference(this.sku);
+  // ...
 }
 </code></pre>
 <p>Note: Since annotations in Dart must be evaluated at compile-time,
@@ -118,7 +125,7 @@ the mapper instance must be a compile-time constant.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

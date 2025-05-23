@@ -87,9 +87,7 @@ class MyUserReferenceMapper implements IriTermMapper&lt;UserReference&gt; {
 
 // In initialization code:
 final userRefMapper = MyUserReferenceMapper();
-initRdfMapper({
-  required IriTermMapper&lt;UserReference&gt; userReferenceMapper: userRefMapper
-}) { ... }
+final rdfMapper = initRdfMapper(userReferenceMapper);
 </code></pre>
 </section>
 
@@ -127,7 +125,7 @@ initRdfMapper({
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

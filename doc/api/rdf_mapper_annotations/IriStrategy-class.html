@@ -61,10 +61,11 @@
 <p>This class is a key component of the <code>@RdfGlobalResource</code> annotation that specifies
 how to construct unique IRIs for instances of annotated classes. It provides a
 template-based mechanism that combines static text with dynamic values from object properties.</p>
+<h2 id="iri-template-variables">IRI Template Variables</h2>
 <p>The IRI template supports two types of variables:</p>
 <ol>
 <li>
-<p><strong>Property-based variables</strong> - Values from object properties marked with <code>@RdfIriPart</code>:</p>
+<p><strong>Property-based variables</strong> - Values from properties marked with <code>@RdfIriPart</code>:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/books/{isbn}'))
 class Book {
   @RdfIriPart('isbn')  // Maps to {isbn} in the template
@@ -74,7 +75,7 @@ class Book {
 </code></pre>
 </li>
 <li>
-<p><strong>Context variables</strong> - Values provided through one of two methods:</p>
+<p><strong>Context variables</strong> - Values provided externally:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
   SchemaBook.classIri,
   IriStrategy('{baseUrl}/books/{id}')  // {baseUrl} is a context variable
@@ -82,24 +83,65 @@ class Book {
 class Book {
   @RdfIriPart('id')
   final String id;
-
-  // Option 1: Provide the context variable within the class
-  @RdfProvides('baseUrl')
-  final String apiUrl = 'https://myapp.example.org';
   // ...
 }
 
-// Option 2: Via initialization code:
+// When registerGlobally is true (default):
 final rdfMapper = initRdfMapper(
-  baseUrlProvider: () =&gt; 'https://myapp.example.org'  // Provides value for {baseUrl}
+  baseUrlProvider: () =&gt; 'https://myapp.example.org'  // Auto-injected parameter
 );
 </code></pre>
 </li>
 </ol>
-<p>You can combine both types of variables in a single template to create flexible,
-context-aware IRI patterns for your resources. Unlike the <code>RdfIri</code> annotation which is used
+<h2 id="context-variable-resolution">Context Variable Resolution</h2>
+<p>When the generator encounters template variables that aren't bound to properties with
+<code>@RdfIriPart</code>, it treats them as context variables and resolves them in the following ways:</p>
+<ol>
+<li>
+<p><strong>Global Registration</strong> (when <code>registerGlobally = true</code> in <code>@RdfGlobalResource</code>, which is the default):</p>
+<ul>
+<li>The generator adds required provider parameters to <code>initRdfMapper()</code></li>
+<li>These providers must be supplied when initializing the RDF mapper</li>
+<li>Example: <code>{baseUrl}</code> becomes <code>required String Function() baseUrlProvider</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Local Resolution</strong> (when <code>registerGlobally = false</code>):</p>
+<ul>
+<li>The parent mapper that uses this type needs to provide the context values</li>
+<li>Context variables can be resolved from:
+a. Properties in the parent class annotated with <code>@RdfProvides('variableName')</code>
+b. Or required in the parent mapper's constructor (which may propagate up to <code>initRdfMapper</code>)</li>
+</ul>
+</li>
+</ol>
+<p>This system enables flexible, context-aware IRI patterns that can adapt to different
+deployment environments without hardcoding values. Unlike the <code>RdfIri</code> annotation which is used
 for classes that represent IRI terms themselves, <code>IriStrategy</code> is used within <code>RdfGlobalResource</code>
 to define how instance IRIs are constructed from their properties.</p>
+<h2 id="internal-record-based-mechanism">Internal Record-Based Mechanism</h2>
+<p>Unlike <code>RdfIri</code> and <code>IriMapping</code> which work with complete objects, <code>IriStrategy</code> operates
+on a record composed of the values from properties marked with <code>@RdfIriPart</code>. This
+record-based approach allows resource mappers to:</p>
+<ol>
+<li>Extract only the necessary IRI-related properties when serializing</li>
+<li>Populate these same properties when deserializing from an IRI term</li>
+</ol>
+<h2 id="constructor-choice-and-rdfiripart-usage">Constructor Choice and RdfIriPart Usage</h2>
+<ul>
+<li>
+<p><strong>Default constructor</strong>: The generator creates an <code>IriTermMapper</code> implementation that
+handles mapping between a record of the <code>@RdfIriPart</code> values and IRI terms. With this
+approach, you can use the standard <code>@RdfIriPart([name])</code> constructor.</p>
+</li>
+<li>
+<p><strong>Custom mappers</strong> (via <code>.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code>): You must
+implement an <code>IriTermMapper</code> that works with a record of the property values. For multiple
+<code>@RdfIriPart</code> properties, use <code>@RdfIriPart.position(index, [name])</code> to specify the
+positional order of fields in the record for more robustness and to avoid bugs introduced by
+changing field order.</p>
+</li>
+</ul>
 </section>
 
 
@@ -110,7 +152,7 @@ to define how instance IRIs are constructed from their properties.</p>
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>IriStrategy</li>
     </ul>
   </dd>
@@ -134,7 +176,7 @@ to define how instance IRIs are constructed from their properties.</p>
           <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.html">IriStrategy</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span></span>])</span>
         </dt>
         <dd>
-          Creates an annotation for a class to be mapped to an IRI term.
+          Creates a strategy for generating IRIs from resource properties.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.mapper" class="callable">
@@ -145,7 +187,7 @@ to define how instance IRIs are constructed from their properties.</p>
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -155,7 +197,7 @@ to define how instance IRIs are constructed from their properties.</p>
           <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.namedMapper.html">IriStrategy.namedMapper</a></span><span class="signature">(<span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>)</span>
         </dt>
         <dd>
-          Creates a reference to a named mapper for this IRI term.
+          Creates a reference to a named mapper for this IRI strategy.
             <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
@@ -180,7 +222,7 @@ to define how instance IRIs are constructed from their properties.</p>
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -209,7 +251,7 @@ to define how instance IRIs are constructed from their properties.</p>
 
 </dt>
 <dd>
-  An optional template string for constructing the IRI.
+  An optional template string for constructing IRIs from resource properties.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -299,7 +341,7 @@ to define how instance IRIs are constructed from their properties.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

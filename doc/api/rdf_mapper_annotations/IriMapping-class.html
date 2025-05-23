@@ -57,24 +57,64 @@
 
     
 <section class="desc markdown">
-  <p>Configures mapping details for IRI terms in RDF.</p>
+  <p>Configures mapping details for IRI terms in RDF at the property level.</p>
 <p>This class is used within the <code>@RdfProperty</code> annotation to customize how objects
-are serialized as IRI terms in RDF, allowing property-specific mapping behavior
-that overrides the class-level configuration defined with <code>@RdfIri</code>.</p>
-<p>IRI mapping is typically used for:</p>
+are serialized as IRI terms in RDF. Unlike class-level mappings configured with
+<code>@RdfIri</code>, these mappings are scoped to the specific property where they
+are defined and are not registered globally.</p>
+<p>In RDF, IRIs (Internationalized Resource Identifiers) are used to uniquely identify
+resources and properties. This mapping is ideal for:</p>
 <ul>
 <li>Properties representing identifiers that need custom formatting as IRIs</li>
 <li>References to other resources with specific IRI patterns</li>
 <li>Properties that must be serialized as IRIs rather than literals</li>
 <li>Customizing resource references for specific relationship contexts</li>
 </ul>
-<p>Example:</p>
+<p><strong>Important</strong>: Mappers configured through <code>IriMapping</code> are only used by
+the specific <code>ResourceMapper</code> whose property annotation references them. They are
+not registered in the global mapper registry and won't be available for use by
+other mappers or for direct lookup.</p>
+<h2 id="property-type-support">Property Type Support</h2>
+<p>The default constructor (<code>IriMapping([template])</code>) only supports <code>String</code> properties.
+For non-String types like value objects (e.g., <code>UserId</code> or <code>ISBN</code> classes), you have
+two options:</p>
+<ol>
+<li>
+<p>Use one of the mapper constructors:</p>
+<ul>
+<li><code>.namedMapper()</code> - Reference a named mapper provided at runtime</li>
+<li><code>.mapper()</code> - Instantiate a mapper from a type</li>
+<li><code>.mapperInstance()</code> - Use a pre-configured mapper instance</li>
+</ul>
+</li>
+<li>
+<p>Annotate the class of the property value with <code>@RdfIri</code> and implement the
+template logic based on fields of that class there. This approach leverages
+automatic mapper registration and is often cleaner when the value class
+is fully under your control.</p>
+</li>
+</ol>
+<p>These approaches ensure proper serialization and deserialization for complex types.</p>
+<h2 id="examples">Examples</h2>
+<p>For String properties:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(
   Dcterms.creator,
   iri: IriMapping('https://example.org/users/{userId}')
 )
 final String userId;
 </code></pre>
+<p>For value objects:</p>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(
+  SchemaPerson.identifier,
+  iri: IriMapping.mapper(UserIdMapper)
+)
+final UserId userId;
+</code></pre>
+<p>Without this override, the property would use the default mapper registered for
+the value class, which might be configured with <code>@RdfIri</code> at the class level.
+The key difference is that the class-level mapper is globally registered (unless
+<code>registerGlobally: false</code> is specified), while this property-level mapping is
+only used for this specific property.</p>
 </section>
 
 
@@ -85,7 +125,7 @@ final String userId;
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>IriMapping</li>
     </ul>
   </dd>
@@ -120,7 +160,7 @@ final String userId;
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriMapping.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriMapping/IriMapping.mapperInstance.html">IriMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation">IriTermMapper</span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriMapping/IriMapping.mapperInstance.html">IriMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -155,7 +195,7 @@ final String userId;
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter">IriTermMapper</span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -274,7 +314,7 @@ final String userId;
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

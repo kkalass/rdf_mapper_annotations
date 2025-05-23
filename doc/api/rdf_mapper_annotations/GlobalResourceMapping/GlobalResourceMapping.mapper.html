@@ -68,16 +68,21 @@ rather than using the automatic generator. The mapper you provide will determine
 how instances of the class are mapped to RDF subjects.</p>
 <p>The generator will create an instance of <code>mapperType</code> to handle mapping
 for instances of this class. The type must implement <code>GlobalResourceMapper&lt;T&gt;</code> where T
-is the annotated class.</p>
+is the annotated class and it must have a no-argument default constructor.
+It will only be used for the Resource Mapper whose property is annotated with this mapping, not automatically be registered globally.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfGlobalResource.mapper(CustomBookMapper)
-class Book {
-  // ...
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Using a custom mapper for a nested Publisher object
+  @RdfProperty(
+    SchemaBook.publisher,
+    globalResource: GlobalResourceMapping.mapper(CustomPublisherMapper)
+  )
+  final Publisher publisher;
 }
 
 // The mapper implementation must be accessible to the generator and
 // it must provide a no-argument constructor:
-class CustomBookMapper implements GlobalResourceMapper&lt;Book&gt; {
+class CustomPublisherMapper implements GlobalResourceMapper&lt;Publisher&gt; {
   // Implementation details...
 }
 </code></pre>
@@ -116,7 +121,7 @@ class CustomBookMapper implements GlobalResourceMapper&lt;Book&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

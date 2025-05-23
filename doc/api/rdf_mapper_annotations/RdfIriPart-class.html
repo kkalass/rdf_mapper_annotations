@@ -61,7 +61,31 @@
 <p>Used in classes annotated with <code>@RdfIri</code> or <code>@RdfGlobalResource</code> to designate
 properties that contribute to IRI construction. This annotation creates a binding
 between template variables and property values.</p>
-<p>Example with named template variable:</p>
+<h2 id="supported-property-types">Supported Property Types</h2>
+<p>This annotation works with:</p>
+<ul>
+<li><strong>Instance fields</strong>: Compatible with all type-annotated fields (mutable, <code>final</code>, and <code>late</code>)</li>
+<li><strong>Getters and setters</strong>: Both getter and setter must be provided.</li>
+<li><strong>Only public properties</strong>: Private properties (with underscore prefix) are not supported.</li>
+</ul>
+<p>For classes with <code>@RdfIri</code> (or indirectly with @IriMapping), all properties necessary for complete serialization/deserialization
+must be annotated with <code>@RdfIriPart</code>. The instance must be fully reconstructable from just
+these annotated properties.</p>
+<h2 id="usage-with-iristrategy">Usage with IriStrategy</h2>
+<p>The annotation has different usage patterns depending on the <code>IriStrategy</code> constructor:</p>
+<ul>
+<li>
+<p>With the <strong>default constructor</strong> (<code>IriStrategy(template)</code>), use the standard form
+<code>@RdfIriPart([name])</code> - the generator handles record creation automatically.</p>
+</li>
+<li>
+<p>With <strong>custom mappers</strong> (<code>IriStrategy.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code>),
+use <code>@RdfIriPart.position(index, [name])</code> for multiple properties to ensure
+correct positioning in the record passed to your mapper.</p>
+</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<p>Example with named template variable (generated mapper):</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/book/{id}'))
 class Book {
   @RdfIriPart('id') // Property value replaces {id} in the template
@@ -77,14 +101,17 @@ class ISBN {
   // ...
 }
 </code></pre>
-<p>Example with positional parts for complex cases:</p>
-<pre class="language-dart"><code class="language-dart">@RdfIri.namedMapper('chapterIdMapper')
-class Chapter {
+<p>Example with positional parts for custom mappers:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  Product.classIri,
+  IriStrategy.namedMapper('productIdMapper')
+)
+class Product {
   @RdfIriPart.position(1) // First position in the generated record type
-  final String bookId;
+  final String category;
 
   @RdfIriPart.position(2) // Second position in the generated record type
-  final int chapterNumber;
+  final String id;
   // ...
 }
 </code></pre>
@@ -273,7 +300,7 @@ from multiple unnamed parts, typically for record types in custom mappers.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>

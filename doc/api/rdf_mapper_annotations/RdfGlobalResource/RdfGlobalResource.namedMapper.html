@@ -88,7 +88,7 @@ class MyBookMapper implements GlobalResourceMapper&lt;Book&gt; {
 
 // In initialization code:
 final bookMapper = MyBookMapper();
-final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
+final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
 </code></pre>
 </section>
 
@@ -127,7 +127,7 @@ final rdfMapper = initRdfMapper({customBookMapper: bookMapper});
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0-dev
+      0.1.0
   </span>
   
 </footer>
