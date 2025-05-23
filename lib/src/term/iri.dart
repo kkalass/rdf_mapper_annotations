@@ -47,7 +47,7 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// By default, the generated mapper is registered globally in `initRdfMapper`. Set
 /// [registerGlobally] to `false` if this mapper should not be registered
 /// automatically. This is useful when the mapper requires constructor parameters
-/// that are only available at runtime and should be provided via `@Provider`
+/// that are only available at runtime and should be provided via `@RdfProvides`
 /// annotations in the parent class.
 ///
 /// ## Examples
@@ -132,7 +132,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///
   /// The [registerGlobally] parameter determines whether the generated mapper is
   /// registered globally in `initRdfMapper`. If set to `false`, the mapper will
-  /// not be registered automatically and must be provided via `@Provider`
+  /// not be registered automatically and must be provided via `@RdfProvides`
   /// annotations in the parent class.
   const RdfIri([this.template, bool registerGlobally = true])
       : super(registerGlobally: registerGlobally);

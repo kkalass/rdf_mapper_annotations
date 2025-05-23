@@ -23,7 +23,7 @@ import 'package:rdf_mapper_annotations/src/term/iri.dart';
 ///
 /// Set [registerGlobally] to `false` if this mapper should not be registered
 /// automatically. This is useful when the mapper requires constructor parameters
-/// that are only available at runtime and should be provided via `@Provider`
+/// that are only available at runtime and should be provided via `@RdfProvides`
 /// annotations in the parent class.
 ///
 /// The instance's IRI is computed using the provided iriStrategy (please refer to
@@ -105,7 +105,7 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   /// Set [registerGlobally] to `false` if this mapper should not be registered
   /// automatically. This is useful when:
   /// - The mapper requires constructor parameters that are only available at runtime
-  /// - The mapper is only used in specific contexts via `@Provider` annotations
+  /// - The mapper is only used in specific contexts via `@RdfProvides` annotations
   /// - You want to manually manage the mapper registration
   ///
   /// [classIri] specifies the `rdf:type` for the resource, which defines what kind

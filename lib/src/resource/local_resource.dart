@@ -12,6 +12,9 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// by a corresponding mapper - either a mapper generated automatically from this
 /// annotation, or a mapper that you implement manually and register with `rdf_mapper`.
 ///
+/// With custom (i.e. manually implemented) mappers, the actual RDF triple generation depends on your mapper
+/// implementation, regardless of any property annotations.
+///
 /// When using the standard constructor (`@RdfLocalResource(classIri)`), a mapper is
 /// automatically generated based on the property annotations (like `@RdfProperty`)
 /// in your class. By default, this mapper is registered within `initRdfMapper`
@@ -20,14 +23,11 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///
 /// Set [registerGlobally] to `false` if this mapper should not be registered
 /// automatically. This is useful when the mapper requires constructor parameters
-/// that are only available at runtime and should be provided via `@Provider`
+/// that are only available at runtime and should be provided via `@RdfProvides`
 /// annotations in the parent class.
 ///
 /// Unlike `@RdfGlobalResource`, instances with this annotation will be mapped to
 /// blank nodes (anonymous resources) rather than resources with IRIs.
-///
-/// With custom mappers, the actual RDF triple generation depends on your mapper
-/// implementation, regardless of any property annotations.
 ///
 /// Use this for value objects or components that only make sense in the context of
 /// their parent entity.
@@ -45,12 +45,6 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// 4. Mapper instance: With `@RdfLocalResource.mapperInstance()` - you must
 ///    implement the mapper, your instance will be registered within initRdfMapper
 ///    automatically
-///
-/// Note: Besides using this annotation at the class level, you can also use it as
-/// a parameter in the `@RdfProperty` annotation with the `localResource` parameter.
-/// This allows you to specify custom mappers for specific relationships, which is
-/// especially useful when you need different mapping behaviors for the same type
-/// depending on the context. See `RdfProperty.localResource` for more details.
 ///
 /// Example:
 /// ```dart
@@ -89,7 +83,7 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   /// Set [registerGlobally] to `false` if this mapper should not be registered
   /// automatically. This is useful when:
   /// - The mapper requires constructor parameters that are only available at runtime
-  /// - The mapper is only used in specific contexts via `@Provider` annotations
+  /// - The mapper is only used in specific contexts via `@RdfProvides` annotations
   /// - You want to manually manage the mapper registration when [registerGlobally] is true.
   ///
   /// [classIri] specifies the `rdf:type` for the blank node, which defines what kind
