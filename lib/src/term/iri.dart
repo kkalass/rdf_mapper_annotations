@@ -238,18 +238,25 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
         super.mapperInstance(instance);
 }
 
-/// Configures mapping details for IRI terms in RDF.
+/// Configures mapping details for IRI terms in RDF at the property level.
 ///
 /// This class is used within the `@RdfProperty` annotation to customize how objects
-/// are serialized as IRI terms in RDF, allowing property-specific mapping behavior
-/// that overrides the class-level configuration defined with `@RdfIri`.
+/// are serialized as IRI terms in RDF. Unlike class-level mappings configured with
+/// `@RdfIri`, these mappings are scoped to the specific property where they
+/// are defined and are not registered globally.
 ///
-/// IRI mapping is typically used for:
+/// In RDF, IRIs (Internationalized Resource Identifiers) are used to uniquely identify 
+/// resources and properties. This mapping is ideal for:
 ///
 /// - Properties representing identifiers that need custom formatting as IRIs
 /// - References to other resources with specific IRI patterns
 /// - Properties that must be serialized as IRIs rather than literals
 /// - Customizing resource references for specific relationship contexts
+///
+/// **Important**: Mappers configured through `IriMapping` are only used by
+/// the specific `ResourceMapper` whose property annotation references them. They are
+/// not registered in the global mapper registry and won't be available for use by
+/// other mappers or for direct lookup.
 ///
 /// ## Property Type Support
 ///
@@ -288,6 +295,12 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
 /// )
 /// final UserId userId;
 /// ```
+/// 
+/// Without this override, the property would use the default mapper registered for
+/// the value class, which might be configured with `@RdfIri` at the class level.
+/// The key difference is that the class-level mapper is globally registered (unless
+/// `registerGlobally: false` is specified), while this property-level mapping is
+/// only used for this specific property.
 class IriMapping extends BaseMapping<IriTermMapper> {
   /// An optional template string for constructing the IRI.
   ///
@@ -373,19 +386,23 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// 2. Instantiate the mapper (outside of the generated code)
   /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
   ///
-  /// The [name] will be used as a parameter name in the generated `initRdfMapper` function.
+  /// The [name] will correspond to a parameter in the generated `initRdfMapper` function,
+  /// but the mapper will *not* be registered globally in the `RdfMapper` instance
+  /// but only used for the Resource Mapper whose property is annotated with this mapping.
   ///
   /// This approach is particularly useful for IRIs that require complex logic or
   /// external context (like base URLs) that might vary between deployments.
   ///
   /// Example:
   /// ```dart
-  /// // Property with a complex type that requires custom IRI mapping:
-  /// @RdfProperty(
-  ///   SchemaPerson.identifier,
-  ///   iri: IriMapping.namedMapper('userReferenceMapper')
-  /// )
-  /// final UserReference userRef;
+  /// class Book {
+  ///   // Using a custom mapper for a UserReference object
+  ///   @RdfProperty(
+  ///     SchemaPerson.identifier,
+  ///     iri: IriMapping.namedMapper('userReferenceMapper')
+  ///   )
+  ///   final UserReference userRef;
+  /// }
   ///
   /// // You must implement the mapper:
   /// class UserReferenceMapper implements IriTermMapper<UserReference> {
@@ -412,19 +429,25 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// Creates a reference to a mapper that will be instantiated from the given type.
   ///
   /// The generator will create an instance of [mapperType] to handle IRI mapping
-  /// for this class. The type must implement `IriTermMapper`.
+  /// for this class. The type must implement `IriTermMapper` and it must have a 
+  /// no-argument default constructor.
+  ///
+  /// It will only be used for the Resource Mapper whose property is annotated with this mapping, 
+  /// not automatically be registered globally.
   ///
   /// This approach is useful when the mapper has a default constructor and doesn't
   /// require additional configuration parameters.
   ///
   /// Example:
   /// ```dart
-  /// // Property with a complex type that requires custom IRI mapping:
-  /// @RdfProperty(
-  ///   Dcterms.source,
-  ///   iri: IriMapping.mapper(IsbnMapper)
-  /// )
-  /// final ISBN isbn;
+  /// class Book {
+  ///   // Using a custom mapper for an ISBN object
+  ///   @RdfProperty(
+  ///     Dcterms.source,
+  ///     iri: IriMapping.mapper(IsbnMapper)
+  ///   )
+  ///   final ISBN isbn;
+  /// }
   ///
   /// // The mapper implementation must be accessible to the generator:
   /// class IsbnMapper implements IriTermMapper<ISBN> {
@@ -451,9 +474,12 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///
   /// This allows you to directly provide a pre-configured `IriTermMapper` instance
   /// to handle mapping for this class without dependency injection.
-  ///
+  /// 
   /// This approach is ideal when your mapper requires configuration that must be
   /// provided at initialization time, such as base URLs or formatting parameters.
+  ///
+  /// It will only be used for the Resource Mapper whose property is annotated with this mapping, 
+  /// not automatically be registered globally.
   ///
   /// Example:
   /// ```dart
@@ -463,12 +489,14 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///   format: UriFormat.pretty,
   /// );
   ///
-  /// // Use the pre-configured mapper for a property:
-  /// @RdfProperty(
-  ///   Schema.product,
-  ///   iri: IriMapping.mapperInstance(catalogMapper)
-  /// )
-  /// final ProductReference product;
+  /// class Book {
+  ///   // Using a custom pre-configured mapper for a product reference
+  ///   @RdfProperty(
+  ///     Schema.product,
+  ///     iri: IriMapping.mapperInstance(catalogMapper)
+  ///   )
+  ///   final ProductReference product;
+  /// }
   /// ```
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,

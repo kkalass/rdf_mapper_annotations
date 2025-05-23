@@ -8,6 +8,8 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// Local resources represent embedded entities that don't need globally unique
 /// identifiers and whose identity depends on the context of their parent resource.
 ///
+/// Unlike `@RdfGlobalResource`, instances with this annotation will be mapped to
+/// blank nodes (anonymous resources) rather than resources with IRIs.
 /// Instances of the annotated class will be mapped to blank nodes in RDF triples
 /// by a corresponding mapper - either a mapper generated automatically from this
 /// annotation, or a mapper that you implement manually and register with `rdf_mapper`.
@@ -25,9 +27,6 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// automatically. This is useful when the mapper requires constructor parameters
 /// that are only available at runtime and should be provided via `@RdfProvides`
 /// annotations in the parent class.
-///
-/// Unlike `@RdfGlobalResource`, instances with this annotation will be mapped to
-/// blank nodes (anonymous resources) rather than resources with IRIs.
 ///
 /// Use this for value objects or components that only make sense in the context of
 /// their parent entity.
@@ -87,10 +86,7 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   ///
   /// 1. Any `@RdfProperty` annotation in this class has an [IriMapping] that
   ///    contains a template variable not provided by this resource class
-  ///    via an `@RdfProvides` annotation. The values must be provided by the
-  ///    resource class that contains this property, either through:
-  ///    - An `@RdfProvides` annotation on one of its properties
-  ///    - Constructor parameters of the mapper (if registerGlobally is false)
+  ///    via an `@RdfProvides` annotation.
   ///
   /// 2. The `@RdfIri` annotation of any `@RdfProperty`'s value class contains `registerGlobally: false` (so it will be instantiated by this resource mapper instead of using the globally registered mapper) and contains
   ///    a template variable not provided by either:
@@ -135,16 +131,19 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   /// 2. Instantiate the mapper (outside of the generated code)
   /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
   ///
-  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function.
-  ///
-  /// Note: The mapper will be registered globally in the `RdfMapper` instance.
-  /// If you need non-global registration, do not annotate your class with this annotation.
+  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function,
+  /// but the mapper will *not* be registered globally in the `RdfMapper` instance
+  /// but only used for the Resource Mapper whose property is annotated with this mapping.
   ///
   /// Example:
   /// ```dart
-  /// @RdfLocalResource.namedMapper('customChapterMapper')
-  /// class Chapter {
-  ///   // ...
+  /// class Book {
+  ///   // Using a custom mapper for a nested Chapter object
+  ///   @RdfProperty(
+  ///     SchemaBook.chapter,
+  ///     localResource: LocalResourceMapping.namedMapper('customChapterMapper')
+  ///   )
+  ///   final Chapter chapter;
   /// }
   ///
   /// // You must implement the mapper:
@@ -210,11 +209,12 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
         super.mapperInstance(instance);
 }
 
-/// Configures mapping details for local resources (blank nodes).
+/// Configures mapping details for local resources (blank nodes) at the property level.
 ///
-/// This class is used specifically within the `@RdfProperty` annotation to customize
-/// how objects are serialized as blank nodes in RDF, allowing property-specific
-/// mapping behavior that overrides the class-level configuration.
+/// This class is used within the `@RdfProperty` annotation to customize how objects
+/// are serialized as blank nodes in RDF. Unlike class-level mappings configured with
+/// `@RdfLocalResource`, these mappings are scoped to the specific property where they
+/// are defined and are not registered globally.
 ///
 /// In RDF, blank nodes represent anonymous resources that exist within the context of
 /// their parent resource, rather than having globally unique identifiers. This mapping
@@ -223,6 +223,12 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
 /// - Composite objects or value objects
 /// - Nested structures where identity outside the parent context isn't needed
 /// - Objects that semantically don't make sense as standalone entities
+/// - Property-specific mapping behavior that differs from the class-level configuration
+///
+/// **Important**: Mappers configured through `LocalResourceMapping` are only used by
+/// the specific `ResourceMapper` whose property annotation references them. They are
+/// not registered in the global mapper registry and won't be available for use by
+/// other mappers or for direct lookup.
 ///
 /// Example:
 /// ```dart
@@ -235,6 +241,9 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
 ///
 /// Without this override, the property would use the default mapper registered for
 /// the `Chapter` class, which might be configured with `@RdfLocalResource` at the class level.
+/// The key difference is that the class-level mapper is globally registered (unless
+/// `registerGlobally: false` is specified), while this property-level mapping is
+/// only used for this specific property.
 class LocalResourceMapping extends BaseMapping<LocalResourceMapper> {
   /// Creates a reference to a named mapper that will be injected at runtime.
   ///
@@ -246,7 +255,9 @@ class LocalResourceMapping extends BaseMapping<LocalResourceMapper> {
   /// 2. Instantiate the mapper (outside of the generated code)
   /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
   ///
-  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function.
+  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function,
+  /// but the mapper will *not* be registered globally in the `RdfMapper` instance
+  /// but only used for the Resource Mapper whose property is annotated with this mapping.
   ///
   /// Example:
   /// ```dart
@@ -275,12 +286,17 @@ class LocalResourceMapping extends BaseMapping<LocalResourceMapper> {
   /// The generator will create an instance of `mapperType` to handle mapping
   /// for instances of this class. The type must implement `LocalResourceMapper<T>` where T
   /// is the annotated class and it must have a no-argument default constructor.
+  /// It will only be used for the Resource Mapper whose property is annotated with this mapping, not automatically be registered globally.
   ///
   /// Example:
   /// ```dart
-  /// @RdfLocalResource.mapper(CustomChapterMapper)
-  /// class Chapter {
-  ///   // ...
+  /// class Book {
+  ///   // Using a custom mapper for a nested Chapter object
+  ///   @RdfProperty(
+  ///     SchemaBook.chapter,
+  ///     localResource: LocalResourceMapping.mapper(CustomChapterMapper)
+  ///   )
+  ///   final Chapter chapter;
   /// }
   ///
   /// // The mapper implementation must be accessible to the generator:
@@ -297,6 +313,8 @@ class LocalResourceMapping extends BaseMapping<LocalResourceMapper> {
   /// for this class. Useful when your mapper requires constructor parameters
   /// or complex setup that cannot be handled by simple instantiation.
   ///
+  /// It will only be used for the Resource Mapper whose property is annotated with this mapping, not automatically be registered globally.
+  ///
   /// Example:
   /// ```dart
   /// // Create a pre-configured mapper with const constructor:
@@ -305,9 +323,13 @@ class LocalResourceMapping extends BaseMapping<LocalResourceMapper> {
   ///   options: chapterOptions,
   /// );
   ///
-  /// @RdfLocalResource.mapperInstance(chapterMapper)
-  /// class Chapter {
-  ///   // ...
+  /// class Book {
+  ///   // Using a custom mapper for a nested Chapter object
+  ///   @RdfProperty(
+  ///     SchemaBook.chapter,
+  ///     localResource: LocalResourceMapping.mapperInstance(chapterMapper)
+  ///   )
+  ///   final Chapter chapter;
   /// }
   /// ```
   ///

@@ -29,11 +29,14 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// serialization for a specific property:
 ///
 /// ```dart
-/// @RdfProperty(
-///   SchemaBook.price,
-///   literal: LiteralMapping.namedMapper('priceMapper')
-/// )
-/// final Price price;
+/// @RdfGlobalResource(...)
+/// class Product {
+///   @RdfProperty(
+///     ProductSchema.price,
+///     literal: LiteralMapping.namedMapper('priceMapper')
+///   )
+///   final Price price;
+/// }
 /// ```
 ///
 /// ## Examples
@@ -194,9 +197,8 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
 
   /// Creates a reference to a named mapper for this literal term.
   ///
-  /// This constructor is used when you want to provide a custom `LiteralTermMapper`
-  /// implementation for this class via dependency injection. When using this
-  /// approach, you must:
+  /// Use this constructor when you want to provide a custom `LiteralTermMapper`
+  /// implementation via dependency injection. When using this approach, you must:
   /// 1. Implement the mapper yourself
   /// 2. Instantiate the mapper (outside of the generated code)
   /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
@@ -235,7 +237,7 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///
   /// The generator will create an instance of [mapperType] to handle literal
   /// term mapping for this class. The type must implement `LiteralTermMapper<T>`
-  /// where T is the annotated class.
+  /// where T is the annotated class and it must have a no-argument default constructor.
   ///
   /// This approach is useful when the mapper has a default constructor and doesn't
   /// require additional configuration parameters.
@@ -304,11 +306,12 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
         super.mapperInstance(instance);
 }
 
-/// Configures mapping details for literal values in RDF.
+/// Configures mapping details for literal values in RDF at the property level.
 ///
 /// This class is used within the `@RdfProperty` annotation to customize how objects
-/// are serialized as literal values in RDF, allowing property-specific mapping behavior
-/// that overrides the class-level configuration defined with `@RdfLiteral`.
+/// are serialized as literal values in RDF. Unlike class-level mappings configured with
+/// `@RdfLiteral`, these mappings are scoped to the specific property where they
+/// are defined and are not registered globally.
 ///
 /// In RDF, literal values represent simple data values like strings, numbers, or dates.
 /// This mapping is typically used for:
@@ -318,6 +321,11 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
 /// - Properties that need different literal representation than their default type
 /// - Context-specific formatting (e.g., currencies that need different formats in different contexts)
 ///
+/// **Important**: Mappers configured through `LiteralMapping` are only used by
+/// the specific `ResourceMapper` whose property annotation references them. They are
+/// not registered in the global mapper registry and won't be available for use by
+/// other mappers or for direct lookup.
+///
 /// Example:
 /// ```dart
 /// @RdfProperty(
@@ -326,32 +334,41 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
 /// )
 /// final Price price;
 /// ```
+///
+/// Without this override, the property would use the default mapper registered for
+/// the `Price` class, which might be configured with `@RdfLiteral` at the class level.
+/// The key difference is that the class-level mapper is globally registered (unless
+/// `registerGlobally: false` is specified), while this property-level mapping is
+/// only used for this specific property.
 class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   final String? language;
   final IriTerm? datatype;
 
   /// Creates a reference to a named mapper for this literal term.
   ///
-  /// This constructor is used when you want to provide a custom `LiteralTermMapper`
-  /// implementation for this class via dependency injection. When using this
-  /// approach, you must:
+  /// Use this constructor when you want to provide a custom `LiteralTermMapper`
+  /// implementation via dependency injection. When using this approach, you must:
   /// 1. Implement the mapper yourself
   /// 2. Instantiate the mapper (outside of the generated code)
   /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
   ///
-  /// The [name] will correspond to a parameter in the generated `initRdfMapper`
-  /// function.
+  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function,
+  /// but the mapper will *not* be registered globally in the `RdfMapper` instance
+  /// but only used for the Resource Mapper whose property is annotated with this mapping.
   ///
   /// This approach is particularly useful for complex value objects that require
   /// special serialization logic or context-dependent conversions.
   ///
   /// Example:
   /// ```dart
-  /// @RdfLiteral.namedMapper('temperatureMapper')
-  /// class Temperature {
-  ///   final double celsius;
-  ///   Temperature(this.celsius);
-  ///   // ...
+  /// @RdfGlobalResource(...)
+  /// class WeatherStation {
+  ///   // Using a custom mapper for a Temperature object
+  ///   @RdfProperty(
+  ///     WeatherSchema.temperature,
+  ///     literal: LiteralMapping.namedMapper('temperatureMapper')
+  ///   )
+  ///   final Temperature temperature;
   /// }
   ///
   /// // You must implement the mapper:
@@ -372,18 +389,24 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///
   /// The generator will create an instance of [mapperType] to handle literal
   /// term mapping for this class. The type must implement `LiteralTermMapper<T>`
-  /// where T is the annotated class.
+  /// where T is the annotated class and it must have a no-argument default constructor.
+  ///
+  /// It will only be used for the Resource Mapper whose property is annotated with this mapping,
+  /// not automatically be registered globally.
   ///
   /// This approach is useful when the mapper has a default constructor and doesn't
   /// require additional configuration parameters.
   ///
   /// Example:
   /// ```dart
-  /// @RdfLiteral.mapper(TemperatureMapper)
-  /// class Temperature {
-  ///   final double celsius;
-  ///   Temperature(this.celsius);
-  ///   // ...
+  /// @RdfGlobalResource(...)
+  /// class WeatherStation {
+  ///   // Using a custom mapper for a Temperature object
+  ///   @RdfProperty(
+  ///     WeatherSchema.temperature,
+  ///     literal: LiteralMapping.mapper(TemperatureMapper)
+  ///   )
+  ///   final Temperature temperature;
   /// }
   ///
   /// // The mapper implementation must be accessible to the generator:
@@ -411,8 +434,10 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   /// for this class. Useful when your mapper requires constructor parameters
   /// or complex setup that cannot be handled by simple instantiation.
   ///
-  /// This is the most direct method for providing custom serialization logic,
-  /// especially when the mapper needs configuration or context from the
+  /// It will only be used for the Resource Mapper whose property is annotated with this mapping,
+  /// not automatically be registered globally.
+  ///
+  /// This approach is particularly useful when the mapper needs configuration or context from the
   /// application.
   ///
   /// Example:
@@ -424,10 +449,14 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///   locale: 'en_US',
   /// );
   ///
-  /// @RdfLiteral.mapperInstance(tempMapper)
-  /// class Temperature {
-  ///   final double value;
-  ///   Temperature(this.value);
+  /// @RdfGlobalResource(...)
+  /// class WeatherStation {
+  ///   // Using a custom pre-configured mapper for a Temperature object
+  ///   @RdfProperty(
+  ///     WeatherSchema.temperature,
+  ///     literal: LiteralMapping.mapperInstance(tempMapper)
+  ///   )
+  ///   final Temperature temperature;
   /// }
   /// ```
   ///
@@ -438,21 +467,29 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
         datatype = null,
         super.mapperInstance(instance);
 
-  /// Specifies a language tag for string literals.
+  /// Specifies a language tag for string literals at the property level.
   ///
   /// This constructor creates a mapping that will apply the given language tag
   /// to string values when serialized as RDF literals. This is particularly useful
   /// for human-readable text that appears in a specific language.
   ///
+  /// Important: This mapping is NOT registered globally and is only used for the specific
+  /// property that is annotated with it.
+  ///
   /// The [language] parameter must be a valid BCP47 language tag (e.g., 'en', 'de-DE').
   ///
   /// Example:
   /// ```dart
-  /// @RdfProperty(
-  ///   SchemaBook.description,
-  ///   literal: LiteralMapping.withLanguage('en')
-  /// )
-  /// final String description; // Will be serialized as "description"@en
+  /// @RdfGlobalResource(...)
+  /// class TravelGuide {
+  ///   @RdfProperty(
+  ///     TourismSchema.description,
+  ///     literal: LiteralMapping.withLanguage('en')
+  ///   )
+  ///   final String description; // Will be serialized as "description"@en
+  ///
+  ///   // Without this override, the description would be serialized without a language tag
+  /// }
   /// ```
   ///
   /// Note: While language tags are primarily intended for string properties, this constructor
@@ -485,11 +522,16 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///
   /// Example:
   /// ```dart
-  /// @RdfProperty(
-  ///   SchemaBook.publicationYear,
-  ///   literal: LiteralMapping.withType(Xsd.gYear)
-  /// )
-  /// final int year; // Will be serialized with a specific year datatype
+  /// @RdfGlobalResource(...)
+  /// class HistoricalEvent {
+  ///   @RdfProperty(
+  ///     HistorySchema.occurredIn,
+  ///     literal: LiteralMapping.withType(Xsd.gYear)
+  ///   )
+  ///   final int year; // Will be serialized with a specific year datatype
+  ///
+  ///   // Without this override, the year would be serialized with the default xsd:integer datatype
+  /// }
   /// ```
   ///
   /// Note: This constructor can be used with both string and non-string properties. For non-string
