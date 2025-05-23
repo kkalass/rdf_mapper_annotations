@@ -81,10 +81,24 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   /// when [registerGlobally] is `true` (the default).
   ///
   /// Set [registerGlobally] to `false` if this mapper should not be registered
-  /// automatically. This is useful when:
-  /// - The mapper requires constructor parameters that are only available at runtime
-  /// - The mapper is only used in specific contexts via `@RdfProvides` annotations
-  /// - You want to manually manage the mapper registration when [registerGlobally] is true.
+  /// automatically. This is required when the generated mapper needs providers
+  /// injected in its constructor which should be provided by a parent class and not
+  /// globally in `initRdfMapper`. This can happen in these cases:
+  ///
+  /// 1. Any `@RdfProperty` annotation in this class has an [IriMapping] that
+  ///    contains a template variable not provided by this resource class
+  ///    via an `@RdfProvides` annotation. The values must be provided by the
+  ///    resource class that contains this property, either through:
+  ///    - An `@RdfProvides` annotation on one of its properties
+  ///    - Constructor parameters of the mapper (if registerGlobally is false)
+  ///
+  /// 2. The `@RdfIri` annotation of any `@RdfProperty`'s value class contains `registerGlobally: false` (so it will be instantiated by this resource mapper instead of using the globally registered mapper) and contains
+  ///    a template variable not provided by either:
+  ///    - The value class's own `@RdfIriPart` annotations
+  ///    - This resource class via `@RdfProvides` annotations
+  ///
+  /// Also set to `false` if you want to manually manage the mapper registration.
+  ///
   ///
   /// [classIri] specifies the `rdf:type` for the blank node, which defines what kind
   /// of entity this is in RDF terms. It is optional, but it's highly recommended to
