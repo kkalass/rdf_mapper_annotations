@@ -56,8 +56,11 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 /// final String title;
 ///
 /// // Optional property (nullable type makes it not required during deserialization)
-/// @RdfProperty(SchemaBook.author)
-/// String? author;
+/// @RdfProperty(
+///   SchemaBook.author,
+///   iri: IriMapping('http://example.org/author/{authorId}')
+/// )
+/// String? authorId;
 ///
 /// // Property that will be read from RDF but not written back during serialization
 /// @RdfProperty(SchemaBook.modified, include: false)

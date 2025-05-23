@@ -17,8 +17,9 @@ class Book {
   @RdfProperty(SchemaBook.name)
   final String title;
 
-  @RdfProperty(SchemaBook.author)
-  final String author;
+  @RdfProperty(SchemaBook.author,
+      iri: IriMapping('http://example.org/author/{authorId}'))
+  final String authorId;
 
   @RdfProperty(SchemaBook.datePublished)
   final DateTime published;
@@ -39,7 +40,7 @@ class Book {
   Book({
     required this.id,
     required this.title,
-    required this.author,
+    required this.authorId,
     required this.published,
     required this.isbn,
     required this.rating,
@@ -106,7 +107,7 @@ class GeneratedBookMapper implements GlobalResourceMapper<Book> {
       id: _extractIdFromIri(subject.iri),
       // From @RdfProperty, required by default
       title: reader.require<String>(SchemaBook.name),
-      author: reader.require<String>(SchemaBook.author),
+      authorId: reader.require<String>(SchemaBook.author),
       published: reader.require<DateTime>(SchemaBook.datePublished),
       isbn: reader.require<ISBN>(SchemaBook.isbn),
       rating: reader.require<Rating>(SchemaBook.aggregateRating),
@@ -123,7 +124,7 @@ class GeneratedBookMapper implements GlobalResourceMapper<Book> {
     return context
         .resourceBuilder(IriTerm(_createIriFromId(book.id)))
         .addValue(SchemaBook.name, book.title)
-        .addValue(SchemaBook.author, book.author)
+        .addValue(SchemaBook.author, book.authorId)
         .addValue<DateTime>(SchemaBook.datePublished, book.published)
         // There is a IriTermMapper for ISBN class registered, not a LiteralTermMapper - thus this will be an IriTerm and not a LiteralTerm
         .addValue<ISBN>(SchemaBook.isbn, book.isbn)
@@ -227,7 +228,7 @@ void main() {
   final book = Book(
     id: 'hobbit',
     title: 'The Hobbit',
-    author: 'J.R.R. Tolkien',
+    authorId: 'J.R.R. Tolkien',
     published: DateTime(1937, 9, 21),
     isbn: ISBN('9780618260300'),
     rating: Rating(5),
@@ -252,7 +253,7 @@ void main() {
   // Verify it worked correctly
   print('\nDeserialized book:');
   print('Title: ${deserializedBook.title}');
-  print('Author: ${deserializedBook.author}');
+  print('Author: ${deserializedBook.authorId}');
   print('Chapters:');
   for (final chapter in deserializedBook.chapters) {
     print('- ${chapter.title} (${chapter.number})');
