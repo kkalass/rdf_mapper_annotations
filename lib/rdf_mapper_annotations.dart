@@ -43,7 +43,7 @@
 ///   Person({required this.id, required this.name, required this.age});
 /// }
 ///
-/// // The mapper is automatically generated and registered within initRdfMapper
+/// // The initRdfMapper function is automatically generated, lets use it to get an rdfMapper facade.
 /// final rdfMapper = initRdfMapper();
 /// final personTurtle = rdfMapper.encodeObject(person);
 /// final decodedPerson = rdfMapper.decodeObject<Person>(personTurtle);

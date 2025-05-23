@@ -217,13 +217,12 @@ RdfMapper initRdfMapper() {
     ..registerMapper<Rating>(GeneratedRatingMapper());
 }
 
-// If the generated initRdfMapper() method has no required parameters,
-// the mapper will automatically generate this global variable for convenience
-final rdfMapper = initRdfMapper();
-
 // --- The code below demonstrates how you work with the generated code ---
 
 void main() {
+  // Initialize the RDF mapper with the generated initRdfMapper function
+  final rdfMapper = initRdfMapper();
+
   // Create a sample book
   final book = Book(
     id: 'hobbit',
