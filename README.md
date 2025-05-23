@@ -1,5 +1,10 @@
 # RDF Mapper Annotations for Dart
 
+> **⚠️ ALPHA PREVIEW VERSION ⚠️**  
+> This library is currently in alpha development stage. The `rdf_mapper_generator` package is still being actively developed.
+> Breaking changes may occur between versions. We're publishing this library to pub.dev to support our cloud builds for the generator project.
+> While the annotation API is relatively stable, the generated code may change significantly.
+
 [![pub package](https://img.shields.io/pub/v/rdf_mapper_annotations.svg)](https://pub.dev/packages/rdf_mapper_annotations)
 [![build](https://github.com/kkalass/rdf_mapper_annotations/actions/workflows/ci.yml/badge.svg)](https://github.com/kkalass/rdf_mapper_annotations/actions)
 [![codecov](https://codecov.io/gh/kkalass/rdf_mapper_annotations/branch/main/graph/badge.svg)](https://codecov.io/gh/kkalass/rdf_mapper_annotations)
