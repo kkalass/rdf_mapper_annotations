@@ -1,3 +1,4 @@
+import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 import 'package:test/test.dart';
@@ -96,6 +97,25 @@ void main() {
       expect(mapping.mapper!.name, isNull);
       expect(mapping.mapper!.type, isNull);
       expect(mapping.mapper!.instance, equals(mapperInstance));
+    });
+
+    test('withLanguage constructor sets language tag', () {
+      const languageTag = 'en';
+      final mapping = LiteralMapping.withLanguage(languageTag);
+
+      expect(mapping.language, equals(languageTag));
+      expect(mapping.datatype, isNull);
+      expect(mapping.mapper, isNull);
+    });
+
+    test('withType constructor sets datatype', () {
+      // Using example datatype from rdf_vocabularies package
+      final datatype = IriTerm.prevalidated('http://example.org/customType');
+      final mapping = LiteralMapping.withType(datatype);
+
+      expect(mapping.datatype, equals(datatype));
+      expect(mapping.language, isNull);
+      expect(mapping.mapper, isNull);
     });
   });
 

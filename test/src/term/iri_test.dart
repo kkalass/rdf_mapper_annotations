@@ -109,6 +109,39 @@ void main() {
       final strategy = IriStrategy(template);
 
       expect(strategy.template, equals(template));
+      expect(strategy.mapper, isNull);
+    });
+
+    test('namedMapper constructor sets mapper name', () {
+      const mapperName = 'testStrategyMapper';
+      final strategy = IriStrategy.namedMapper(mapperName);
+
+      expect(strategy.template, isNull);
+      expect(strategy.mapper, isNotNull);
+      expect(strategy.mapper!.name, equals(mapperName));
+      expect(strategy.mapper!.type, isNull);
+      expect(strategy.mapper!.instance, isNull);
+    });
+
+    test('mapper constructor sets mapper type', () {
+      final strategy = IriStrategy.mapper(MockIriTermMapper);
+
+      expect(strategy.template, isNull);
+      expect(strategy.mapper, isNotNull);
+      expect(strategy.mapper!.name, isNull);
+      expect(strategy.mapper!.type, equals(MockIriTermMapper));
+      expect(strategy.mapper!.instance, isNull);
+    });
+
+    test('mapperInstance constructor sets mapper instance', () {
+      const mapperInstance = MockIriTermMapper();
+      final strategy = IriStrategy.mapperInstance(mapperInstance);
+
+      expect(strategy.template, isNull);
+      expect(strategy.mapper, isNotNull);
+      expect(strategy.mapper!.name, isNull);
+      expect(strategy.mapper!.type, isNull);
+      expect(strategy.mapper!.instance, equals(mapperInstance));
     });
   });
 
