@@ -243,7 +243,7 @@ Use globally injected placeholders for values that should be provided at runtime
 // Define models with configurable base URIs
 @RdfGlobalResource(
   SchemaPerson.classIri, 
-  IriStrategy('{baseUri}/persons/{id}')  // {baseUri} is not directly from a class field
+  IriStrategy('{+baseUri}/persons/{id}')  // {baseUri} is not directly from a class field and is marked with +, thus matches including /
 )
 class Person {
   @RdfIriPart()
@@ -257,7 +257,7 @@ class Person {
 
 @RdfGlobalResource(
   SchemaOrganization.classIri, 
-  IriStrategy('{baseUri}/organizations/{id}')  // Same placeholder across models
+  IriStrategy('{+baseUri}/organizations/{id}')  // Same placeholder across models
 )
 class Organization {
   @RdfIriPart()

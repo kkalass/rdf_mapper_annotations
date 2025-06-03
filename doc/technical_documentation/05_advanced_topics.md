@@ -56,7 +56,7 @@ void main() {
 // Usage in model:
 @RdfGlobalResource(
   SchemaBook.classIri,
-  iriStrategy: IriStrategy('{baseUri}/{version}/books/{isbn}'),
+  iriStrategy: IriStrategy('{+baseUri}/{version}/books/{isbn}'),
 )
 class Book {
   @RdfIriPart()

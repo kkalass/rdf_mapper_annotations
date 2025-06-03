@@ -24,7 +24,7 @@ class ExampleVocab {
 
 @RdfGlobalResource(
   ExampleVocab.Parent,
-  IriStrategy('{baseUri}/{id}.ttl'),
+  IriStrategy('{+baseUri}/{id}.ttl'),
 )
 class Parent {
   @RdfIriPart()
@@ -35,13 +35,13 @@ class Parent {
   late Child child;
 
   @RdfProperty(ExampleVocab.sibling,
-      iri: IriMapping('{baseUri}/{parentId}/sibling/{siblingId}.ttl'))
+      iri: IriMapping('{+baseUri}/{parentId}/sibling/{siblingId}.ttl'))
   late String siblingId;
 }
 
 @RdfGlobalResource(
   ExampleVocab.Child,
-  IriStrategy('{baseUri}/{parentId}/child/{id}.ttl'),
+  IriStrategy('{+baseUri}/{parentId}/child/{id}.ttl'),
   registerGlobally: false,
 )
 class Child {

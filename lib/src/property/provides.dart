@@ -26,7 +26,7 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// ```dart
 /// @RdfGlobalResource(
 ///   ExampleVocab.Parent,
-///   IriStrategy('{baseUri}/{id}.ttl'),
+///   IriStrategy('{+baseUri}/{id}.ttl'),
 /// )
 /// class Parent {
 ///   @RdfIriPart()
@@ -37,13 +37,13 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///   late Child child;
 ///
 ///   @RdfProperty(ExampleVocab.sibling,
-///       iri: IriMapping('{baseUri}/{parentId}/sibling/{siblingId}.ttl'))
+///       iri: IriMapping('{+baseUri}/{parentId}/sibling/{siblingId}.ttl'))
 ///   late String siblingId;
 /// }
 ///
 /// @RdfGlobalResource(
 ///   ExampleVocab.Child,
-///   IriStrategy('{baseUri}/{parentId}/child/{id}.ttl'),
+///   IriStrategy('{+baseUri}/{parentId}/child/{id}.ttl'),
 ///   registerGlobally: false,
 /// )
 /// class Child {
@@ -63,8 +63,9 @@ class RdfProvides extends RdfAnnotation {
   /// The name by which this provided value can be referenced in IRI templates.
   ///
   /// When not specified, the property's name is used as the provided variable name.
-  /// For example, `@RdfProvides()` on a property named `baseUri` makes `{baseUri}`
-  /// available in IRI templates.
+  /// For example, `@RdfProvides()` on a property named `baseUri` makes `{+baseUri}`
+  /// available in IRI templates. The `+` prefix indicates that the variable may contain
+  /// URI-reserved characters like slashes, which should not be percent-encoded when substituted.
   final String? name;
 
   /// Creates an annotation that provides a value to be used in IRI templates.

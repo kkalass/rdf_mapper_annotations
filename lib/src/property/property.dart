@@ -97,18 +97,20 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 /// // Override: String property value converted to an IRI using a template
 /// @RdfProperty(
 ///   Dcterms.creator,
-///   iri: IriMapping('{baseUri}/profile/{userId}')
+///   iri: IriMapping('{+baseUri}/profile/{userId}')
 /// )
 /// final String userId;
 /// ```
 ///
 /// In the example above:
 /// - `{userId}` is a property-specific placeholder that refers directly to the property's value
-/// - `{baseUri}` is a context variable that must be provided through one of two methods:
+/// - `{+baseUri}` is a context variable that must be provided through one of two methods:
 ///   1. Via a global provider function in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`)
 ///      The generator will automatically add a required parameter to `initRdfMapper`.
 ///   2. Via another property in the same class annotated with `@RdfProvides('baseUri')`
 ///      This is preferred for context variables that are already available in the class.
+/// - The `+` prefix (e.g., `{+baseUri}`) indicates variables that may contain URI-reserved
+///   characters like slashes, which should not be percent-encoded when substituted
 ///
 /// For instance, if `userId` contains "jsmith", and `baseUri` resolves to "https://example.com",
 /// this will generate an IRI: "https://example.com/profile/jsmith"
@@ -213,16 +215,18 @@ class RdfProperty implements RdfAnnotation {
   /// - Context-dependent IRI construction strategies
   ///
   /// Available IriMapping constructor variants:
-  /// - Template constructor: `iri: IriMapping('{baseUri}/profile/{propertyName}')`
+  /// - Template constructor: `iri: IriMapping('{+baseUri}/profile/{propertyName}')`
   /// - `.namedMapper()` - references a mapper provided to `initRdfMapper`
   /// - `.mapper()` - uses a mapper type that will be instantiated
   /// - `.mapperInstance()` - uses a specific mapper instance
   ///
   /// Template placeholders are resolved in two ways:
   /// 1. Property placeholders (e.g., `{userId}`) use the property's value directly
-  /// 2. Context variables (e.g., `{baseUri}`) are provided through:
+  /// 2. Context variables (e.g., `{+baseUri}`) are provided through:
   ///    - Global provider functions in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`)
   ///    - Properties in the same class annotated with `@RdfProvides('baseUri')`
+  ///    - The `+` prefix (e.g., `{+baseUri}`) indicates variables that may contain URI-reserved
+  ///      characters like slashes, which should not be percent-encoded when substituted
   ///
   /// Example:
   /// ```dart
@@ -233,7 +237,7 @@ class RdfProperty implements RdfAnnotation {
   /// // Using an IRI template for a property
   /// @RdfProperty(
   ///   Dcterms.creator,
-  ///   iri: IriMapping('{baseUri}/profile/{userId}')
+  ///   iri: IriMapping('{+baseUri}/profile/{userId}')
   /// )
   /// final String userId; // Converts to "https://example.com/profile/jsmith" if userId="jsmith"
   /// ```
