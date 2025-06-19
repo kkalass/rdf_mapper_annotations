@@ -20,10 +20,6 @@ class EnhancedRating {
 
 /// Example for a class that uses custom conversion methods
 @RdfLiteral.custom(
-  // If you leave out the datatype, it will be `Xsd.string` by default.
-  // Note that you may have compatibility issues with other RDF libraries
-  // if you use a datatype that is not in the `Xsd` namespace.
-  datatype: IriTerm.prevalidated('http://example.org/temperature'),
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
 )
@@ -33,11 +29,17 @@ class Temperature {
   Temperature(this.celsius);
 
   // Custom formatting method used by the @RdfLiteral annotation
-  String formatCelsius() => '$celsius°C';
+  LiteralTerm formatCelsius() => LiteralTerm(
+        '$celsius°C',
+        // If you leave out the datatype, it will be `Xsd.string` by default.
+        // Note that you may have compatibility issues with other RDF libraries
+        // if you use a datatype that is not in the `Xsd` namespace.
+        datatype: IriTerm.prevalidated('http://example.org/temperature'),
+      );
 
   // Static method for parsing text back into a Temperature instance
-  static Temperature parse(String value) {
-    return Temperature(double.parse(value.replaceAll('°C', '')));
+  static Temperature parse(LiteralTerm term) {
+    return Temperature(double.parse(term.value.replaceAll('°C', '')));
   }
 }
 
@@ -80,19 +82,13 @@ class GeneratedEnhancedRatingMapper
 class GeneratedTemperatureMapper implements LiteralTermMapper<Temperature> {
   @override
   LiteralTerm toRdfTerm(Temperature temp, SerializationContext context) {
-    // The toStringMethod is used from the @RdfLiteral annotation
-    return LiteralTerm(temp.formatCelsius(),
-        datatype: IriTerm.prevalidated('http://example.org/temperature'));
+    return temp.formatCelsius();
   }
 
   @override
   Temperature fromRdfTerm(LiteralTerm term, DeserializationContext context) {
-    assert(
-      term.datatype == IriTerm.prevalidated('http://example.org/temperature'),
-      'Expected datatype to be http://example.org/temperature',
-    );
     // Convert back to a Temperature instance with the static parse method
-    return Temperature.parse(term.value);
+    return Temperature.parse(term);
   }
 }
 

@@ -161,8 +161,8 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   /// This approach allows you to define how your class is converted to/from RDF literals
   /// by specifying methods in your class:
   ///
-  /// * [toLiteralTermMethod]: An instance method that converts your object to a `String`
-  /// * [fromLiteralTermMethod]: A static method that creates your object from a `String`
+  /// * [toLiteralTermMethod]: An instance method that converts your object to a `LiteralTerm`
+  /// * [fromLiteralTermMethod]: A static method that creates your object from a `LiteralTerm`
   ///
   /// This is ideal for classes that need special formatting or validation during
   /// serialization, such as formatted values with specific string representations
@@ -180,19 +180,19 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///   Temperature(this.celsius);
   ///
   ///   // Instance method for serialization
-  ///   String formatCelsius() => '$celsius°C';
+  ///   LiteralTerm formatCelsius() => LiteralTerm('$celsius°C');
   ///
   ///   // Static method for deserialization
-  ///   static Temperature parse(String value) =>
-  ///     Temperature(double.parse(value.replaceAll('°C', '')));
+  ///   static Temperature parse(LiteralTerm term) =>
+  ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
   /// }
   /// ```
   const RdfLiteral.custom(
-      {this.datatype,
-      required String toLiteralTermMethod,
+      {required String toLiteralTermMethod,
       required String fromLiteralTermMethod})
       : toLiteralTermMethod = toLiteralTermMethod,
         fromLiteralTermMethod = fromLiteralTermMethod,
+        datatype = null,
         super();
 
   /// Creates a reference to a named mapper for this literal term.
