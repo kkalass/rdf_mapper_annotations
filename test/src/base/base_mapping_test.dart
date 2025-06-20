@@ -9,7 +9,8 @@ abstract class TestMapper implements LiteralTermMapper {}
 // Eine konkrete Test-Klasse, die das Interface implementiert
 class ConcreteTestMapper implements TestMapper {
   @override
-  fromRdfTerm(LiteralTerm term, DeserializationContext context) {
+  fromRdfTerm(LiteralTerm term, DeserializationContext context,
+      {bool bypassDatatypeCheck = false}) {
     throw UnimplementedError();
   }
 

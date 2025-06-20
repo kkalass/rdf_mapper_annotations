@@ -17,7 +17,8 @@ class LocalizedEntryMapper
 
   @override
   MapEntry<String, String> fromRdfTerm(
-          LiteralTerm term, DeserializationContext context) =>
+          LiteralTerm term, DeserializationContext context,
+          {bool bypassDatatypeCheck = false}) =>
       MapEntry(
         term.language ?? 'en',
         term.value,

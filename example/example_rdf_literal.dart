@@ -73,7 +73,8 @@ class GeneratedEnhancedRatingMapper
   }
 
   @override
-  EnhancedRating fromRdfTerm(LiteralTerm term, DeserializationContext context) {
+  EnhancedRating fromRdfTerm(LiteralTerm term, DeserializationContext context,
+      {bool bypassDatatypeCheck = false}) {
     return EnhancedRating(context.fromLiteralTerm<int>(term));
   }
 }
@@ -86,7 +87,8 @@ class GeneratedTemperatureMapper implements LiteralTermMapper<Temperature> {
   }
 
   @override
-  Temperature fromRdfTerm(LiteralTerm term, DeserializationContext context) {
+  Temperature fromRdfTerm(LiteralTerm term, DeserializationContext context,
+      {bool bypassDatatypeCheck = false}) {
     // Convert back to a Temperature instance with the static parse method
     return Temperature.parse(term);
   }
@@ -109,7 +111,8 @@ class GeneratedLocalizedTextMapper implements LiteralTermMapper<LocalizedText> {
   }
 
   @override
-  LocalizedText fromRdfTerm(LiteralTerm term, DeserializationContext context) {
+  LocalizedText fromRdfTerm(LiteralTerm term, DeserializationContext context,
+      {bool bypassDatatypeCheck = false}) {
     // Note that we are using <String> because the term.value is a String -
     // if it was a custom type, we would specify that type here, basically
     // allowing us to use classes like Name, Description etc. if we wanted to
