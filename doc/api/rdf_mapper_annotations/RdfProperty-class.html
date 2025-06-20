@@ -155,14 +155,14 @@ final int rating;
 <pre class="language-dart"><code class="language-dart">// Override: String property value converted to an IRI using a template
 @RdfProperty(
   Dcterms.creator,
-  iri: IriMapping('{baseUri}/profile/{userId}')
+  iri: IriMapping('{+baseUri}/profile/{userId}')
 )
 final String userId;
 </code></pre>
 <p>In the example above:</p>
 <ul>
 <li><code>{userId}</code> is a property-specific placeholder that refers directly to the property's value</li>
-<li><code>{baseUri}</code> is a context variable that must be provided through one of two methods:
+<li><code>{+baseUri}</code> is a context variable that must be provided through one of two methods:
 <ol>
 <li>Via a global provider function in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>)
 The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
@@ -170,6 +170,8 @@ The generator will automatically add a required parameter to <code>initRdfMapper
 This is preferred for context variables that are already available in the class.</li>
 </ol>
 </li>
+<li>The <code>+</code> prefix (e.g., <code>{+baseUri}</code>) indicates variables that may contain URI-reserved
+characters like slashes, which should not be percent-encoded when substituted</li>
 </ul>
 <p>For instance, if <code>userId</code> contains "jsmith", and <code>baseUri</code> resolves to "https://example.com",
 this will generate an IRI: "https://example.com/profile/jsmith"</p>
@@ -478,7 +480,7 @@ final List&lt;String&gt; tags;
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

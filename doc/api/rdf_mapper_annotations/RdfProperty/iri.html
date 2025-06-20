@@ -79,7 +79,7 @@ for this specific property.</p>
 </ul>
 <p>Available IriMapping constructor variants:</p>
 <ul>
-<li>Template constructor: <code>iri: IriMapping('{baseUri}/profile/{propertyName}')</code></li>
+<li>Template constructor: <code>iri: IriMapping('{+baseUri}/profile/{propertyName}')</code></li>
 <li><code>.namedMapper()</code> - references a mapper provided to <code>initRdfMapper</code></li>
 <li><code>.mapper()</code> - uses a mapper type that will be instantiated</li>
 <li><code>.mapperInstance()</code> - uses a specific mapper instance</li>
@@ -87,10 +87,12 @@ for this specific property.</p>
 <p>Template placeholders are resolved in two ways:</p>
 <ol>
 <li>Property placeholders (e.g., <code>{userId}</code>) use the property's value directly</li>
-<li>Context variables (e.g., <code>{baseUri}</code>) are provided through:
+<li>Context variables (e.g., <code>{+baseUri}</code>) are provided through:
 <ul>
 <li>Global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>)</li>
 <li>Properties in the same class annotated with <code>@RdfProvides('baseUri')</code></li>
+<li>The <code>+</code> prefix (e.g., <code>{+baseUri}</code>) indicates variables that may contain URI-reserved
+characters like slashes, which should not be percent-encoded when substituted</li>
 </ul>
 </li>
 </ol>
@@ -102,7 +104,7 @@ final String serviceUrl = 'https://example.com';
 // Using an IRI template for a property
 @RdfProperty(
   Dcterms.creator,
-  iri: IriMapping('{baseUri}/profile/{userId}')
+  iri: IriMapping('{+baseUri}/profile/{userId}')
 )
 final String userId; // Converts to "https://example.com/profile/jsmith" if userId="jsmith"
 </code></pre>
@@ -140,7 +142,7 @@ final String userId; // Converts to "https://example.com/profile/jsmith" if user
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

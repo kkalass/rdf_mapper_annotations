@@ -66,24 +66,30 @@
       
 <section class="desc markdown">
   <p>An optional template string for constructing IRIs from resource properties.</p>
-<p>The template can contain static text combined with variables in curly braces (<code>{variable}</code>).
-Variables are resolved in the following order:</p>
+<p>The template can contain static text combined with variables in curly braces. Two variable
+expansion syntaxes are supported:</p>
+<ul>
+<li><strong>Standard variables</strong> (<code>{variable}</code>): Values are percent-encoded according to URI standards</li>
+<li><strong>Reserved expansion</strong> (<code>{+variable}</code>): Values containing URI-reserved characters like
+slashes are not percent-encoded, preserving them as structural URI components</li>
+</ul>
+<p>Variables are resolved in the following order:</p>
 <ol>
 <li>
 <p><strong>Class property variables</strong>: Bound to properties marked with <code>@RdfIriPart</code></p>
 <ul>
 <li>Example: <code>IriStrategy('urn:isbn:{isbn}')</code> where <code>{isbn}</code> is replaced with
 the value of a property marked with <code>@RdfIriPart('isbn')</code></li>
-<li>Multiple properties can be combined: <code>{baseUrl}/users/{userId}/profiles/{profileId}</code></li>
+<li>Multiple properties can be combined: <code>{+baseUrl}/users/{userId}/profiles/{profileId}</code></li>
 </ul>
 </li>
 <li>
-<p><strong>Context variables</strong>: Any variable not bound to a property (e.g., <code>{baseUri}</code>)</p>
+<p><strong>Context variables</strong>: Any variable not bound to a property (commonly using <code>+</code> prefix)</p>
 <ul>
 <li>When used with <code>registerGlobally = true</code> (default):
 <ul>
 <li>The generator adds provider parameters to <code>initRdfMapper</code></li>
-<li>Example: <code>{baseUri}</code> creates <code>required baseUriProvider: () =&gt; 'https://example.org'</code></li>
+<li>Example: <code>{+baseUri}</code> creates <code>required baseUriProvider: () =&gt; 'https://example.org'</code></li>
 </ul>
 </li>
 <li>When used with <code>registerGlobally = false</code>:
@@ -96,6 +102,8 @@ the value of a property marked with <code>@RdfIriPart('isbn')</code></li>
 </li>
 </ul>
 </li>
+<li>The <code>+</code> prefix (e.g., <code>{+baseUri}</code>) indicates variables that may contain URI-reserved
+characters like slashes, which should not be percent-encoded when substituted</li>
 </ul>
 </li>
 </ol>
@@ -135,7 +143,7 @@ will be used directly as the complete IRI value.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

@@ -76,7 +76,7 @@ an IRI mapper automatically. The generator will:</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
   Person.classIri,
-  IriStrategy('{baseUri}/people/{id}')
+  IriStrategy('{+baseUri}/people/{id}')
 )
 class Person {
   @RdfIriPart('id')  // Standard form works with generated mappers
@@ -121,7 +121,7 @@ the generator will automatically create provider parameters. With <code>register
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

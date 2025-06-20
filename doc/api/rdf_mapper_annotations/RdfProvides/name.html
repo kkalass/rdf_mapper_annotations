@@ -67,8 +67,9 @@
 <section class="desc markdown">
   <p>The name by which this provided value can be referenced in IRI templates.</p>
 <p>When not specified, the property's name is used as the provided variable name.
-For example, <code>@RdfProvides()</code> on a property named <code>baseUri</code> makes <code>{baseUri}</code>
-available in IRI templates.</p>
+For example, <code>@RdfProvides()</code> on a property named <code>baseUri</code> makes <code>{+baseUri}</code>
+available in IRI templates. The <code>+</code> prefix indicates that the variable may contain
+URI-reserved characters like slashes, which should not be percent-encoded when substituted.</p>
 </section>
 
       
@@ -103,7 +104,7 @@ available in IRI templates.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

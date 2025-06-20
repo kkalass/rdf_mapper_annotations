@@ -79,7 +79,7 @@ available within the object graph.</p>
 <p><strong>Example: Using @RdfProvides to pass parentId to Iri property and nested resource</strong></p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
   ExampleVocab.Parent,
-  IriStrategy('{baseUri}/{id}.ttl'),
+  IriStrategy('{+baseUri}/{id}.ttl'),
 )
 class Parent {
   @RdfIriPart()
@@ -90,13 +90,13 @@ class Parent {
   late Child child;
 
   @RdfProperty(ExampleVocab.sibling,
-      iri: IriMapping('{baseUri}/{parentId}/sibling/{siblingId}.ttl'))
+      iri: IriMapping('{+baseUri}/{parentId}/sibling/{siblingId}.ttl'))
   late String siblingId;
 }
 
 @RdfGlobalResource(
   ExampleVocab.Child,
-  IriStrategy('{baseUri}/{parentId}/child/{id}.ttl'),
+  IriStrategy('{+baseUri}/{parentId}/child/{id}.ttl'),
   registerGlobally: false,
 )
 class Child {
@@ -278,7 +278,7 @@ in <code>initRdfMapper</code> and will only be used within the context of the Pa
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

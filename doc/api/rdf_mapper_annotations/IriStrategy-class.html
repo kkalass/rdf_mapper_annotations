@@ -62,7 +62,14 @@
 how to construct unique IRIs for instances of annotated classes. It provides a
 template-based mechanism that combines static text with dynamic values from object properties.</p>
 <h2 id="iri-template-variables">IRI Template Variables</h2>
-<p>The IRI template supports two types of variables:</p>
+<p>The IRI template supports two types of variables with different expansion syntaxes:</p>
+<h3 id="variable-expansion-syntax">Variable Expansion Syntax</h3>
+<ul>
+<li><strong>Standard variables</strong> (<code>{variable}</code>): Values are percent-encoded according to URI standards</li>
+<li><strong>Reserved expansion</strong> (<code>{+variable}</code>): Values containing URI-reserved characters like
+slashes (<code>/</code>) are not percent-encoded, allowing them to remain as structural URI components</li>
+</ul>
+<h3 id="variable-types">Variable Types</h3>
 <ol>
 <li>
 <p><strong>Property-based variables</strong> - Values from properties marked with <code>@RdfIriPart</code>:</p>
@@ -75,10 +82,10 @@ class Book {
 </code></pre>
 </li>
 <li>
-<p><strong>Context variables</strong> - Values provided externally:</p>
+<p><strong>Context variables</strong> - Values provided externally, often using reserved expansion:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
   SchemaBook.classIri,
-  IriStrategy('{baseUrl}/books/{id}')  // {baseUrl} is a context variable
+  IriStrategy('{+baseUrl}/books/{id}')  // {+baseUrl} preserves slashes
 )
 class Book {
   @RdfIriPart('id')
@@ -152,7 +159,7 @@ changing field order.</p>
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>IriStrategy</li>
     </ul>
   </dd>
@@ -187,7 +194,7 @@ changing field order.</p>
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -222,7 +229,7 @@ changing field order.</p>
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.7.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -341,7 +348,7 @@ changing field order.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>

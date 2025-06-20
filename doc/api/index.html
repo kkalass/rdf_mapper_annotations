@@ -267,7 +267,7 @@ class Chapter {
 <pre class="language-dart"><code class="language-dart">// Define models with configurable base URIs
 @RdfGlobalResource(
   SchemaPerson.classIri, 
-  IriStrategy('{baseUri}/persons/{id}')  // {baseUri} is not directly from a class field
+  IriStrategy('{+baseUri}/persons/{id}')  // {baseUri} is not directly from a class field and is marked with +, thus matches including /
 )
 class Person {
   @RdfIriPart()
@@ -281,7 +281,7 @@ class Person {
 
 @RdfGlobalResource(
   SchemaOrganization.classIri, 
-  IriStrategy('{baseUri}/organizations/{id}')  // Same placeholder across models
+  IriStrategy('{+baseUri}/organizations/{id}')  // Same placeholder across models
 )
 class Organization {
   @RdfIriPart()
@@ -398,7 +398,6 @@ class Rating {
 }
 
 @RdfLiteral.custom(
-  datatype: IriTerm.prevalidated('http://example.org/temperature'),
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
 )
@@ -407,10 +406,10 @@ class Temperature {
   
   Temperature(this.celsius);
   
-  String formatCelsius() =&gt; '$celsius°C';
+  LiteralTerm formatCelsius() =&gt; LiteralTerm('$celsius°C', datatype: IriTerm.prevalidated('http://example.org/temperature'));
   
-  static Temperature parse(String value) {
-    return Temperature(double.parse(value.replaceAll('°C', '')));
+  static Temperature parse(LiteralTerm term) {
+    return Temperature(double.parse(term.value.replaceAll('°C', '')));
   }
 }
 </code></pre>
@@ -586,7 +585,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.1.0
+      0.2.0
   </span>
   
 </footer>
