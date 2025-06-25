@@ -115,6 +115,32 @@ the value class, which might be configured with <code>@RdfIri</code> at the clas
 The key difference is that the class-level mapper is globally registered (unless
 <code>registerGlobally: false</code> is specified), while this property-level mapping is
 only used for this specific property.</p>
+<h2 id="enum-property-mapping">Enum Property Mapping</h2>
+<p>Can be used to override enum IRI serialization at the property level:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class Product {
+  // Uses the enum's default @RdfIri mapping with @RdfEnumValue annotations
+  @RdfProperty(ProductSchema.condition)
+  final ItemCondition condition;
+
+  // Override the enum's default mapping with a custom mapper for this property
+  @RdfProperty(
+    ProductSchema.format,
+    iri: IriMapping.namedMapper('customFormatMapper')
+  )
+  final BookFormat format;
+
+  // Use a different IRI template for the same enum in this specific context
+  @RdfProperty(
+    ProductSchema.category,
+    iri: IriMapping('http://local.vocab/{value}/category')
+  )
+  final ItemCondition categoryCondition; // Same enum, different IRI pattern
+}
+</code></pre>
+<p>This is particularly useful when you need different IRI patterns for the same
+enum type in different contexts, or when you want to override the global enum
+mapping for specific properties.</p>
 </section>
 
 
@@ -125,7 +151,7 @@ only used for this specific property.</p>
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>IriMapping</li>
     </ul>
   </dd>
@@ -160,7 +186,7 @@ only used for this specific property.</p>
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriMapping.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriMapping/IriMapping.mapperInstance.html">IriMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriMapping/IriMapping.mapperInstance.html">IriMapping.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -195,7 +221,7 @@ only used for this specific property.</p>
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -314,7 +340,7 @@ only used for this specific property.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>

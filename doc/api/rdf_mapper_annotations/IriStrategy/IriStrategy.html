@@ -73,15 +73,33 @@ an IRI mapper automatically. The generator will:</p>
 (unless they are also annotated with <code>@RdfProperty</code>, in which case the
  value from @RdfProperty takes precedence)</li>
 </ol>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
-  Person.classIri,
-  IriStrategy('{+baseUri}/people/{id}')
-)
+<h2 id="template-system">Template System</h2>
+<p>The <code>template</code> supports flexible IRI construction with:</p>
+<ul>
+<li><strong>Property placeholders</strong>: <code>{propertyName}</code> - values from <code>@RdfIriPart</code> properties</li>
+<li><strong>Context variables</strong>: <code>{+contextVar}</code> or <code>{contextVar}</code> - external values from providers</li>
+<li><strong>Reserved expansion</strong>: Use <code>{+variable}</code> to preserve URI structure (like <code>/</code>)</li>
+</ul>
+<p>Context variables enable deployment-specific configuration without hardcoding URIs.
+They are resolved from:</p>
+<ul>
+<li>Global providers in <code>initRdfMapper()</code> when <code>registerGlobally = true</code> (default)</li>
+<li>Parent class properties with <code>@RdfProvides()</code> annotations</li>
+<li>Constructor parameters when <code>registerGlobally = false</code></li>
+</ul>
+<p>Examples:</p>
+<pre class="language-dart"><code class="language-dart">// Property-based IRI
+@RdfGlobalResource(Person.classIri, IriStrategy('http://example.org/people/{id}'))
 class Person {
-  @RdfIriPart('id')  // Standard form works with generated mappers
+  @RdfIriPart('id')
   final String id;
-  // ...
+}
+
+// Context-aware IRI (auto-adds baseUriProvider to initRdfMapper)
+@RdfGlobalResource(Book.classIri, IriStrategy('{+baseUri}/books/{isbn}'))
+class Book {
+  @RdfIriPart('isbn')
+  final String isbn;
 }
 </code></pre>
 <p>When the <code>template</code> contains unbound variables (not matching any property with <code>@RdfIriPart</code>),
@@ -121,7 +139,7 @@ the generator will automatically create provider parameters. With <code>register
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>

@@ -57,7 +57,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">LiteralMapping.withType</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="withType-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">datatype</span></span></li>
+      <span class="name ">LiteralMapping.withType</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="withType-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.3/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">datatype</span></span></li>
 </ol>)
     </section>
     
@@ -67,6 +67,10 @@
 to values when serialized as RDF literals. This is useful when you need to
 explicitly set the datatype of a literal, overriding the default datatype
 that would be inferred from the Dart type.</p>
+<p><strong>Important</strong>: This mapping delegates to the registered mapper for the
+property's type and then applies the custom datatype to the result. This means
+the property's type must have a registered mapper available (built-in for
+primitives, generated from annotations, or explicitly registered).</p>
 <p>The <code>datatype</code> parameter must be an <code>IriTerm</code> representing the IRI of the RDF datatype.
 Well-known datatypes are available as constants in the Xsd class in the
 <code>rdf_vocabularies</code> package. For example:</p>
@@ -78,23 +82,34 @@ Well-known datatypes are available as constants in the Xsd class in the
 <li>Xsd.date</li>
 <li>Xsd.time</li>
 </ul>
-<p>Example:</p>
+<p>Example with primitive type:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
 class HistoricalEvent {
   @RdfProperty(
     HistorySchema.occurredIn,
     literal: LiteralMapping.withType(Xsd.gYear)
   )
-  final int year; // Will be serialized with a specific year datatype
-
-  // Without this override, the year would be serialized with the default xsd:integer datatype
+  final int year; // Will be serialized with gYear datatype instead of xsd:integer
 }
 </code></pre>
-<p>Note: This constructor can be used with both string and non-string properties. For non-string
-properties, the mapper first converts the value to a string representation using the
-appropriate registered mapper for the property's type, then applies the custom datatype
-to the resulting string literal. This allows you to use custom datatypes with any property
-type that has a registered mapper, while preserving the semantics of the original value.</p>
+<p>Example with annotated enum property:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral() // Creates registered mapper
+enum Priority {
+  @RdfEnumValue('HIGH')
+  high,
+  @RdfEnumValue('LOW')
+  low,
+}
+
+@RdfGlobalResource(...)
+class Task {
+  @RdfProperty(
+    TaskSchema.priority,
+    literal: LiteralMapping.withType(Xsd.string)
+  )
+  final Priority priority; // Uses registered enum mapper + applies xsd:string datatype
+}
+</code></pre>
 </section>
 
 
@@ -132,7 +147,7 @@ type that has a registered mapper, while preserving the semantics of the origina
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>

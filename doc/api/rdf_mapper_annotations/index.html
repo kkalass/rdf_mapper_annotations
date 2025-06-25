@@ -181,6 +181,45 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 <li><a href="../rdf_mapper_annotations/RdfValue-class.html">RdfValue</a>: Identifies the value source for literal serialization</li>
 <li><a href="../rdf_mapper_annotations/RdfMapEntry-class.html">RdfMapEntry</a>: Specifies how map entries shall be (de-)serialized</li>
 </ul>
+<p><strong>Enum-specific annotations</strong> customize enum serialization:</p>
+<ul>
+<li><a href="../rdf_mapper_annotations/RdfEnumValue-class.html">RdfEnumValue</a>: Customizes individual enum constant serialization values</li>
+</ul>
+<h2 id="enum-support">Enum Support</h2>
+<p>The library provides comprehensive support for mapping enums to RDF values:</p>
+<pre class="language-dart"><code class="language-dart">// Literal enum mapping
+@RdfLiteral()
+enum Priority {
+  @RdfEnumValue('H')
+  high,     // → "H"
+  medium,   // → "medium"
+}
+
+// IRI enum mapping
+@RdfIri('http://example.org/status/{value}')
+enum Status {
+  @RdfEnumValue('active-state')
+  active,   // → &lt;http://example.org/status/active-state&gt;
+  pending,  // → &lt;http://example.org/status/pending&gt;
+}
+
+// Usage in resource classes
+@RdfGlobalResource(...)
+class Task {
+  @RdfProperty('http://example.org/priority')
+  final Priority priority; // Uses enum's default mapping
+
+  @RdfProperty(
+    'http://example.org/status',
+    literal: LiteralMapping.namedMapper('customStatusMapper')
+  )
+  final Status status; // Override with custom mapper
+}
+</code></pre>
+<p>Enums can be annotated with either <code>@RdfLiteral</code> or <code>@RdfIri</code> to define their
+default mapping behavior. Individual enum constants can use <code>@RdfEnumValue</code>
+to override their serialization value. This enables clean Dart enum names
+while supporting domain-specific RDF vocabularies.</p>
 <p>For usage examples, see the <a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">example</a> directory.</p>
 </section>
 
@@ -189,7 +228,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
       <h2>Classes</h2>
       <dl>
           <dt id="BaseMapping">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
@@ -197,7 +236,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 </dd>
 
           <dt id="BaseMappingAnnotation">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
@@ -260,6 +299,14 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
   Base annotation interface for RDF mapper generation.
 </dd>
 
+          <dt id="RdfEnumValue">
+  <span class="name "><a href="../rdf_mapper_annotations/RdfEnumValue-class.html">RdfEnumValue</a></span> 
+
+</dt>
+<dd>
+  Annotation for customizing how individual enum constants are serialized in RDF.
+</dd>
+
           <dt id="RdfGlobalResource">
   <span class="name "><a href="../rdf_mapper_annotations/RdfGlobalResource-class.html">RdfGlobalResource</a></span> 
 
@@ -273,7 +320,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 
 </dt>
 <dd>
-  Marks a Dart class as representing an RDF IRI term.
+  Marks a Dart class or enum as representing an RDF IRI term.
 </dd>
 
           <dt id="RdfIriPart">
@@ -297,7 +344,7 @@ final event = rdfMapper.decodeObject&lt;Event&gt;(eventTurtle);
 
 </dt>
 <dd>
-  Marks a Dart class as representing an RDF literal term.
+  Marks a Dart class or enum as representing an RDF literal term.
 </dd>
 
           <dt id="RdfLocalResource">
@@ -409,7 +456,7 @@ conversion.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>

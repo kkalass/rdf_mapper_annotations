@@ -57,7 +57,7 @@
 
     
 <section class="desc markdown">
-  <p>Marks a Dart class as representing an RDF literal term.</p>
+  <p>Marks a Dart class or enum as representing an RDF literal term.</p>
 <p>This annotation is used for value types that need custom serialization beyond simple
 Dart primitives:</p>
 <ul>
@@ -144,6 +144,51 @@ class Temperature {
     Temperature(double.parse(term.value.replaceAll('°C', '')));
 }
 </code></pre>
+<h2 id="enum-usage">Enum Usage</h2>
+<p><code>@RdfLiteral</code> can be applied to enums to generate automatic literal mappers:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral() // Uses enum constant names as literal values
+enum BookFormat {
+  hardcover, // → "hardcover"
+  paperback, // → "paperback"
+  ebook,     // → "ebook"
+}
+
+@RdfLiteral(XSD.string) // With explicit datatype
+enum Priority {
+  @RdfEnumValue('H') // Custom value override
+  high,              // → "H"
+
+  @RdfEnumValue('M')
+  medium,            // → "M"
+
+  low,               // → "low" (uses enum name)
+}
+</code></pre>
+<p>When applied to enums, the generator creates a <code>LiteralTermMapper&lt;EnumType&gt;</code>
+that automatically handles conversion between enum constants and RDF literals.
+By default, the enum constant name is used as the literal value, but this can
+be overridden using the <code>@RdfEnumValue</code> annotation on individual constants.</p>
+<p><strong>Enum Validation Rules:</strong></p>
+<ul>
+<li>Each enum constant with <code>@RdfEnumValue</code> must have a unique custom value</li>
+<li>Custom values cannot be empty or contain only whitespace</li>
+<li>The enum itself must be annotated with <code>@RdfLiteral</code></li>
+</ul>
+<p><strong>Integration with Properties:</strong></p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
+class Product {
+  // Uses the enum's default @RdfLiteral mapping
+  @RdfProperty(ProductSchema.format)
+  final BookFormat format;
+
+  // Override with custom mapper for this property
+  @RdfProperty(
+    ProductSchema.priority,
+    literal: LiteralMapping.namedMapper('customPriorityMapper')
+  )
+  final Priority priority;
+}
+</code></pre>
 </section>
 
 
@@ -154,8 +199,8 @@ class Temperature {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
       <li>RdfLiteral</li>
     </ul>
   </dd>
@@ -182,10 +227,10 @@ class Temperature {
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfLiteral" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.html">RdfLiteral</a></span><span class="signature">([<span class="parameter" id="-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">datatype</span></span>])</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.html">RdfLiteral</a></span><span class="signature">([<span class="parameter" id="-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.3/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">datatype</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>])</span>
         </dt>
         <dd>
-          Creates an annotation for a class to be mapped to a literal term.
+          Creates an annotation for a class or enum to be mapped to a literal term.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLiteral.custom" class="callable">
@@ -203,7 +248,7 @@ class Temperature {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLiteral.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.mapperInstance.html">RdfLiteral.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.mapperInstance.html">RdfLiteral.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this literal
@@ -227,7 +272,7 @@ term.
     <dl class="properties">
         <dt id="datatype" class="property">
   <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/datatype.html">datatype</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/IriTerm-class.html">IriTerm</a>?</span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rdf_core/0.9.3/rdf/IriTerm-class.html">IriTerm</a>?</span>
   
 
 </dt>
@@ -244,7 +289,7 @@ term.
 
 </dt>
 <dd>
-  Optional static method name to use for converting a <a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/LiteralTerm-class.html">LiteralTerm</a> back to
+  Optional static method name to use for converting a <a href="https://pub.dev/documentation/rdf_core/0.9.3/rdf/LiteralTerm-class.html">LiteralTerm</a> back to
 the object type.
   <div class="features"><span class="feature">final</span></div>
 
@@ -264,7 +309,7 @@ the object type.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.4/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -306,7 +351,7 @@ in the <code>initRdfMapper</code> function.
 
 </dt>
 <dd>
-  Optional method name to use for converting the object to a <a href="https://pub.dev/documentation/rdf_core/0.9.2/rdf/LiteralTerm-class.html">LiteralTerm</a>.
+  Optional method name to use for converting the object to a <a href="https://pub.dev/documentation/rdf_core/0.9.3/rdf/LiteralTerm-class.html">LiteralTerm</a>.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -396,7 +441,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>

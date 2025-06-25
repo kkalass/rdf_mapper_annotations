@@ -66,10 +66,12 @@
 <p>This constructor creates a mapping that will apply the given language tag
 to string values when serialized as RDF literals. This is particularly useful
 for human-readable text that appears in a specific language.</p>
-<p>Important: This mapping is NOT registered globally and is only used for the specific
-property that is annotated with it.</p>
+<p><strong>Important</strong>: This mapping delegates to the registered mapper for the
+property's type and then applies the language tag to the result. This means
+the property's type must have a registered mapper available (built-in for
+primitives, generated from annotations, or explicitly registered).</p>
 <p>The <code>language</code> parameter must be a valid BCP47 language tag (e.g., 'en', 'de-DE').</p>
-<p>Example:</p>
+<p>Example with String property:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(...)
 class TravelGuide {
   @RdfProperty(
@@ -77,16 +79,25 @@ class TravelGuide {
     literal: LiteralMapping.withLanguage('en')
   )
   final String description; // Will be serialized as "description"@en
-
-  // Without this override, the description would be serialized without a language tag
 }
 </code></pre>
-<p>Note: While language tags are primarily intended for string properties, this constructor
-can also be used with non-string properties. In such cases, the mapper first converts
-the value to a string representation using the appropriate registered mapper, then
-applies the language tag to the resulting string literal. This makes it ideal for use
-with custom value types that essentially wrap a string, such as translated content,
-descriptions, or any text that should be associated with a specific language.</p>
+<p>Example with annotated enum property:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral() // Creates registered mapper
+enum Status {
+  @RdfEnumValue('active')
+  active,
+  inactive,
+}
+
+@RdfGlobalResource(...)
+class Task {
+  @RdfProperty(
+    TaskSchema.status,
+    literal: LiteralMapping.withLanguage('en')
+  )
+  final Status status; // Uses registered enum mapper + applies @en language tag
+}
+</code></pre>
 </section>
 
 
@@ -124,7 +135,7 @@ descriptions, or any text that should be associated with a specific language.</p
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>

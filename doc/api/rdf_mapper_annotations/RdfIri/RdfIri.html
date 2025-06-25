@@ -63,38 +63,80 @@
     </section>
     
 <section class="desc markdown">
-  <p>Creates an annotation for a class to be mapped to an IRI term.</p>
+  <p>Creates an annotation for a class or enum to be mapped to an IRI term.</p>
 <p>This standard constructor creates a mapper that automatically handles the
-conversion between your class and an IRI term. By default, this mapper is
+conversion between your Dart type and an IRI term. By default, this mapper is
 registered within <code>initRdfMapper</code> when <code>registerGlobally</code> is <code>true</code>.</p>
-<p>The mapper uses:</p>
+<h2 id="template-system">Template System</h2>
+<p>The <code>template</code> parameter supports a powerful placeholder system that works for
+both classes and enums:</p>
+<h3 id="placeholder-types">Placeholder Types:</h3>
 <ul>
-<li>An optional <code>template</code> with placeholders like <code>{propertyName}</code> that will be
-replaced with values from properties marked with <code>@RdfIriPart</code></li>
-<li>If no template is provided, the property marked with <code>@RdfIriPart</code> will be
-used directly as the complete IRI</li>
+<li><code>{propertyName}</code> - Values from <code>@RdfIriPart</code> annotated properties (percent-encoded)</li>
+<li><code>{contextVariable}</code> - Context variables from providers (percent-encoded)</li>
+<li><code>{+contextVariable}</code> - Reserved expansion for URI structure preservation</li>
 </ul>
-<p>Examples:</p>
-<pre class="language-dart"><code class="language-dart">// With template
+<h3 id="context-variable-resolution">Context Variable Resolution:</h3>
+<p>Context variables are resolved from:</p>
+<ul>
+<li>Global providers in <code>initRdfMapper()</code> (e.g., <code>baseUriProvider: () =&gt; 'https://api.example.com'</code>)</li>
+<li>Class properties annotated with <code>@RdfProvides('variableName')</code></li>
+</ul>
+<h3 id="usage-for-classes">Usage for Classes:</h3>
+<pre class="language-dart"><code class="language-dart">// Template with property placeholders
 @RdfIri('urn:isbn:{value}')
 class ISBN {
   @RdfIriPart()
   final String value;
-  // ...
+  ISBN(this.value);
 }
 
-// Without template (direct value)
+// Template with context variables
+@RdfIri('{+baseUri}/users/{userId}')
+class UserProfile {
+  @RdfIriPart('userId')
+  final String id;
+  UserProfile(this.id);
+}
+
+// Direct value (no template)
 @RdfIri()
-class Uri {
+class AbsoluteUri {
   @RdfIriPart()
-  final String value;
-  // ...
+  final String uri;
+  AbsoluteUri(this.uri);
 }
 </code></pre>
-<p>The <code>registerGlobally</code> parameter determines whether the generated mapper is
-registered globally in <code>initRdfMapper</code>. If set to <code>false</code>, the mapper will
-not be registered automatically and must be provided via <code>@RdfProvides</code>
-annotations in the parent class.</p>
+<h3 id="usage-for-enums">Usage for Enums:</h3>
+<p>For enums, the template system provides an automatic <code>{value}</code> placeholder
+in addition to context variables:</p>
+<pre class="language-dart"><code class="language-dart">// Using enum value with custom @RdfEnumValue annotations
+@RdfIri('https://vocab.example.com/status#{value}')
+enum TaskStatus {
+  pending,
+  @RdfEnumValue('in-progress')
+  inProgress,  // → &lt;https://vocab.example.com/status#in-progress&gt;
+  completed    // → &lt;https://vocab.example.com/status#completed&gt;
+}
+
+// Using context variables with enums
+@RdfIri('{+vocabBase}/priority/{value}')
+enum Priority { low, medium, high }
+</code></pre>
+<p>For enums:</p>
+<ul>
+<li><code>{value}</code> resolves to the custom value from <code>@RdfEnumValue</code> or the enum constant name if not specified</li>
+<li>Context variables work the same as with classes</li>
+<li>If no template is provided, the enum value (respecting <code>@RdfEnumValue</code>) is used as the complete IRI</li>
+</ul>
+<h2 id="parameters">Parameters</h2>
+<p><code>template</code> - Optional IRI template with placeholders. If not provided:</p>
+<ul>
+<li>For classes: the single <code>@RdfIriPart</code> property value is used directly as the IRI</li>
+<li>For enums: the enum value (respecting <code>@RdfEnumValue</code> annotations) is used directly as the IRI</li>
+</ul>
+<p><code>registerGlobally</code> - Whether to register the generated mapper in <code>initRdfMapper</code>.
+Set to <code>false</code> if the mapper should be registered manually or used at the property level instead.</p>
 </section>
 
 
@@ -130,7 +172,7 @@ annotations in the parent class.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.0
+      0.2.1
   </span>
   
 </footer>
