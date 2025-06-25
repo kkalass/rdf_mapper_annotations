@@ -2,7 +2,7 @@ import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 
-/// Marks a Dart class as representing an RDF IRI term.
+/// Marks a Dart class or enum as representing an RDF IRI term.
 ///
 /// This annotation is used for classes that represent identifiers or references
 /// that should be serialized as IRIs (Internationalized Resource Identifiers)
@@ -17,7 +17,7 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///
 /// ## Property Requirements
 ///
-/// For classes with `@RdfIri` using the default constructor:
+/// For classes with `@RdfIri` (enum support see below) using the default constructor:
 /// - All properties used for serialization/deserialization **must** be annotated with `@RdfIriPart`
 /// - Any property without `@RdfIriPart` will be ignored during mapping
 /// - The class must be fully serializable/deserializable using only the `@RdfIriPart` properties
@@ -75,6 +75,139 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///   // Uses the value directly as IRI: 'https://example.org/resource/123'
 /// }
 /// ```
+///
+/// ## Advanced Template Patterns
+///
+/// All `@RdfIri` templates support a powerful placeholder system with context variables
+/// and reserved expansion, applicable to both classes and enums:
+///
+/// ### Template Variable Types
+/// - `{value}` - Property values from `@RdfIriPart` annotations
+/// - `{variable}` - Context variables (percent-encoded)
+/// - `{+variable}` - Reserved expansion (preserves URI structure like `/`)
+///
+/// ### Context Variable Resolution
+/// Context variables are resolved from:
+/// - Providers passed to the constructor of the generated Mapper.
+/// - Global providers in `initRdfMapper()` are automatically passed to the generated Mapper constructor (when `registerGlobally: true`)
+///
+/// ### General Template Examples
+///
+/// **Classes with context variables:**
+/// ```dart
+/// @RdfIri('{+baseUri}/users/{userId}/profile')
+/// class UserProfile {
+///   @RdfIriPart('userId')
+///   final String userId;
+///
+///   UserProfile(this.userId);
+/// }
+///
+/// // When registerGlobally is true (default), this adds required providers:
+/// final rdfMapper = initRdfMapper(
+///   baseUriProvider: () => 'https://api.example.org',
+/// );
+/// ```
+///
+/// **Multi-part class IRIs:**
+/// ```dart
+/// @RdfIri('{+baseUri}/collections/{collection}/{item}')
+/// class CollectionItem {
+///   @RdfIriPart('collection')
+///   final String collection;
+///
+///   @RdfIriPart('item')
+///   final String item;
+///
+///   CollectionItem(this.collection, this.item);
+/// }
+/// ```
+///
+/// **Enums with context variables:**
+/// ```dart
+/// @RdfIri('{+baseUri}/categories/{category}/{value}')
+/// enum ProductCategory {
+///   electronics, // → <https://example.org/categories/products/electronics>
+///   clothing,    // → <https://example.org/categories/products/clothing>
+/// }
+///
+/// // Same provider setup applies to enums:
+/// final rdfMapper = initRdfMapper(
+///   baseUriProvider: () => 'https://example.org',
+///   categoryProvider: () => 'products',
+/// );
+/// ```
+///
+/// ## Enum Usage
+///
+/// `@RdfIri` can be applied to enums to generate automatic IRI mappers:
+///
+/// ```dart
+/// @RdfIri('http://example.org/formats/{value}')
+/// enum BookFormat {
+///   @RdfEnumValue('hardcover-type')
+///   hardcover, // → <http://example.org/formats/hardcover-type>
+///
+///   paperback, // → <http://example.org/formats/paperback>
+/// }
+///
+/// @RdfIri('http://vocab.org/status/{value}')
+/// enum Status {
+///   active,   // → <http://vocab.org/status/active>
+///   inactive, // → <http://vocab.org/status/inactive>
+/// }
+/// ```
+///
+/// ### Advanced Enum Templates
+///
+/// Enums also support the full template system with context variables:
+///
+/// ```dart
+/// @RdfIri('{+baseUri}/categories/{category}/{value}')
+/// enum ProductCategory {
+///   electronics, // → <https://example.org/categories/products/electronics>
+///   clothing,    // → <https://example.org/categories/products/clothing>
+/// }
+///
+/// // When registerGlobally is true (default), this adds required providers to initRdfMapper:
+/// final rdfMapper = initRdfMapper(
+///   baseUriProvider: () => 'https://example.org',
+///   categoryProvider: () => 'products',
+/// );
+/// ```
+///
+/// For enums, the `{value}` placeholder is replaced with either:
+/// - The custom value from `@RdfEnumValue('custom')` annotation
+/// - The enum constant name (default)
+///
+/// When applied to enums, the generator creates an `IriTermMapper<EnumType>`
+/// that automatically handles conversion between enum constants and IRI terms.
+/// This is particularly useful for representing controlled vocabularies or
+/// taxonomies as IRIs in RDF.
+///
+/// **Enum Validation Rules:**
+/// - Each enum constant with `@RdfEnumValue` must have a unique custom value
+/// - Custom values must be valid IRI path segments (no spaces, proper encoding)
+/// - The enum itself must be annotated with `@RdfIri`
+/// - Template must contain `{value}` placeholder when used with enums
+/// - Additional context variables are supported and follow the same resolution rules as class mappings
+///
+/// **Integration with Properties:**
+/// ```dart
+/// @RdfGlobalResource(...)
+/// class Product {
+///   // Uses the enum's default @RdfIri mapping
+///   @RdfProperty(ProductSchema.condition)
+///   final ItemCondition condition;
+///
+///   // Override with custom mapper for this property
+///   @RdfProperty(
+///     ProductSchema.format,
+///     iri: IriMapping.namedMapper('customFormatMapper')
+///   )
+///   final BookFormat format;
+/// }
+/// ```
 class RdfIri extends BaseMappingAnnotation<IriTermMapper>
     implements RdfAnnotation {
   /// An optional template string for constructing the IRI.
@@ -100,42 +233,86 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// will be used as the complete IRI value.
   final String? template;
 
-  /// Creates an annotation for a class to be mapped to an IRI term.
+  /// Creates an annotation for a class or enum to be mapped to an IRI term.
   ///
   /// This standard constructor creates a mapper that automatically handles the
-  /// conversion between your class and an IRI term. By default, this mapper is
+  /// conversion between your Dart type and an IRI term. By default, this mapper is
   /// registered within `initRdfMapper` when [registerGlobally] is `true`.
   ///
-  /// The mapper uses:
+  /// ## Template System
   ///
-  /// - An optional [template] with placeholders like `{propertyName}` that will be
-  ///   replaced with values from properties marked with `@RdfIriPart`
-  /// - If no template is provided, the property marked with `@RdfIriPart` will be
-  ///   used directly as the complete IRI
+  /// The [template] parameter supports a powerful placeholder system that works for
+  /// both classes and enums:
   ///
-  /// Examples:
+  /// ### Placeholder Types:
+  /// - `{propertyName}` - Values from `@RdfIriPart` annotated properties (percent-encoded)
+  /// - `{contextVariable}` - Context variables from providers (percent-encoded)
+  /// - `{+contextVariable}` - Reserved expansion for URI structure preservation
+  ///
+  /// ### Context Variable Resolution:
+  /// Context variables are resolved from:
+  /// - Global providers in `initRdfMapper()` (e.g., `baseUriProvider: () => 'https://api.example.com'`)
+  /// - Class properties annotated with `@RdfProvides('variableName')`
+  ///
+  /// ### Usage for Classes:
   /// ```dart
-  /// // With template
+  /// // Template with property placeholders
   /// @RdfIri('urn:isbn:{value}')
   /// class ISBN {
   ///   @RdfIriPart()
   ///   final String value;
-  ///   // ...
+  ///   ISBN(this.value);
   /// }
   ///
-  /// // Without template (direct value)
+  /// // Template with context variables
+  /// @RdfIri('{+baseUri}/users/{userId}')
+  /// class UserProfile {
+  ///   @RdfIriPart('userId')
+  ///   final String id;
+  ///   UserProfile(this.id);
+  /// }
+  ///
+  /// // Direct value (no template)
   /// @RdfIri()
-  /// class Uri {
+  /// class AbsoluteUri {
   ///   @RdfIriPart()
-  ///   final String value;
-  ///   // ...
+  ///   final String uri;
+  ///   AbsoluteUri(this.uri);
   /// }
   /// ```
   ///
-  /// The [registerGlobally] parameter determines whether the generated mapper is
-  /// registered globally in `initRdfMapper`. If set to `false`, the mapper will
-  /// not be registered automatically and must be provided via `@RdfProvides`
-  /// annotations in the parent class.
+  /// ### Usage for Enums:
+  /// For enums, the template system provides an automatic `{value}` placeholder
+  /// in addition to context variables:
+  ///
+  /// ```dart
+  /// // Using enum value with custom @RdfEnumValue annotations
+  /// @RdfIri('https://vocab.example.com/status#{value}')
+  /// enum TaskStatus {
+  ///   pending,
+  ///   @RdfEnumValue('in-progress')
+  ///   inProgress,  // → <https://vocab.example.com/status#in-progress>
+  ///   completed    // → <https://vocab.example.com/status#completed>
+  /// }
+  ///
+  /// // Using context variables with enums
+  /// @RdfIri('{+vocabBase}/priority/{value}')
+  /// enum Priority { low, medium, high }
+  /// ```
+  ///
+  /// For enums:
+  /// - `{value}` resolves to the custom value from `@RdfEnumValue` or the enum constant name if not specified
+  /// - Context variables work the same as with classes
+  /// - If no template is provided, the enum value (respecting `@RdfEnumValue`) is used as the complete IRI
+  ///
+  /// ## Parameters
+  ///
+  /// [template] - Optional IRI template with placeholders. If not provided:
+  /// - For classes: the single `@RdfIriPart` property value is used directly as the IRI
+  /// - For enums: the enum value (respecting `@RdfEnumValue` annotations) is used directly as the IRI
+  ///
+  /// [registerGlobally] - Whether to register the generated mapper in `initRdfMapper`.
+  /// Set to `false` if the mapper should be registered manually or used at the property level instead.
   const RdfIri([this.template, bool registerGlobally = true])
       : super(registerGlobally: registerGlobally);
 
@@ -167,7 +344,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///
   /// // In initialization code:
   /// final userRefMapper = MyUserReferenceMapper();
-  /// final rdfMapper = initRdfMapper(userReferenceMapper);
+  /// final rdfMapper = initRdfMapper(userReferenceMapper: userRefMapper);
   /// ```
   const RdfIri.namedMapper(String name)
       : template = null,
@@ -303,6 +480,37 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
 /// The key difference is that the class-level mapper is globally registered (unless
 /// `registerGlobally: false` is specified), while this property-level mapping is
 /// only used for this specific property.
+///
+/// ## Enum Property Mapping
+///
+/// Can be used to override enum IRI serialization at the property level:
+///
+/// ```dart
+/// @RdfGlobalResource(...)
+/// class Product {
+///   // Uses the enum's default @RdfIri mapping with @RdfEnumValue annotations
+///   @RdfProperty(ProductSchema.condition)
+///   final ItemCondition condition;
+///
+///   // Override the enum's default mapping with a custom mapper for this property
+///   @RdfProperty(
+///     ProductSchema.format,
+///     iri: IriMapping.namedMapper('customFormatMapper')
+///   )
+///   final BookFormat format;
+///
+///   // Use a different IRI template for the same enum in this specific context
+///   @RdfProperty(
+///     ProductSchema.category,
+///     iri: IriMapping('http://local.vocab/{value}/category')
+///   )
+///   final ItemCondition categoryCondition; // Same enum, different IRI pattern
+/// }
+/// ```
+///
+/// This is particularly useful when you need different IRI patterns for the same
+/// enum type in different contexts, or when you want to override the global enum
+/// mapping for specific properties.
 class IriMapping extends BaseMapping<IriTermMapper> {
   /// An optional template string for constructing the IRI.
   ///
@@ -339,17 +547,29 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// Use this constructor to customize how a specific property should be
   /// transformed into an IRI term in the RDF graph.
   ///
+  /// ## Template System
+  ///
+  /// The [template] supports a powerful placeholder system:
+  /// - **Property placeholders**: `{propertyName}` - replaced with the property value
+  /// - **Context variables**: `{+contextVar}` or `{contextVar}` - resolved from providers
+  /// - **Reserved expansion**: Use `{+variable}` to preserve URI structure (like `/`)
+  ///
+  /// Context variables are resolved from:
+  /// - Global providers in `initRdfMapper()` (e.g., `baseUriProvider: () => 'https://api.example.com'`)
+  /// - Class properties annotated with `@RdfProvides('variableName')`
+  ///
   /// **Important:** This constructor is only designed for properties of type `String`.
   /// For non-String types (like value objects or domain-specific types), you have two options:
   /// 1. Use one of the mapper constructors: `.namedMapper()`, `.mapper()`, or `.mapperInstance()`
   /// 2. Annotate the value class itself with `@RdfIri` and implement the template logic there
   ///
-  /// The [template] defines the pattern for constructing IRIs from the property value:
-  /// - With a template: `IriMapping('http://example.org/users/{value}')`
-  /// - Without a template: `IriMapping()` - uses the property value directly as the IRI
+  /// ## Template Patterns
+  /// - Property only: `IriMapping('http://example.org/users/{userId}')`
+  /// - With context: `IriMapping('{+baseUri}/users/{userId}')`
+  /// - Direct value: `IriMapping()` - uses the property value directly as the IRI
   ///
-  /// This is particularly useful when the property contains identifier information
-  /// that needs to be formatted in a specific way to create valid IRIs.
+  /// This approach enables flexible, context-aware IRI generation for individual properties
+  /// while maintaining clear separation from global mapping configurations.
   ///
   /// Examples:
   /// ```dart
@@ -640,16 +860,33 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   ///    (unless they are also annotated with `@RdfProperty`, in which case the
   ///     value from @RdfProperty takes precedence)
   ///
-  /// Example:
+  /// ## Template System
+  ///
+  /// The [template] supports flexible IRI construction with:
+  /// - **Property placeholders**: `{propertyName}` - values from `@RdfIriPart` properties
+  /// - **Context variables**: `{+contextVar}` or `{contextVar}` - external values from providers
+  /// - **Reserved expansion**: Use `{+variable}` to preserve URI structure (like `/`)
+  ///
+  /// Context variables enable deployment-specific configuration without hardcoding URIs.
+  /// They are resolved from:
+  /// - Global providers in `initRdfMapper()` when `registerGlobally = true` (default)
+  /// - Parent class properties with `@RdfProvides()` annotations
+  /// - Constructor parameters when `registerGlobally = false`
+  ///
+  /// Examples:
   /// ```dart
-  /// @RdfGlobalResource(
-  ///   Person.classIri,
-  ///   IriStrategy('{+baseUri}/people/{id}')
-  /// )
+  /// // Property-based IRI
+  /// @RdfGlobalResource(Person.classIri, IriStrategy('http://example.org/people/{id}'))
   /// class Person {
-  ///   @RdfIriPart('id')  // Standard form works with generated mappers
+  ///   @RdfIriPart('id')
   ///   final String id;
-  ///   // ...
+  /// }
+  ///
+  /// // Context-aware IRI (auto-adds baseUriProvider to initRdfMapper)
+  /// @RdfGlobalResource(Book.classIri, IriStrategy('{+baseUri}/books/{isbn}'))
+  /// class Book {
+  ///   @RdfIriPart('isbn')
+  ///   final String isbn;
   /// }
   /// ```
   ///

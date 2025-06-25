@@ -3,7 +3,7 @@ import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 
-/// Marks a Dart class as representing an RDF literal term.
+/// Marks a Dart class or enum as representing an RDF literal term.
 ///
 /// This annotation is used for value types that need custom serialization beyond simple
 /// Dart primitives:
@@ -105,6 +105,57 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
 /// }
 /// ```
+///
+/// ## Enum Usage
+///
+/// `@RdfLiteral` can be applied to enums to generate automatic literal mappers:
+///
+/// ```dart
+/// @RdfLiteral() // Uses enum constant names as literal values
+/// enum BookFormat {
+///   hardcover, // → "hardcover"
+///   paperback, // → "paperback"
+///   ebook,     // → "ebook"
+/// }
+///
+/// @RdfLiteral(XSD.string) // With explicit datatype
+/// enum Priority {
+///   @RdfEnumValue('H') // Custom value override
+///   high,              // → "H"
+///
+///   @RdfEnumValue('M')
+///   medium,            // → "M"
+///
+///   low,               // → "low" (uses enum name)
+/// }
+/// ```
+///
+/// When applied to enums, the generator creates a `LiteralTermMapper<EnumType>`
+/// that automatically handles conversion between enum constants and RDF literals.
+/// By default, the enum constant name is used as the literal value, but this can
+/// be overridden using the `@RdfEnumValue` annotation on individual constants.
+///
+/// **Enum Validation Rules:**
+/// - Each enum constant with `@RdfEnumValue` must have a unique custom value
+/// - Custom values cannot be empty or contain only whitespace
+/// - The enum itself must be annotated with `@RdfLiteral`
+///
+/// **Integration with Properties:**
+/// ```dart
+/// @RdfGlobalResource(...)
+/// class Product {
+///   // Uses the enum's default @RdfLiteral mapping
+///   @RdfProperty(ProductSchema.format)
+///   final BookFormat format;
+///
+///   // Override with custom mapper for this property
+///   @RdfProperty(
+///     ProductSchema.priority,
+///     literal: LiteralMapping.namedMapper('customPriorityMapper')
+///   )
+///   final Priority priority;
+/// }
+/// ```
 class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
     implements RdfAnnotation {
   /// Optional method name to use for converting the object to a [LiteralTerm].
@@ -126,18 +177,35 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
 
   final IriTerm? datatype;
 
-  /// Creates an annotation for a class to be mapped to a literal term.
+  /// Creates an annotation for a class or enum to be mapped to a literal term.
   ///
   /// This standard constructor creates a mapper that automatically handles the
-  /// conversion between your class and an RDF literal term. It works by:
+  /// conversion between your type and an RDF literal term. By default, this mapper is
+  /// registered within `initRdfMapper` when [registerGlobally] is `true`.
   ///
+  /// ## For Classes
+  /// The mapper works by:
   /// 1. Looking for a property in your class marked with `@RdfValue`
   /// 2. Using that property to create a literal value during serialization
   /// 3. Using that property's type and the constructor to deserialize values
   ///
   /// This is the simplest approach for value objects that wrap a single literal value.
   ///
-  /// Example:
+  /// ## For Enums
+  /// When applied to enums, generates an automatic literal mapper that:
+  /// - Uses enum constant names as literal values by default
+  /// - Respects `@RdfEnumValue` annotations for custom values
+  /// - Handles bidirectional conversion between enum constants and literals
+  ///
+  /// ## Parameters
+  ///
+  /// [datatype] - Optional RDF datatype IRI to apply to generated literals.
+  /// If not specified, the datatype is inferred from the Dart type.
+  ///
+  /// [registerGlobally] - Whether to register the generated mapper in `initRdfMapper`.
+  /// Set to `false` if the mapper should be registered manually or used at the property level instead.
+  ///
+  /// Example with class:
   /// ```dart
   /// @RdfLiteral()
   /// class Rating {
@@ -151,10 +219,21 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///   }
   /// }
   /// ```
-  const RdfLiteral([this.datatype])
+  ///
+  /// Example with enum:
+  /// ```dart
+  /// @RdfLiteral() // Uses enum names as literal values
+  /// enum Priority {
+  ///   @RdfEnumValue('H') // Custom literal value
+  ///   high,              // → "H"
+  ///   medium,            // → "medium" (uses enum name)
+  ///   low,               // → "low" (uses enum name)
+  /// }
+  /// ```
+  const RdfLiteral([this.datatype, bool registerGlobally = true])
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
-        super(registerGlobally: true);
+        super(registerGlobally: registerGlobally);
 
   /// Creates an annotation for a class using custom methods for literal conversion.
   ///
@@ -340,6 +419,49 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
 /// The key difference is that the class-level mapper is globally registered (unless
 /// `registerGlobally: false` is specified), while this property-level mapping is
 /// only used for this specific property.
+///
+/// ## Property Type Support
+///
+/// For all property types, there must be a registered mapper available:
+/// - **Primitive types**: Built-in mappers (String, int, double, bool, etc.)
+/// - **Annotated types**: Generated mappers from `@RdfLiteral` annotations
+/// - **Custom types**: Explicitly registered mappers
+///
+/// The `LiteralMapping.withLanguage()` and `LiteralMapping.withType()` constructors
+/// delegate to the registered mapper for the property's type and then apply additional
+/// processing (language tag or datatype override).
+///
+/// ## Examples
+///
+/// ```dart
+/// @RdfGlobalResource(...)
+/// class Product {
+///   // Uses registered mapper for BookFormat enum
+///   @RdfProperty(ProductSchema.format)
+///   final BookFormat format;
+///
+///   // Override with custom mapper for this property
+///   @RdfProperty(
+///     ProductSchema.priority,
+///     literal: LiteralMapping.namedMapper('customPriorityMapper')
+///   )
+///   final Priority priority;
+///
+///   // Apply language tag to registered mapper result
+///   @RdfProperty(
+///     ProductSchema.condition,
+///     literal: LiteralMapping.withLanguage('en')
+///   )
+///   final BookFormat condition;
+///
+///   // Apply custom datatype to registered mapper result
+///   @RdfProperty(
+///     ProductSchema.urgency,
+///     literal: LiteralMapping.withType(Xsd.string)
+///   )
+///   final Priority urgency;
+/// }
+/// ```
 class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   final String? language;
   final IriTerm? datatype;
@@ -473,12 +595,14 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   /// to string values when serialized as RDF literals. This is particularly useful
   /// for human-readable text that appears in a specific language.
   ///
-  /// Important: This mapping is NOT registered globally and is only used for the specific
-  /// property that is annotated with it.
+  /// **Important**: This mapping delegates to the registered mapper for the
+  /// property's type and then applies the language tag to the result. This means
+  /// the property's type must have a registered mapper available (built-in for
+  /// primitives, generated from annotations, or explicitly registered).
   ///
   /// The [language] parameter must be a valid BCP47 language tag (e.g., 'en', 'de-DE').
   ///
-  /// Example:
+  /// Example with String property:
   /// ```dart
   /// @RdfGlobalResource(...)
   /// class TravelGuide {
@@ -487,17 +611,27 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///     literal: LiteralMapping.withLanguage('en')
   ///   )
   ///   final String description; // Will be serialized as "description"@en
-  ///
-  ///   // Without this override, the description would be serialized without a language tag
   /// }
   /// ```
   ///
-  /// Note: While language tags are primarily intended for string properties, this constructor
-  /// can also be used with non-string properties. In such cases, the mapper first converts
-  /// the value to a string representation using the appropriate registered mapper, then
-  /// applies the language tag to the resulting string literal. This makes it ideal for use
-  /// with custom value types that essentially wrap a string, such as translated content,
-  /// descriptions, or any text that should be associated with a specific language.
+  /// Example with annotated enum property:
+  /// ```dart
+  /// @RdfLiteral() // Creates registered mapper
+  /// enum Status {
+  ///   @RdfEnumValue('active')
+  ///   active,
+  ///   inactive,
+  /// }
+  ///
+  /// @RdfGlobalResource(...)
+  /// class Task {
+  ///   @RdfProperty(
+  ///     TaskSchema.status,
+  ///     literal: LiteralMapping.withLanguage('en')
+  ///   )
+  ///   final Status status; // Uses registered enum mapper + applies @en language tag
+  /// }
+  /// ```
   const LiteralMapping.withLanguage(String language)
       : language = language,
         datatype = null,
@@ -510,6 +644,11 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   /// explicitly set the datatype of a literal, overriding the default datatype
   /// that would be inferred from the Dart type.
   ///
+  /// **Important**: This mapping delegates to the registered mapper for the
+  /// property's type and then applies the custom datatype to the result. This means
+  /// the property's type must have a registered mapper available (built-in for
+  /// primitives, generated from annotations, or explicitly registered).
+  ///
   /// The [datatype] parameter must be an `IriTerm` representing the IRI of the RDF datatype.
   /// Well-known datatypes are available as constants in the Xsd class in the
   /// `rdf_vocabularies` package. For example:
@@ -520,7 +659,7 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   /// - Xsd.date
   /// - Xsd.time
   ///
-  /// Example:
+  /// Example with primitive type:
   /// ```dart
   /// @RdfGlobalResource(...)
   /// class HistoricalEvent {
@@ -528,17 +667,29 @@ class LiteralMapping extends BaseMapping<LiteralTermMapper> {
   ///     HistorySchema.occurredIn,
   ///     literal: LiteralMapping.withType(Xsd.gYear)
   ///   )
-  ///   final int year; // Will be serialized with a specific year datatype
-  ///
-  ///   // Without this override, the year would be serialized with the default xsd:integer datatype
+  ///   final int year; // Will be serialized with gYear datatype instead of xsd:integer
   /// }
   /// ```
   ///
-  /// Note: This constructor can be used with both string and non-string properties. For non-string
-  /// properties, the mapper first converts the value to a string representation using the
-  /// appropriate registered mapper for the property's type, then applies the custom datatype
-  /// to the resulting string literal. This allows you to use custom datatypes with any property
-  /// type that has a registered mapper, while preserving the semantics of the original value.
+  /// Example with annotated enum property:
+  /// ```dart
+  /// @RdfLiteral() // Creates registered mapper
+  /// enum Priority {
+  ///   @RdfEnumValue('HIGH')
+  ///   high,
+  ///   @RdfEnumValue('LOW')
+  ///   low,
+  /// }
+  ///
+  /// @RdfGlobalResource(...)
+  /// class Task {
+  ///   @RdfProperty(
+  ///     TaskSchema.priority,
+  ///     literal: LiteralMapping.withType(Xsd.string)
+  ///   )
+  ///   final Priority priority; // Uses registered enum mapper + applies xsd:string datatype
+  /// }
+  /// ```
   const LiteralMapping.withType(IriTerm datatype)
       : language = null,
         datatype = datatype,

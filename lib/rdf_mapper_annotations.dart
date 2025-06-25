@@ -120,8 +120,53 @@
 /// - [RdfValue]: Identifies the value source for literal serialization
 /// - [RdfMapEntry]: Specifies how map entries shall be (de-)serialized
 ///
+/// **Enum-specific annotations** customize enum serialization:
+/// - [RdfEnumValue]: Customizes individual enum constant serialization values
+///
+/// ## Enum Support
+///
+/// The library provides comprehensive support for mapping enums to RDF values:
+///
+/// ```dart
+/// // Literal enum mapping
+/// @RdfLiteral()
+/// enum Priority {
+///   @RdfEnumValue('H')
+///   high,     // → "H"
+///   medium,   // → "medium"
+/// }
+///
+/// // IRI enum mapping
+/// @RdfIri('http://example.org/status/{value}')
+/// enum Status {
+///   @RdfEnumValue('active-state')
+///   active,   // → <http://example.org/status/active-state>
+///   pending,  // → <http://example.org/status/pending>
+/// }
+///
+/// // Usage in resource classes
+/// @RdfGlobalResource(...)
+/// class Task {
+///   @RdfProperty('http://example.org/priority')
+///   final Priority priority; // Uses enum's default mapping
+///
+///   @RdfProperty(
+///     'http://example.org/status',
+///     literal: LiteralMapping.namedMapper('customStatusMapper')
+///   )
+///   final Status status; // Override with custom mapper
+/// }
+/// ```
+///
+/// Enums can be annotated with either `@RdfLiteral` or `@RdfIri` to define their
+/// default mapping behavior. Individual enum constants can use `@RdfEnumValue`
+/// to override their serialization value. This enables clean Dart enum names
+/// while supporting domain-specific RDF vocabularies.
+///
 /// For usage examples, see the [example](https://github.com/kkalass/rdf_mapper_annotations/tree/main/example) directory.
 library;
+
+export 'src/term/rdf_enum_value.dart';
 
 export 'src/base/base_mapping.dart';
 export 'src/base/mapper_ref.dart';
