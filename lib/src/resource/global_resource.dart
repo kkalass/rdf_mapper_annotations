@@ -255,7 +255,7 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
 /// `@RdfGlobalResource`, these mappings are scoped to the specific property where they
 /// are defined and are not registered globally.
 ///
-/// In RDF, global resources represent entities with their own unique identifiers (IRIs). 
+/// In RDF, global resources represent entities with their own unique identifiers (IRIs).
 /// This mapping is ideal for:
 ///
 /// - Objects that need their own identity across multiple contexts
@@ -281,7 +281,7 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
 /// )
 /// final Publisher publisher;
 /// ```
-/// 
+///
 /// Without this override, the property would use the default mapper registered for
 /// the `Publisher` class, which might be configured with `@RdfGlobalResource` at the class level.
 /// The key difference is that the class-level mapper is globally registered (unless
@@ -375,7 +375,7 @@ class GlobalResourceMapping extends BaseMapping<GlobalResourceMapper> {
   ///   includeMetadata: true,
   ///   defaultLanguage: 'en',
   /// );
-  /// 
+  ///
   /// class Book {
   ///   // Using a custom mapper for a nested Publisher object
   ///   @RdfProperty(
