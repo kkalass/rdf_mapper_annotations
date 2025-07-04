@@ -30,17 +30,14 @@
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
-  <div class="toggle" id="theme-button" title="Toggle brightness">
-    <label for="theme">
-      <input type="checkbox" id="theme" value="light-theme">
-      <span id="dark-theme-button" class="material-symbols-outlined">
-        dark_mode
-      </span>
-      <span id="light-theme-button" class="material-symbols-outlined">
-        light_mode
-      </span>
-    </label>
-  </div>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
 </header>
 <main>
   <div id="dartdoc-main-content" class="main-content">
@@ -48,10 +45,8 @@
 <section class="desc markdown">
   <h1 id="rdf-mapper-annotations-for-dart">RDF Mapper Annotations for Dart</h1>
 <blockquote>
-<p><strong>⚠️ ALPHA PREVIEW VERSION ⚠️</strong><br>
-This library is currently in alpha development stage. The <code>rdf_mapper_generator</code> package is still being actively developed.
-Breaking changes may occur between versions. We're publishing this library to pub.dev to support our cloud builds for the generator project.
-While the annotation API is relatively stable, the generated code may change significantly.</p>
+<p><strong>🎯 Code Generation Now Available</strong><br>
+This library provides the annotation system for mapping Dart objects to RDF graphs. Use it with the <code>rdf_mapper_generator</code> package (v0.2.1+) to automatically generate type-safe mapping code from your annotated classes.</p>
 </blockquote>
 <p><a href="https://pub.dev/packages/rdf_mapper_annotations"><img src="https://img.shields.io/pub/v/rdf_mapper_annotations.svg" alt="pub package"></a>
 <a href="https://github.com/kkalass/rdf_mapper_annotations/actions"><img src="https://github.com/kkalass/rdf_mapper_annotations/actions/workflows/ci.yml/badge.svg" alt="build"></a>
@@ -60,7 +55,14 @@ While the annotation API is relatively stable, the generated code may change sig
 <p>A powerful, declarative annotation system for seamless mapping between Dart objects and RDF graphs.</p>
 <h2 id="overview">Overview</h2>
 <p><a href="https://kkalass.github.io/rdf_mapper_annotations/">🌐 <strong>Official Homepage</strong></a></p>
-<p><code>rdf_mapper_annotations</code> provides the annotation system for declaring how to map between Dart objects and RDF data, similar to how an ORM works for databases. These annotations are used by the <code>rdf_mapper_generator</code> package to generate the actual mapping code. With this concise annotation system, you can define how your domain model maps to RDF without writing boilerplate serialization code.</p>
+<p><code>rdf_mapper_annotations</code> provides the annotation system for declaring how to map between Dart objects and RDF data, similar to how an ORM works for databases. These annotations are processed by the <code>rdf_mapper_generator</code> package to generate the actual mapping code at build time.</p>
+<p><strong>To use these annotations:</strong></p>
+<ol>
+<li>Annotate your Dart classes with the provided RDF annotations</li>
+<li>Run the <code>rdf_mapper_generator</code> code generator to create mapping code</li>
+<li>Use the generated mappers to serialize/deserialize between Dart objects and RDF formats</li>
+</ol>
+<p>With this declarative approach, you can define how your domain model maps to RDF without writing boilerplate serialization code.</p>
 <h3 id="key-features">Key Features</h3>
 <ul>
 <li><strong>Declarative annotations</strong> for clean, maintainable code</li>
@@ -108,6 +110,7 @@ While the annotation API is relatively stable, the generated code may change sig
 </li>
 </ul>
 <h2 id="quick-start">Quick Start</h2>
+<p><strong>Prerequisites:</strong> This library requires the <code>rdf_mapper_generator</code> package to generate the actual mapping code from your annotations.</p>
 <ol>
 <li>Add dependencies to your project:</li>
 </ol>
@@ -115,9 +118,9 @@ While the annotation API is relatively stable, the generated code may change sig
 dart pub add rdf_core rdf_mapper rdf_mapper_annotations
 dart pub add rdf_vocabularies  # Optional but recommended for standard vocabularies
 
-# Add development dependencies
+# Add development dependencies (required for code generation)
 dart pub add build_runner --dev
-dart pub add rdf_mapper_generator --dev
+dart pub add rdf_mapper_generator --dev  # Version 0.2.1 or higher
 </code></pre>
 <ol start="2">
 <li>Define your data model with RDF annotations:</li>
@@ -166,10 +169,17 @@ class Chapter {
 }
 </code></pre>
 <ol start="3">
-<li>Generate mappers:</li>
+<li><strong>Generate the mapping code</strong> using the <code>rdf_mapper_generator</code>:</li>
 </ol>
-<pre class="language-bash"><code class="language-bash">dart run build_runner build --delete-conflicting-outputs
+<pre class="language-bash"><code class="language-bash"># This command processes your annotations and generates the mapping code
+dart run build_runner build --delete-conflicting-outputs
 </code></pre>
+<p>This will generate:</p>
+<ul>
+<li>A <code>rdf_mapper.g.dart</code> file with the initialization function</li>
+<li>Individual mapper files for each annotated class</li>
+<li>Type-safe serialization/deserialization code</li>
+</ul>
 <ol start="4">
 <li>Use the generated mappers:</li>
 </ol>
@@ -203,6 +213,18 @@ void main() {
   print(parsedBook.title); // 'RDF Mapping with Dart'
 }
 </code></pre>
+<h2 id="how-it-works">How It Works</h2>
+<p>This library follows a two-step process:</p>
+<ol>
+<li><strong>Annotation Phase</strong>: You annotate your Dart classes with RDF mapping annotations (this library)</li>
+<li><strong>Code Generation Phase</strong>: The <code>rdf_mapper_generator</code> analyzes your annotations and generates efficient mapping code</li>
+</ol>
+<p><strong>Development Workflow:</strong></p>
+<ul>
+<li>Annotate your classes → Run <code>dart run build_runner build</code> → Use generated mappers</li>
+<li>When you change annotations → Re-run the build command → Updated mappers are ready to use</li>
+</ul>
+<p>The generated code is type-safe, efficient, and handles all the RDF serialization/deserialization complexity for you.</p>
 <h2 id="key-concepts">Key Concepts</h2>
 <h3 id="class-annotations">Class Annotations</h3>
 <ul>
@@ -525,7 +547,8 @@ final eventGraph = rdfMapper.encodeObject(event);
 <ul>
 <li><code>@RdfGlobalResource</code> for entities with independent identity</li>
 <li><code>@RdfLocalResource</code> for entities that only exist in context of a parent</li>
-<li><code>@RdfIri</code> for reference values with specialized formats</li>
+<li><code>@RdfLiteral</code> for values you want to serialize as a primitive like String, int etc.</li>
+<li><code>@RdfIri</code> for IRI (similar to URL) reference values</li>
 </ul>
 </li>
 <li>
@@ -552,7 +575,7 @@ final eventGraph = rdfMapper.encodeObject(event);
           <h2>Libraries</h2>
         <dl>
           <dt id="rdf_mapper_annotations">
-  <span class="name"><a href="rdf_mapper_annotations">rdf_mapper_annotations</a></span> 
+  <span class="name"><a href="rdf_mapper_annotations/">rdf_mapper_annotations</a></span> 
 
 </dt>
 <dd>Annotation library for mapping Dart classes to RDF graphs.
@@ -575,7 +598,7 @@ final eventGraph = rdfMapper.encodeObject(event);
     <h5 class="hidden-xs"><span class="package-name">rdf_mapper_annotations</span> <span class="package-kind">package</span></h5>
     <ol>
       <li class="section-title">Libraries</li>
-      <li><a href="rdf_mapper_annotations">rdf_mapper_annotations</a></li>
+      <li><a href="rdf_mapper_annotations/">rdf_mapper_annotations</a></li>
 </ol>
 
   </div>
@@ -585,7 +608,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.1
+      0.2.2
   </span>
   
 </footer>
