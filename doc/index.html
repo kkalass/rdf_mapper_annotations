@@ -305,6 +305,11 @@
                     </div>
                     
                     <div class="feature-card">
+                        <h3>Native Enum Support</h3>
+                        <p>Type-safe enum mapping to RDF literals and IRIs with custom values and template patterns.</p>
+                    </div>
+                    
+                    <div class="feature-card">
                         <h3>Extensible Architecture</h3>
                         <p>Easily extend with custom mappers for specialized data types and complex mapping scenarios.</p>
                     </div>
@@ -325,6 +330,7 @@
                 <div class="example-container">
                     <div class="example-tabs">
                         <div class="example-tab active">book.dart</div>
+                        <div class="example-tab">enums.dart</div>
                         <div class="example-tab">terminal</div>
                         <div class="example-tab">usage</div>
                     </div>
@@ -369,6 +375,52 @@
   <span class="code-keyword">final</span> <span class="code-type">int</span> number;
 
   Chapter(<span class="code-keyword">this</span>.title, <span class="code-keyword">this</span>.number);
+}</code></pre>
+                    </div>
+                    <div class="example-code">
+                        <pre><code><span class="code-comment">// Enum support with custom values and IRI templates</span>
+<span class="code-keyword">import</span> <span class="code-string">'package:rdf_mapper_annotations/rdf_mapper_annotations.dart'</span>;
+
+<span class="code-comment">// Literal enum mapping</span>
+<span class="code-annotation">@RdfLiteral</span>()
+<span class="code-keyword">enum</span> <span class="code-type">BookFormat</span> {
+  <span class="code-annotation">@RdfEnumValue</span>(<span class="code-string">'H'</span>)
+  hardcover,  <span class="code-comment">// → "H"</span>
+  
+  <span class="code-annotation">@RdfEnumValue</span>(<span class="code-string">'P'</span>)
+  paperback,  <span class="code-comment">// → "P"</span>
+  
+  ebook,      <span class="code-comment">// → "ebook" (default: enum name)</span>
+}
+
+<span class="code-comment">// IRI enum mapping with templates</span>
+<span class="code-annotation">@RdfIri</span>(<span class="code-string">'http://schema.org/{value}'</span>)
+<span class="code-keyword">enum</span> <span class="code-type">ItemCondition</span> {
+  <span class="code-annotation">@RdfEnumValue</span>(<span class="code-string">'NewCondition'</span>)
+  brandNew,     <span class="code-comment">// → &lt;http://schema.org/NewCondition&gt;</span>
+  
+  <span class="code-annotation">@RdfEnumValue</span>(<span class="code-string">'UsedCondition'</span>)
+  used,         <span class="code-comment">// → &lt;http://schema.org/UsedCondition&gt;</span>
+  
+  refurbished,  <span class="code-comment">// → &lt;http://schema.org/refurbished&gt;</span>
+}
+
+<span class="code-comment">// Using enums in resource classes</span>
+<span class="code-annotation">@RdfGlobalResource</span>(
+  SchemaBook.classIri, 
+  IriStrategy(<span class="code-string">'http://example.org/book/{id}'</span>)
+)
+<span class="code-keyword">class</span> <span class="code-type">Book</span> {
+  <span class="code-annotation">@RdfIriPart</span>()
+  <span class="code-keyword">final</span> <span class="code-type">String</span> id;
+
+  <span class="code-annotation">@RdfProperty</span>(SchemaBook.bookFormat)
+  <span class="code-keyword">final</span> <span class="code-type">BookFormat</span> format;  <span class="code-comment">// Uses enum's @RdfLiteral mapping</span>
+
+  <span class="code-annotation">@RdfProperty</span>(SchemaBook.itemCondition)
+  <span class="code-keyword">final</span> <span class="code-type">ItemCondition</span> condition;  <span class="code-comment">// Uses enum's @RdfIri mapping</span>
+
+  Book({<span class="code-keyword">required</span> <span class="code-keyword">this</span>.id, <span class="code-keyword">required</span> <span class="code-keyword">this</span>.format, <span class="code-keyword">required</span> <span class="code-keyword">this</span>.condition});
 }</code></pre>
                     </div>
                     <div class="example-code">
@@ -440,6 +492,7 @@
                     <ul class="footer-links">
                         <li><a href="https://pub.dev/packages/rdf_mapper_annotations">Pub.dev Package</a></li>
                         <li><a href="https://kkalass.github.io/rdf_mapper_annotations/api/rdf_mapper_annotations/index.html">API Reference</a></li>
+                        <li><a href="https://github.com/kkalass/rdf_mapper_annotations/blob/main/doc/enum_mapping_guide.md">Enum Mapping Guide</a></li>
                         <li><a href="https://github.com/kkalass/rdf_mapper_annotations">GitHub Repository</a></li>
                     </ul>
                 </div>

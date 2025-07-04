@@ -30,6 +30,7 @@ With this declarative approach, you can define how your domain model maps to RDF
 - **Support for code generation** (via rdf_mapper_generator)
 - **Flexible IRI generation strategies** for resource identification
 - **Comprehensive collection support** for lists, sets, and maps
+- **Native enum support** with custom values and IRI templates
 - **Extensible architecture** through custom mappers
 
 ## Part of a Family of Projects
@@ -514,6 +515,89 @@ class LocalizedEntryMapper implements LiteralTermMapper<MapEntry<String, String>
 
 In this example, map entries are serialized as language-tagged literals, where the key becomes the language tag and the value becomes the literal value.
 
+### Enum Support
+
+RDF Mapper provides comprehensive support for mapping Dart enums to RDF literals and IRIs with type safety and custom serialization values.
+
+#### Basic Enum Mapping
+
+Use `@RdfLiteral` for enums that should serialize as literal values:
+
+```dart
+@RdfLiteral()
+enum BookFormat {
+  hardcover,  // → "hardcover"
+  paperback,  // → "paperback"
+  ebook,      // → "ebook"
+}
+```
+
+Use `@RdfIri` with templates for enums that should serialize as IRIs:
+
+```dart
+@RdfIri('http://schema.org/{value}')
+enum ItemCondition {
+  brandNew,     // → <http://schema.org/brandNew>
+  used,         // → <http://schema.org/used>
+  refurbished,  // → <http://schema.org/refurbished>
+}
+```
+
+#### Custom Enum Values
+
+Override individual enum constant serialization with `@RdfEnumValue`:
+
+```dart
+@RdfLiteral()
+enum Priority {
+  @RdfEnumValue('H')
+  high,         // → "H"
+  
+  @RdfEnumValue('M')
+  medium,       // → "M"
+  
+  @RdfEnumValue('L')
+  low,          // → "L"
+}
+
+@RdfIri('http://schema.org/{value}')
+enum ItemCondition {
+  @RdfEnumValue('NewCondition')
+  brandNew,     // → <http://schema.org/NewCondition>
+  
+  @RdfEnumValue('UsedCondition')
+  used,         // → <http://schema.org/UsedCondition>
+  
+  refurbished,  // → <http://schema.org/refurbished> (uses enum name)
+}
+```
+
+#### Enum Integration with Resources
+
+Enums work seamlessly with resource classes:
+
+```dart
+@RdfGlobalResource(BookVocab.classIri, IriStrategy('http://example.org/books/{id}'))
+class Book {
+  @RdfIriPart()
+  final String id;
+
+  @RdfProperty(BookVocab.format)
+  final BookFormat format;  // Uses enum's @RdfLiteral mapping
+
+  @RdfProperty(BookVocab.condition)
+  final ItemCondition condition;  // Uses enum's @RdfIri mapping
+
+  // Override with custom language tag for this property
+  @RdfProperty(BookVocab.priority, literal: LiteralMapping.withLanguage('en'))
+  final Priority priority;
+
+  Book({required this.id, required this.format, required this.condition, required this.priority});
+}
+```
+
+For detailed examples including advanced IRI templates with context variables, see the [Enum Mapping Guide](doc/enum_mapping_guide.md).
+
 ### Using Custom Mappers
 
 For special cases, you can implement custom mappers alongside generated ones:
@@ -565,7 +649,10 @@ To get the most out of RDF Mapper:
 
 ## Learn More
 
-For detailed examples, including complex mappings, vector clocks, IRI strategies, and more, see the [examples](https://github.com/kkalass/rdf_mapper_annotations/tree/main/example) directory.
+For detailed examples and advanced topics:
+
+- **[Enum Mapping Guide](doc/enum_mapping_guide.md)** - Comprehensive guide to enum support with examples
+- **[Examples Directory](https://github.com/kkalass/rdf_mapper_annotations/tree/main/example)** - Complex mappings, vector clocks, IRI strategies, and more
 
 ## 🤝 Contributing
 
