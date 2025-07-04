@@ -70,6 +70,7 @@ This library provides the annotation system for mapping Dart objects to RDF grap
 <li><strong>Support for code generation</strong> (via rdf_mapper_generator)</li>
 <li><strong>Flexible IRI generation strategies</strong> for resource identification</li>
 <li><strong>Comprehensive collection support</strong> for lists, sets, and maps</li>
+<li><strong>Native enum support</strong> with custom values and IRI templates</li>
 <li><strong>Extensible architecture</strong> through custom mappers</li>
 </ul>
 <h2 id="part-of-a-family-of-projects">Part of a Family of Projects</h2>
@@ -505,6 +506,71 @@ class LocalizedEntryMapper implements LiteralTermMapper&lt;MapEntry&lt;String, S
 }
 </code></pre>
 <p>In this example, map entries are serialized as language-tagged literals, where the key becomes the language tag and the value becomes the literal value.</p>
+<h3 id="enum-support">Enum Support</h3>
+<p>RDF Mapper provides comprehensive support for mapping Dart enums to RDF literals and IRIs with type safety and custom serialization values.</p>
+<h4 id="basic-enum-mapping">Basic Enum Mapping</h4>
+<p>Use <code>@RdfLiteral</code> for enums that should serialize as literal values:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral()
+enum BookFormat {
+  hardcover,  // → "hardcover"
+  paperback,  // → "paperback"
+  ebook,      // → "ebook"
+}
+</code></pre>
+<p>Use <code>@RdfIri</code> with templates for enums that should serialize as IRIs:</p>
+<pre class="language-dart"><code class="language-dart">@RdfIri('http://schema.org/{value}')
+enum ItemCondition {
+  brandNew,     // → &lt;http://schema.org/brandNew&gt;
+  used,         // → &lt;http://schema.org/used&gt;
+  refurbished,  // → &lt;http://schema.org/refurbished&gt;
+}
+</code></pre>
+<h4 id="custom-enum-values">Custom Enum Values</h4>
+<p>Override individual enum constant serialization with <code>@RdfEnumValue</code>:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLiteral()
+enum Priority {
+  @RdfEnumValue('H')
+  high,         // → "H"
+  
+  @RdfEnumValue('M')
+  medium,       // → "M"
+  
+  @RdfEnumValue('L')
+  low,          // → "L"
+}
+
+@RdfIri('http://schema.org/{value}')
+enum ItemCondition {
+  @RdfEnumValue('NewCondition')
+  brandNew,     // → &lt;http://schema.org/NewCondition&gt;
+  
+  @RdfEnumValue('UsedCondition')
+  used,         // → &lt;http://schema.org/UsedCondition&gt;
+  
+  refurbished,  // → &lt;http://schema.org/refurbished&gt; (uses enum name)
+}
+</code></pre>
+<h4 id="enum-integration-with-resources">Enum Integration with Resources</h4>
+<p>Enums work seamlessly with resource classes:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(BookVocab.classIri, IriStrategy('http://example.org/books/{id}'))
+class Book {
+  @RdfIriPart()
+  final String id;
+
+  @RdfProperty(BookVocab.format)
+  final BookFormat format;  // Uses enum's @RdfLiteral mapping
+
+  @RdfProperty(BookVocab.condition)
+  final ItemCondition condition;  // Uses enum's @RdfIri mapping
+
+  // Override with custom language tag for this property
+  @RdfProperty(BookVocab.priority, literal: LiteralMapping.withLanguage('en'))
+  final Priority priority;
+
+  Book({required this.id, required this.format, required this.condition, required this.priority});
+}
+</code></pre>
+<p>For detailed examples including advanced IRI templates with context variables, see the <a href="doc/enum_mapping_guide.md">Enum Mapping Guide</a>.</p>
 <h3 id="using-custom-mappers">Using Custom Mappers</h3>
 <p>For special cases, you can implement custom mappers alongside generated ones:</p>
 <pre class="language-dart"><code class="language-dart">// Custom mapper implementation
@@ -556,7 +622,11 @@ final eventGraph = rdfMapper.encodeObject(event);
 </li>
 </ul>
 <h2 id="learn-more">Learn More</h2>
-<p>For detailed examples, including complex mappings, vector clocks, IRI strategies, and more, see the <a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">examples</a> directory.</p>
+<p>For detailed examples and advanced topics:</p>
+<ul>
+<li><strong><a href="doc/enum_mapping_guide.md">Enum Mapping Guide</a></strong> - Comprehensive guide to enum support with examples</li>
+<li><strong><a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">Examples Directory</a></strong> - Complex mappings, vector clocks, IRI strategies, and more</li>
+</ul>
 <h2 id="-contributing">🤝 Contributing</h2>
 <p>Contributions, bug reports, and feature requests are welcome!</p>
 <ul>
@@ -608,7 +678,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.2
+      0.2.3
   </span>
   
 </footer>
