@@ -5,9 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2025-07-04
+
+### Changed
+
+- Improved example code quality and readability
+- Renamed example file to ensure better discoverability on pub.dev
+- Ensured all source files are properly formatted according to Dart conventions
+
 ## [0.2.2] - 2025-07-04
 
-## Changed
+### Changed
 
 - Updated README to reflect that the generator package is released and ready for use
 
