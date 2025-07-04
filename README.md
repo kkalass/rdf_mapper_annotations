@@ -1,9 +1,7 @@
 # RDF Mapper Annotations for Dart
 
-> **⚠️ ALPHA PREVIEW VERSION ⚠️**  
-> This library is currently in alpha development stage. The `rdf_mapper_generator` package is still being actively developed.
-> Breaking changes may occur between versions. We're publishing this library to pub.dev to support our cloud builds for the generator project.
-> While the annotation API is relatively stable, the generated code may change significantly.
+> **🎯 Code Generation Now Available**  
+> This library provides the annotation system for mapping Dart objects to RDF graphs. Use it with the `rdf_mapper_generator` package (v0.2.1+) to automatically generate type-safe mapping code from your annotated classes.
 
 [![pub package](https://img.shields.io/pub/v/rdf_mapper_annotations.svg)](https://pub.dev/packages/rdf_mapper_annotations)
 [![build](https://github.com/kkalass/rdf_mapper_annotations/actions/workflows/ci.yml/badge.svg)](https://github.com/kkalass/rdf_mapper_annotations/actions)
@@ -16,7 +14,14 @@ A powerful, declarative annotation system for seamless mapping between Dart obje
 
 [🌐 **Official Homepage**](https://kkalass.github.io/rdf_mapper_annotations/)
 
-`rdf_mapper_annotations` provides the annotation system for declaring how to map between Dart objects and RDF data, similar to how an ORM works for databases. These annotations are used by the `rdf_mapper_generator` package to generate the actual mapping code. With this concise annotation system, you can define how your domain model maps to RDF without writing boilerplate serialization code.
+`rdf_mapper_annotations` provides the annotation system for declaring how to map between Dart objects and RDF data, similar to how an ORM works for databases. These annotations are processed by the `rdf_mapper_generator` package to generate the actual mapping code at build time.
+
+**To use these annotations:**
+1. Annotate your Dart classes with the provided RDF annotations
+2. Run the `rdf_mapper_generator` code generator to create mapping code
+3. Use the generated mappers to serialize/deserialize between Dart objects and RDF formats
+
+With this declarative approach, you can define how your domain model maps to RDF without writing boilerplate serialization code.
 
 ### Key Features
 
@@ -62,6 +67,8 @@ To better understand this library, it's helpful to know these core RDF concepts:
 
 ## Quick Start
 
+**Prerequisites:** This library requires the `rdf_mapper_generator` package to generate the actual mapping code from your annotations.
+
 1. Add dependencies to your project:
 
 ```bash
@@ -69,9 +76,9 @@ To better understand this library, it's helpful to know these core RDF concepts:
 dart pub add rdf_core rdf_mapper rdf_mapper_annotations
 dart pub add rdf_vocabularies  # Optional but recommended for standard vocabularies
 
-# Add development dependencies
+# Add development dependencies (required for code generation)
 dart pub add build_runner --dev
-dart pub add rdf_mapper_generator --dev
+dart pub add rdf_mapper_generator --dev  # Version 0.2.1 or higher
 ```
 
 2. Define your data model with RDF annotations:
@@ -121,11 +128,17 @@ class Chapter {
 }
 ```
 
-3. Generate mappers:
+3. **Generate the mapping code** using the `rdf_mapper_generator`:
 
 ```bash
+# This command processes your annotations and generates the mapping code
 dart run build_runner build --delete-conflicting-outputs
 ```
+
+This will generate:
+- A `rdf_mapper.g.dart` file with the initialization function
+- Individual mapper files for each annotated class
+- Type-safe serialization/deserialization code
 
 4. Use the generated mappers:
 
@@ -160,6 +173,19 @@ void main() {
   print(parsedBook.title); // 'RDF Mapping with Dart'
 }
 ```
+
+## How It Works
+
+This library follows a two-step process:
+
+1. **Annotation Phase**: You annotate your Dart classes with RDF mapping annotations (this library)
+2. **Code Generation Phase**: The `rdf_mapper_generator` analyzes your annotations and generates efficient mapping code
+
+**Development Workflow:**
+- Annotate your classes → Run `dart run build_runner build` → Use generated mappers
+- When you change annotations → Re-run the build command → Updated mappers are ready to use
+
+The generated code is type-safe, efficient, and handles all the RDF serialization/deserialization complexity for you.
 
 ## Key Concepts
 
@@ -532,7 +558,8 @@ To get the most out of RDF Mapper:
 - **Choose the right resource type**:
   - `@RdfGlobalResource` for entities with independent identity
   - `@RdfLocalResource` for entities that only exist in context of a parent
-  - `@RdfIri` for reference values with specialized formats
+  - `@RdfLiteral` for values you want to serialize as a primitive like String, int etc.
+  - `@RdfIri` for IRI (similar to URL) reference values 
 
 - **Model relationships correctly** - Use IRI mapping for references to other resources rather than string literals
 
