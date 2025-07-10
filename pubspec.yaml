@@ -22,7 +22,7 @@ environment:
 dependencies:
   rdf_core: ^0.9.3
   rdf_vocabularies: ^0.3.0 
-  rdf_mapper: ^0.8.4
+  rdf_mapper: ^0.8.7
   logging: ^1.2.0
 
 dev_dependencies:
