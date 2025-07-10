@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2025-01-11
+
+### Added
+- **Lossless mapping support**: Added `@RdfUnmappedTriples` annotation for capturing unmapped RDF triples during deserialization
+- **Enhanced examples**: Updated `catch_all.dart` example to demonstrate both `@RdfUnmappedTriples` and `RdfGraph` usage for comprehensive RDF data handling
+- **Comprehensive documentation**: Added detailed "Lossless RDF Mapping" section to README with object-level and document-level mapping examples
+- **Feature showcase**: Updated project documentation to highlight lossless mapping capabilities
+
+### Enhanced
+- **Improved example quality**: Enhanced `catch_all.dart` with realistic Person class and full round-trip usage demonstration
+- **Better documentation coverage**: Added usage examples for `encodeObjectLossless`/`decodeObjectLossless` methods for complete document preservation
+- **Feature visibility**: Added lossless mapping feature card to project documentation homepage
+
 ## [0.2.3] - 2025-07-04
 
 ### Changed

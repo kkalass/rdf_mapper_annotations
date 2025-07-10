@@ -28,6 +28,7 @@ With this declarative approach, you can define how your domain model maps to RDF
 - **Declarative annotations** for clean, maintainable code
 - **Type-safe mapping** between Dart classes and RDF resources
 - **Support for code generation** (via rdf_mapper_generator)
+- **Lossless RDF mapping** with `@RdfUnmappedTriples` for perfect round-trip preservation
 - **Flexible IRI generation strategies** for resource identification
 - **Comprehensive collection support** for lists, sets, and maps
 - **Native enum support** with custom values and IRI templates
@@ -515,6 +516,74 @@ class LocalizedEntryMapper implements LiteralTermMapper<MapEntry<String, String>
 
 In this example, map entries are serialized as language-tagged literals, where the key becomes the language tag and the value becomes the literal value.
 
+### Lossless RDF Mapping
+
+Preserve all RDF data during serialization/deserialization cycles with lossless mapping features:
+
+#### @RdfUnmappedTriples - Catch-All for Unknown Properties
+
+Use `@RdfUnmappedTriples()` to capture any RDF properties that aren't explicitly mapped to other fields:
+
+```dart
+@RdfGlobalResource(SchemaPerson.classIri, IriStrategy("https://example.org/people/{id}"))
+class Person {
+  @RdfIriPart("id")
+  final String id;
+
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+
+  // Captures email, telephone, and any other unmapped properties
+  @RdfUnmappedTriples()
+  final RdfGraph unmappedProperties;
+
+  Person({required this.id, required this.name, RdfGraph? unmappedProperties})
+    : unmappedProperties = unmappedProperties ?? RdfGraph(triples: []);
+}
+```
+
+#### RdfGraph as Property Type
+
+Use `RdfGraph` as a regular property type to capture structured subgraphs without creating custom classes:
+
+```dart
+class Person {
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+
+  // Captures address as a subgraph (streetAddress, city, postalCode, etc.)
+  @RdfProperty(SchemaPerson.address)
+  final RdfGraph? address;
+
+  // Still preserves any other unmapped properties
+  @RdfUnmappedTriples()
+  final RdfGraph unmappedProperties;
+}
+```
+
+#### Document-Level Lossless Workflow
+
+For complete document preservation including unrelated entities, use the lossless methods:
+
+```dart
+// Decode with remainder - captures both object data and document-level unmapped data
+final (person, remainderGraph) = mapper.decodeObjectLossless<Person>(turtle);
+
+// person.unmappedProperties contains triples about the person that weren't mapped
+// remainderGraph contains all other triples from the document (other entities, etc.)
+
+// Encode back preserving everything - perfect round-trip
+final restoredTurtle = mapper.encodeObjectLossless((person, remainderGraph));
+```
+
+**Benefits:**
+- **Perfect round-trip preservation**: No data loss during Dart ↔ RDF conversion
+- **Future-proof**: Handle evolving RDF schemas gracefully
+- **Flexibility**: Mix strongly-typed properties with flexible graph storage
+- **Document integrity**: Preserve entire RDF documents, not just individual objects
+
+See `example/catch_all.dart` for a complete demonstration.
+
 ### Enum Support
 
 RDF Mapper provides comprehensive support for mapping Dart enums to RDF literals and IRIs with type safety and custom serialization values.
@@ -653,6 +722,12 @@ For detailed examples and advanced topics:
 
 - **[Enum Mapping Guide](doc/enum_mapping_guide.md)** - Comprehensive guide to enum support with examples
 - **[Examples Directory](https://github.com/kkalass/rdf_mapper_annotations/tree/main/example)** - Complex mappings, vector clocks, IRI strategies, and more
+
+## 🛣️ Roadmap / Next Steps
+
+- Catch-All both for entire (child) instances and for "all non-mapped triples of this subject" as e.g. RdfGraph (probably mapper based, so you can use your own catch-all types)
+- Schema generating based on annotations, for example `@RdfProperty.schemaDefine('https://my.app.com/vocab/MyType/myProp')` or similar
+
 
 ## 🤝 Contributing
 
