@@ -68,6 +68,7 @@ This library provides the annotation system for mapping Dart objects to RDF grap
 <li><strong>Declarative annotations</strong> for clean, maintainable code</li>
 <li><strong>Type-safe mapping</strong> between Dart classes and RDF resources</li>
 <li><strong>Support for code generation</strong> (via rdf_mapper_generator)</li>
+<li><strong>Lossless RDF mapping</strong> with <code>@RdfUnmappedTriples</code> for perfect round-trip preservation</li>
 <li><strong>Flexible IRI generation strategies</strong> for resource identification</li>
 <li><strong>Comprehensive collection support</strong> for lists, sets, and maps</li>
 <li><strong>Native enum support</strong> with custom values and IRI templates</li>
@@ -506,6 +507,60 @@ class LocalizedEntryMapper implements LiteralTermMapper&lt;MapEntry&lt;String, S
 }
 </code></pre>
 <p>In this example, map entries are serialized as language-tagged literals, where the key becomes the language tag and the value becomes the literal value.</p>
+<h3 id="lossless-rdf-mapping">Lossless RDF Mapping</h3>
+<p>Preserve all RDF data during serialization/deserialization cycles with lossless mapping features:</p>
+<h4 id="rdfunmappedtriples---catch-all-for-unknown-properties">@RdfUnmappedTriples - Catch-All for Unknown Properties</h4>
+<p>Use <code>@RdfUnmappedTriples()</code> to capture any RDF properties that aren't explicitly mapped to other fields:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(SchemaPerson.classIri, IriStrategy("https://example.org/people/{id}"))
+class Person {
+  @RdfIriPart("id")
+  final String id;
+
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+
+  // Captures email, telephone, and any other unmapped properties
+  @RdfUnmappedTriples()
+  final RdfGraph unmappedProperties;
+
+  Person({required this.id, required this.name, RdfGraph? unmappedProperties})
+    : unmappedProperties = unmappedProperties ?? RdfGraph(triples: []);
+}
+</code></pre>
+<h4 id="rdfgraph-as-property-type">RdfGraph as Property Type</h4>
+<p>Use <code>RdfGraph</code> as a regular property type to capture structured subgraphs without creating custom classes:</p>
+<pre class="language-dart"><code class="language-dart">class Person {
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+
+  // Captures address as a subgraph (streetAddress, city, postalCode, etc.)
+  @RdfProperty(SchemaPerson.address)
+  final RdfGraph? address;
+
+  // Still preserves any other unmapped properties
+  @RdfUnmappedTriples()
+  final RdfGraph unmappedProperties;
+}
+</code></pre>
+<h4 id="document-level-lossless-workflow">Document-Level Lossless Workflow</h4>
+<p>For complete document preservation including unrelated entities, use the lossless methods:</p>
+<pre class="language-dart"><code class="language-dart">// Decode with remainder - captures both object data and document-level unmapped data
+final (person, remainderGraph) = mapper.decodeObjectLossless&lt;Person&gt;(turtle);
+
+// person.unmappedProperties contains triples about the person that weren't mapped
+// remainderGraph contains all other triples from the document (other entities, etc.)
+
+// Encode back preserving everything - perfect round-trip
+final restoredTurtle = mapper.encodeObjectLossless((person, remainderGraph));
+</code></pre>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li><strong>Perfect round-trip preservation</strong>: No data loss during Dart ↔ RDF conversion</li>
+<li><strong>Future-proof</strong>: Handle evolving RDF schemas gracefully</li>
+<li><strong>Flexibility</strong>: Mix strongly-typed properties with flexible graph storage</li>
+<li><strong>Document integrity</strong>: Preserve entire RDF documents, not just individual objects</li>
+</ul>
+<p>See <code>example/catch_all.dart</code> for a complete demonstration.</p>
 <h3 id="enum-support">Enum Support</h3>
 <p>RDF Mapper provides comprehensive support for mapping Dart enums to RDF literals and IRIs with type safety and custom serialization values.</p>
 <h4 id="basic-enum-mapping">Basic Enum Mapping</h4>
@@ -627,6 +682,11 @@ final eventGraph = rdfMapper.encodeObject(event);
 <li><strong><a href="doc/enum_mapping_guide.md">Enum Mapping Guide</a></strong> - Comprehensive guide to enum support with examples</li>
 <li><strong><a href="https://github.com/kkalass/rdf_mapper_annotations/tree/main/example">Examples Directory</a></strong> - Complex mappings, vector clocks, IRI strategies, and more</li>
 </ul>
+<h2 id="-roadmap--next-steps">🛣️ Roadmap / Next Steps</h2>
+<ul>
+<li>Catch-All both for entire (child) instances and for "all non-mapped triples of this subject" as e.g. RdfGraph (probably mapper based, so you can use your own catch-all types)</li>
+<li>Schema generating based on annotations, for example <code>@RdfProperty.schemaDefine('https://my.app.com/vocab/MyType/myProp')</code> or similar</li>
+</ul>
 <h2 id="-contributing">🤝 Contributing</h2>
 <p>Contributions, bug reports, and feature requests are welcome!</p>
 <ul>
@@ -678,7 +738,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.3
+      0.2.4
   </span>
   
 </footer>
