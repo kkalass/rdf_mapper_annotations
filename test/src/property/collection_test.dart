@@ -37,12 +37,4 @@ void main() {
       expect(identical(const RdfMapValue(), const RdfMapValue()), isTrue);
     });
   });
-
-  group('RdfCollectionType', () {
-    test('enum values are correct', () {
-      expect(RdfCollectionType.values.length, equals(2));
-      expect(RdfCollectionType.auto, isA<RdfCollectionType>());
-      expect(RdfCollectionType.none, isA<RdfCollectionType>());
-    });
-  });
 }

@@ -452,6 +452,86 @@ class LocalizedText {
 }
 ```
 
+### Collection Handling
+
+RDF Mapper provides flexible support for collection types (List, Set, Iterable) and Map collections with different serialization strategies.
+
+#### Standard Collections (List, Set, Iterable)
+
+By default, standard Dart collections are serialized as multiple separate RDF triples with the same predicate:
+
+```dart
+class Book {
+  // Uses UnorderedItemsListMapper automatically - each author generates a separate triple
+  @RdfProperty(SchemaBook.author)
+  final List<Person> authors;
+  
+  // Uses UnorderedItemsSetMapper automatically - each keyword as separate triple
+  @RdfProperty(SchemaBook.keywords)
+  final Set<String> keywords;
+  
+  // Uses UnorderedItemsMapper automatically - recommended for semantic clarity
+  @RdfProperty(SchemaBook.contributors)
+  final Iterable<Person> contributors;
+}
+```
+
+**Important notes about default collection behavior:**
+- **Order is not preserved** in RDF representation
+- Each item generates its own triple: `book:123 schema:author person:1`, `book:123 schema:author person:2`
+- **NOT** serialized as RDF Collection structures (rdf:first/rdf:rest/rdf:nil)
+- Use `Iterable<T>` for clarity that order shouldn't be relied upon
+
+#### Custom Collection Mappers
+
+Use the `collection` parameter to specify custom collection mapping strategies:
+
+```dart
+class Book {
+  // Structured RDF List (preserves order)
+  @RdfProperty(SchemaBook.chapters, collection: RdfListMapper)
+  final List<Chapter> chapters;
+  
+  // RDF Sequence structure
+  @RdfProperty(SchemaBook.authors, collection: RdfSeqMapper)
+  final List<Person> authors;
+  
+  // Custom collection behavior - treating entire collection as single value
+  @RdfProperty(SchemaBook.keywords, collection: StringListMapper)
+  final List<String> keywords; // Uses custom collection mapper for entire list
+}
+```
+
+#### Item Mapping within Collections
+
+The `iri`, `literal`, `globalResource`, and `localResource` parameters configure how individual items are mapped:
+
+```dart
+class Book {
+  // Default collection behavior (multiple triples) with custom item mapping
+  @RdfProperty(
+    SchemaBook.authors,
+    iri: IriMapping('{+baseUri}/person/{authorId}')
+  )
+  final List<String> authorIds; // Each ID converted to IRI, separate triples
+  
+  // Default collection with custom literal mapping for each item
+  @RdfProperty(
+    SchemaBook.tags,
+    literal: LiteralMapping.withLanguage('en')
+  )
+  final List<String> tags; // Each tag as separate literal with @en language tag
+  
+  // Structured collection with custom item mapping
+  @RdfProperty(
+    SchemaBook.chapters,
+    collection: RdfListMapper,
+    globalResource: GlobalResourceMapping.namedMapper('chapterMapper')
+  )
+  final List<Chapter> chapters;
+}
+```
+
 ### Map Collections
 
 RDF has no native concept of key-value pairs. This library provides two different approaches for mapping Map<K,V> collections:

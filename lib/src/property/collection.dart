@@ -1,54 +1,5 @@
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 
-/// Specifies how Dart collection properties are represented in the RDF graph.
-///
-/// This enum determines the serialization strategy for collection types (List, Set, Map, etc.)
-/// when mapping between Dart objects and RDF triples.
-///
-/// IMPORTANT NOTE: By default, this library represents Dart collections (List, Set, etc.)
-/// as multiple RDF triples with the same subject and predicate, but different objects.
-/// This is NOT the same as the RDF Collection concept (rdf:List with rdf:first/rdf:rest/rdf:nil),
-/// which requires specific handling to maintain order.
-///
-/// For Map collections, you have two options:
-/// - Provide a mapper for `MapEntry&lt;K,V&gt;` instances directly in the `@RdfProperty` annotation (as iri, literal, localResource or globalResource).
-/// - Use the dedicated annotations for complex map entries:
-///   - [RdfMapEntry] - Defines the class that represents a map entry
-///   - [RdfMapKey] - Marks a property as the key in a map entry
-///   - [RdfMapValue] - Marks a property as the value in a map entry
-enum RdfCollectionType {
-  /// Automatically determines the appropriate collection representation based on the Dart property type.
-  ///
-  /// This default option intelligently analyzes the property type:
-  /// - For `Iterable` types (List, Set, etc.): Creates multiple triples sharing the same subject and predicate.
-  ///   Each item produces a separate triple with the same predicate. For example:
-  ///   ```
-  ///   <subject> <predicate> "item1" .
-  ///   <subject> <predicate> "item2" .
-  ///   <subject> <predicate> "item3" .
-  ///   ```
-  ///   For complex objects, each item is fully serialized as a separate resource in the RDF graph.
-  ///
-  ///   Note: This is NOT an rdf:List (which would use rdf:first/rdf:rest/rdf:nil).
-  ///   Order is not guaranteed to be preserved in the RDF serialization.
-  ///
-  /// - For `Map` types: Creates a collection of triples with the same subject and predicate.
-  ///   Each map entry is processed according to available mapping configurations:
-  ///   - If `@RdfProperty` includes a mapper that handles `MapEntry&lt;K,V&gt;` directly (e.g.,
-  ///     through `literal`, `iri`, etc.), that mapper is used without requiring additional annotations.
-  ///   - Otherwise, each entry is serialized as a separate resource in the RDF graph, using either
-  ///     [RdfMapKey], [RdfMapValue], and [RdfMapEntry] annotations or standard registered mappers for `MapEntry` (if any).
-  ///
-  /// - For all other types: Treats as a single value (non-collection).
-  auto,
-
-  /// Forces the property to be treated as a single value, even if the Dart type is a collection.
-  ///
-  /// Use this to explicitly override the automatic collection detection when you need a collection
-  /// property to be serialized as a single value in the RDF graph. This gives you full control
-  /// over the mapping process in your custom mapper implementation.
-  none,
-}
 
 /// Designates a property as the key in a mapped `Map<K,V>` collection.
 ///

@@ -10,11 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **New `LiteralContent` class**: Added helper class for building RDF literals with simplified datatype and language handling
 - **Enhanced datatype support**: `@RdfLiteral.custom` now accepts optional `datatype` parameter for consistent datatype handling
+- **Collection item type specification**: Added `itemType` parameter to `@RdfProperty` for explicit item type control in custom collections
 
 ### Changed
 - **BREAKING**: `@RdfLiteral.custom` methods now use `LiteralContent` instead of `LiteralTerm` for parameters and return types
+- **BREAKING**: `@RdfProperty.collection` parameter changed from `RdfCollectionType` enum to `Type?` for direct mapper type specification
+- **BREAKING**: Removed `RdfCollectionType` enum - collection behavior now specified through mapper types
 - Adjusted to API changes in rdf_mapper (Iterable<Triple>, datatype property in LiteralTermMapper etc.)
 - Updated examples and documentation to reflect new API patterns
+
+### Removed
+- **BREAKING**: `RdfCollectionType` enum - replaced with direct Type specification for collection mappers
 
 ## [0.2.4] - 2025-07-10
 
