@@ -49,7 +49,7 @@ class Library {
   final String id;
 
   /// Default behavior: Creates multiple triples with same predicate
-  /// Each book generates: <library> vocab:books <book_resource>
+  /// Each book generates: `<library> vocab:books <book_resource>`
   @RdfProperty(CollectionVocab.books)
   final List<Book> books;
 

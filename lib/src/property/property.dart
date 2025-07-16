@@ -348,7 +348,7 @@ class RdfProperty implements RdfAnnotation {
   /// Specifies a custom collection mapper for handling collection properties.
   ///
   /// This parameter references a Type that implements `Mapper<C>` and has a constructor
-  /// with the signature `Mapper<C> Function([Mapper<T>? mapper])`, where:
+  /// with the signature `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})`, where:
   /// - `C` is the collection type (e.g., `List<Person>`)
   /// - `T` is the item type (e.g., `Person`)
   /// - The class implements `Mapper<C>` to handle collection serialization/deserialization
@@ -457,7 +457,7 @@ class RdfProperty implements RdfAnnotation {
   /// - `RdfAltMapper`: Creates rdf:Alt structure for alternative values
   ///
   /// *Custom mappers*:
-  /// - Implement `Mapper<C>` with constructor matching `Mapper<C> Function([Mapper<T>? mapper])` signature
+  /// - Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature
   ///
   final Type? collection;
 
@@ -468,7 +468,7 @@ class RdfProperty implements RdfAnnotation {
   /// for custom collection types that don't follow standard generic patterns.
   ///
   /// The item type determines what `T` will be when instantiating the collection mapper
-  /// with the constructor function `Mapper<C> Function([Mapper<T>? mapper])`.
+  /// with the constructor function `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})`.
   ///
   /// **When to use**:
   /// - Custom collection types without clear generic parameters
@@ -520,7 +520,7 @@ class RdfProperty implements RdfAnnotation {
   ///
   /// [collection] - Specifies a custom collection mapper Type for handling collections.
   /// When provided, the Type must implement `Mapper<C>` and have a constructor that matches
-  /// the `Mapper<C> Function([Mapper<T>? mapper])` signature where `T` is the item type and `C` the collection type (e.g. `List<T>`).
+  /// the `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature where `T` is the item type and `C` the collection type (e.g. `List<T>`).
   /// If not specified, standard collections
   /// use their respective default mappers: `List<T>` → UnorderedItemsListMapper,
   /// `Set<T>` → UnorderedItemsSetMapper, `Iterable<T>` → UnorderedItemsMapper.
@@ -528,7 +528,7 @@ class RdfProperty implements RdfAnnotation {
   /// Well-known collection mappers include:
   /// - Default mappers (multiple triples): UnorderedItemsListMapper, UnorderedItemsSetMapper, UnorderedItemsMapper
   /// - RDF structures (single collection): RdfListMapper, RdfSeqMapper, RdfBagMapper, RdfAltMapper
-  /// - Custom mappers: Implement `Mapper<C>` with constructor matching `Mapper<C> Function([Mapper<T>? mapper])` signature
+  /// - Custom mappers: Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature
   ///
   /// [itemType] - Explicitly specifies the item type for collection mapping when
   /// it cannot be automatically extracted from the field's generic type parameters.
