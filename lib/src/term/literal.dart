@@ -785,9 +785,9 @@ class LiteralContent {
   /// Creates content for a language-tagged string literal.
   const LiteralContent.withLanguage(this.value, this.language);
 
-  LiteralTerm toLiteralTerm(IriTerm datatype) {
+  LiteralTerm toLiteralTerm(IriTerm? datatype) {
     if (language != null) {
-      if (datatype != Rdf.langString) {
+      if (datatype != null && datatype != Rdf.langString) {
         throw ArgumentError("""
 Language-tagged literals must use rdf:langString datatype. Adjust the annotation for example like this:
 
@@ -800,7 +800,10 @@ Language-tagged literals must use rdf:langString datatype. Adjust the annotation
       }
       return LiteralTerm.withLanguage(value, language!);
     }
-    return LiteralTerm(value, datatype: datatype);
+    if (datatype != null) {
+      return LiteralTerm(value, datatype: datatype);
+    }
+    return LiteralTerm(value);
   }
 
   static LiteralContent fromLiteralTerm(LiteralTerm term) {
