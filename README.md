@@ -725,7 +725,6 @@ For detailed examples and advanced topics:
 
 ## 🛣️ Roadmap / Next Steps
 
-- Catch-All both for entire (child) instances and for "all non-mapped triples of this subject" as e.g. RdfGraph (probably mapper based, so you can use your own catch-all types)
 - Schema generating based on annotations, for example `@RdfProperty.schemaDefine('https://my.app.com/vocab/MyType/myProp')` or similar
 
 
