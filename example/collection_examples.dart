@@ -1,14 +1,11 @@
 /// Comprehensive examples demonstrating different collection mapping strategies
 /// using RDF Mapper Annotations.
 ///
-/// This file showcases conceptual usage patterns for:
+/// This file showcases usage patterns for:
 /// 1. Default collection behavior (multiple triples)
-/// 2. Structured RDF collections (conceptual - mapper types would be imported)
+/// 2. Structured RDF collections
 /// 3. Custom collection handling
 /// 4. Item mapping within collections
-///
-/// Note: This is a documentation example. In real usage, collection mapper
-/// types like RdfListMapper would be imported from the appropriate packages.
 ///
 /// **Quick Reference:**
 /// - For most collections: Use default behavior (multiple triples)
