@@ -1,6 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
+import 'package:rdf_vocabularies/rdf.dart' show Rdf;
 
 @RdfLocalResource()
 class Book {
@@ -14,6 +15,9 @@ class Book {
 class LocalizedEntryMapper
     implements LiteralTermMapper<MapEntry<String, String>> {
   const LocalizedEntryMapper();
+
+  @override
+  IriTerm? get datatype => Rdf.langString;
 
   @override
   MapEntry<String, String> fromRdfTerm(

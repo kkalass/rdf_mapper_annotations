@@ -1,6 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
+import 'package:rdf_vocabularies/rdf.dart';
 import 'package:rdf_vocabularies/xsd.dart';
 
 // --- Example classes with RdfValue annotation ---
@@ -22,6 +23,11 @@ class EnhancedRating {
 @RdfLiteral.custom(
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
+
+  /// If you leave out the datatype, it will be `Xsd.string` by default.
+  /// Note that you may have compatibility issues with other RDF libraries
+  /// if you use a datatype that is not in the `Xsd` namespace.
+  datatype: IriTerm.prevalidated('http://example.org/temperature'),
 )
 class Temperature {
   final double celsius;
@@ -29,16 +35,12 @@ class Temperature {
   Temperature(this.celsius);
 
   // Custom formatting method used by the @RdfLiteral annotation
-  LiteralTerm formatCelsius() => LiteralTerm(
+  LiteralContent formatCelsius() => LiteralContent(
         '$celsius°C',
-        // If you leave out the datatype, it will be `Xsd.string` by default.
-        // Note that you may have compatibility issues with other RDF libraries
-        // if you use a datatype that is not in the `Xsd` namespace.
-        datatype: IriTerm.prevalidated('http://example.org/temperature'),
       );
 
   // Static method for parsing text back into a Temperature instance
-  static Temperature parse(LiteralTerm term) {
+  static Temperature parse(LiteralContent term) {
     return Temperature(double.parse(term.value.replaceAll('°C', '')));
   }
 }
@@ -67,6 +69,9 @@ class LocalizedText {
 class GeneratedEnhancedRatingMapper
     implements LiteralTermMapper<EnhancedRating> {
   @override
+  IriTerm get datatype => Xsd.string;
+
+  @override
   LiteralTerm toRdfTerm(EnhancedRating rating, SerializationContext context) {
     // The stars property is recognized based on the @RdfValue annotation
     return context.toLiteralTerm(rating.stars);
@@ -81,21 +86,26 @@ class GeneratedEnhancedRatingMapper
 
 /// This class would be automatically generated based on Temperature annotations
 class GeneratedTemperatureMapper implements LiteralTermMapper<Temperature> {
+  final IriTerm datatype =
+      IriTerm.prevalidated('http://example.org/temperature');
   @override
   LiteralTerm toRdfTerm(Temperature temp, SerializationContext context) {
-    return temp.formatCelsius();
+    return temp.formatCelsius().toLiteralTerm(
+          datatype,
+        );
   }
 
   @override
   Temperature fromRdfTerm(LiteralTerm term, DeserializationContext context,
       {bool bypassDatatypeCheck = false}) {
     // Convert back to a Temperature instance with the static parse method
-    return Temperature.parse(term);
+    return Temperature.parse(LiteralContent.fromLiteralTerm(term));
   }
 }
 
 /// This class would be automatically generated based on LocalizedText annotations
 class GeneratedLocalizedTextMapper implements LiteralTermMapper<LocalizedText> {
+  final IriTerm datatype = Rdf.langString;
   @override
   LiteralTerm toRdfTerm(LocalizedText localized, SerializationContext context) {
     // Use the @RdfValue property for the value and @RdfLanguageTag for the language

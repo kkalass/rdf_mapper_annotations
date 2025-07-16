@@ -416,15 +416,16 @@ class Rating {
 @RdfLiteral.custom(
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
+  datatype: IriTerm.prevalidated('http://example.org/temperature')
 )
 class Temperature {
   final double celsius;
   
   Temperature(this.celsius);
   
-  LiteralTerm formatCelsius() => LiteralTerm('$celsius°C', datatype: IriTerm.prevalidated('http://example.org/temperature'));
+  LiteralContent formatCelsius() => LiteralContent('$celsius°C');
   
-  static Temperature parse(LiteralTerm term) {
+  static Temperature parse(LiteralContent term) {
     return Temperature(double.parse(term.value.replaceAll('°C', '')));
   }
 }

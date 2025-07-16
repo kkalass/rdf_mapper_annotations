@@ -2,6 +2,7 @@ import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
+import 'package:rdf_vocabularies/rdf.dart';
 
 /// Marks a Dart class or enum as representing an RDF literal term.
 ///
@@ -61,14 +62,15 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// @RdfLiteral.custom(
 ///   toLiteralTermMethod: 'formatCelsius',
 ///   fromLiteralTermMethod: 'parse',
+///   datatype: Xsd.string
 /// )
 /// class Temperature {
 ///   final double celsius;
 ///   Temperature(this.celsius);
 ///
-///   LiteralTerm formatCelsius() => LiteralTerm('$celsius°C');
+///   LiteralContent formatCelsius() => LiteralContent('$celsius°C');
 ///
-///   static Temperature parse(LiteralTerm term) =>
+///   static Temperature parse(LiteralContent term) =>
 ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
 /// }
 /// ```
@@ -93,15 +95,16 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// @RdfLiteral.custom(
 ///   toLiteralTermMethod: 'toRdf',
 ///   fromLiteralTermMethod: 'fromRdf',
+///   datatype: Xsd.string
 /// )
 /// class Temperature {
 ///   final double celsius;
 ///
 ///   Temperature(this.celsius);
 ///
-///   LiteralTerm toRdf() => LiteralTerm('$celsius°C');
+///   LiteralContent toRdf() => LiteralContent('$celsius°C');
 ///
-///   static Temperature fromRdf(LiteralTerm term) =>
+///   static Temperature fromRdf(LiteralContent term) =>
 ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
 /// }
 /// ```
@@ -240,8 +243,9 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   /// This approach allows you to define how your class is converted to/from RDF literals
   /// by specifying methods in your class:
   ///
-  /// * [toLiteralTermMethod]: An instance method that converts your object to a `LiteralTerm`
-  /// * [fromLiteralTermMethod]: A static method that creates your object from a `LiteralTerm`
+  /// * [toLiteralTermMethod]: An instance method that converts your object to a `LiteralContent`
+  /// * [fromLiteralTermMethod]: A static method that creates your object from a `LiteralContent`
+  /// * [datatype]: Optional: The RDF datatype IRI to apply to generated literals.
   ///
   /// This is ideal for classes that need special formatting or validation during
   /// serialization, such as formatted values with specific string representations
@@ -252,6 +256,7 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   /// @RdfLiteral.custom(
   ///   toLiteralTermMethod: 'formatCelsius',
   ///   fromLiteralTermMethod: 'parse',
+  ///   datatype: Xsd.string
   /// )
   /// class Temperature {
   ///   final double celsius;
@@ -259,19 +264,20 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///   Temperature(this.celsius);
   ///
   ///   // Instance method for serialization
-  ///   LiteralTerm formatCelsius() => LiteralTerm('$celsius°C');
+  ///   LiteralContent formatCelsius() => LiteralContent('$celsius°C');
   ///
   ///   // Static method for deserialization
-  ///   static Temperature parse(LiteralTerm term) =>
+  ///   static Temperature parse(LiteralContent term) =>
   ///     Temperature(double.parse(term.value.replaceAll('°C', '')));
   /// }
   /// ```
-  const RdfLiteral.custom(
-      {required String toLiteralTermMethod,
-      required String fromLiteralTermMethod})
-      : toLiteralTermMethod = toLiteralTermMethod,
+  const RdfLiteral.custom({
+    required String toLiteralTermMethod,
+    required String fromLiteralTermMethod,
+    IriTerm? datatype,
+  })  : toLiteralTermMethod = toLiteralTermMethod,
         fromLiteralTermMethod = fromLiteralTermMethod,
-        datatype = null,
+        datatype = datatype,
         super();
 
   /// Creates a reference to a named mapper for this literal term.
@@ -763,4 +769,44 @@ class RdfValue implements RdfAnnotation {
 /// ```
 class RdfLanguageTag implements RdfAnnotation {
   const RdfLanguageTag();
+}
+
+/// Represents the content for building an RDF Literal.
+///
+/// Use the default constructor for a value that will be combined with a datatype,
+/// or `LiteralContent.withLanguage` for a language-tagged string.
+class LiteralContent {
+  final String value;
+  final String? language;
+
+  /// Creates content for a literal that will be combined with a datatype.
+  const LiteralContent(this.value) : language = null;
+
+  /// Creates content for a language-tagged string literal.
+  const LiteralContent.withLanguage(this.value, this.language);
+
+  LiteralTerm toLiteralTerm(IriTerm datatype) {
+    if (language != null) {
+      if (datatype != Rdf.langString) {
+        throw ArgumentError("""
+Language-tagged literals must use rdf:langString datatype. Adjust the annotation for example like this:
+
+@RdfLiteral.custom(
+  toLiteralTermMethod: 'formatLiteral',
+  fromLiteralTermMethod: 'parseLiteral',
+  datatype: Rdf.langString,
+)
+          """);
+      }
+      return LiteralTerm.withLanguage(value, language!);
+    }
+    return LiteralTerm(value, datatype: datatype);
+  }
+
+  static LiteralContent fromLiteralTerm(LiteralTerm term) {
+    if (term.language != null) {
+      return LiteralContent.withLanguage(term.value, term.language!);
+    }
+    return LiteralContent(term.value);
+  }
 }
