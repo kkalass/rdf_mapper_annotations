@@ -160,22 +160,22 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 /// final List<Person> authors; // Each Person is fully mapped with its own set of triples
 ///
 /// // Using structured RDF collections (preserves order)
-/// @RdfProperty(SchemaBook.chapters, collection: RdfListMapper)
+/// @RdfProperty(SchemaBook.chapters, collection: rdfList)
 /// final List<Chapter> chapters; // Creates rdf:List structure
 ///
 /// // Custom collection with explicit item type
 /// @RdfProperty(
 ///   SchemaBook.metadata,
-///   collection: CustomCollectionMapper,
+///   collection: CollectionMapping.mapper(CustomCollectionMapper),
 ///   itemType: MetadataEntry
 /// )
 /// final CustomCollection metadata;
 ///
 /// // Structured RDF collections (different types)
-/// @RdfProperty(SchemaBook.authors, collection: RdfSeqMapper)
+/// @RdfProperty(SchemaBook.authors, collection: rdfSeq)
 /// final List<Person> authors; // Creates rdf:Seq structure
 ///
-/// @RdfProperty(SchemaBook.genres, collection: RdfBagMapper)
+/// @RdfProperty(SchemaBook.genres, collection: rdfBag)
 /// final List<String> genres; // Creates rdf:Bag structure
 /// ```
 class RdfProperty implements RdfAnnotation {
@@ -360,13 +360,19 @@ class RdfProperty implements RdfAnnotation {
   /// handles individual item conversion.
   ///
   /// **Default behavior without explicit collection mapper**:
-  /// - `List<T>` automatically uses `UnorderedItemsListMapper` (default behavior)
-  /// - `Set<T>` automatically uses `UnorderedItemsSetMapper` (default behavior)
-  /// - `Iterable<T>` automatically uses `UnorderedItemsMapper` (default behavior)
+  /// Unlike other mapping properties (iri, literal, globalResource, localResource)
+  /// which default to registry lookup when not specified, collections have a different
+  /// default behavior:
+  /// - `List<T>` automatically uses `UnorderedItemsListMapper` (equivalent to `CollectionMapping.auto()`)
+  /// - `Set<T>` automatically uses `UnorderedItemsSetMapper` (equivalent to `CollectionMapping.auto()`)
+  /// - `Iterable<T>` automatically uses `UnorderedItemsMapper` (equivalent to `CollectionMapping.auto()`)
   /// - Each item generates a separate triple with the same predicate
   /// - Not serialized as RDF Collection structures (rdf:first/rdf:rest/rdf:nil)
   /// - List order is not preserved in RDF representation
   /// - Map collections continue using existing [RdfMapEntry]/[RdfMapKey]/[RdfMapValue] annotations
+  ///
+  /// To use registry-based mapper lookup (matching the default behavior of other mapping
+  /// properties), explicitly specify `collection: CollectionMapping.fromRegistry()`
   ///
   /// **When to specify a collection mapper**:
   /// 1. **Custom collection types**: When using non-standard collection types
@@ -401,13 +407,13 @@ class RdfProperty implements RdfAnnotation {
   /// ### Structured RDF Collections
   /// ```dart
   /// // Creates an rdf:List structure preserving order - single collection object
-  /// @RdfProperty(SchemaBook.chapters, collection: RdfListMapper)
+  /// @RdfProperty(SchemaBook.chapters, collection: rdfList)
   /// final List<Chapter> chapters;
   ///
   /// // rdf:List with custom item mapping - single ordered collection
   /// @RdfProperty(
   ///   SchemaBook.authorIds,
-  ///   collection: RdfListMapper,
+  ///   collection: rdfList,
   ///   iri: IriMapping('{+baseUri}/person/{authorId}')
   /// )
   /// final List<String> authorIds; // Ordered rdf:List of IRIs
@@ -418,7 +424,7 @@ class RdfProperty implements RdfAnnotation {
   /// // For non-standard collection types, explicit mapper needed
   /// @RdfProperty(
   ///   SchemaBook.metadata,
-  ///   collection: CustomCollectionMapper,
+  ///   collection: CollectionMapping.mapper(CustomCollectionMapper),
   ///   itemType: MetadataEntry,  // Explicit when type can't be inferred
   ///   globalResource: GlobalResourceMapping.namedMapper('metadataEntryMapper')
   ///   // => We will require a GlobalResourceMapper<MetadataEntry> with the name 'metadataEntryMapper' in the generated initRdfMapper function and pass it as `itemMapper` to `CustomCollectionMapper(itemMapper)`.
@@ -432,15 +438,15 @@ class RdfProperty implements RdfAnnotation {
   /// // that handles the entire collection as one unit
   /// @RdfProperty(
   ///   SchemaBook.keywords,
-  ///   collection: StringListMapper
+  ///   collection: CollectionMapping.mapper(StringListMapper)
   /// )
   /// final List<String> keywords; // Uses a custom literal mapper that serializes entire list
   ///
   /// // Alternative RDF collection structures
-  /// @RdfProperty(SchemaBook.alternativeFormats, collection: RdfAltMapper)
+  /// @RdfProperty(SchemaBook.alternativeFormats, collection: rdfAlt)
   /// final List<String> formats; // Creates rdf:Alt structure
   ///
-  /// @RdfProperty(SchemaBook.relatedTopics, collection: RdfBagMapper)
+  /// @RdfProperty(SchemaBook.relatedTopics, collection: rdfBag)
   /// final List<String> topics; // Creates rdf:Bag structure
   /// ```
   ///
@@ -460,7 +466,7 @@ class RdfProperty implements RdfAnnotation {
   /// *Custom mappers*:
   /// - Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature
   ///
-  final Type? collection;
+  final CollectionMapping? collection;
 
   /// Explicitly specifies the item type for collection mapping.
   ///
@@ -485,10 +491,9 @@ class RdfProperty implements RdfAnnotation {
   /// ```dart
   /// @RdfProperty(
   ///   SchemaBook.customData,
-  ///   collection: CustomCollectionMapper,
+  ///   collection: CollectionMapping.mapper(CustomCollectionMapper),
   ///   itemType: DataEntry,  // Explicit because CustomCollection doesn't expose item type
   ///   localResource: LocalResourceMapping.namedMapper('dataEntryMapper')
-  ///
   /// )
   /// final CustomCollection customData;
   /// ```
@@ -527,9 +532,9 @@ class RdfProperty implements RdfAnnotation {
   /// `Set<T>` → UnorderedItemsSetMapper, `Iterable<T>` → UnorderedItemsMapper.
   ///
   /// Well-known collection mappers include:
-  /// - Default mappers (multiple triples): UnorderedItemsListMapper, UnorderedItemsSetMapper, UnorderedItemsMapper
-  /// - RDF structures (single collection): RdfListMapper, RdfSeqMapper, RdfBagMapper, RdfAltMapper
-  /// - Custom mappers: Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature
+  /// - Default mappers (multiple triples): `unorderedItems`, `unorderedItemsList`, `unorderedItemsSet`
+  /// - RDF structures (single collection): `rdfList`, `rdfSeq`, `rdfBag`, `rdfAlt`
+  /// - Custom mappers: Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature and refer to that type with `CollectionMapping.mapper(MyMapper) - you can of course also store the result of that call in a global const variable to have a shortcut, like we do for `rdfList`, `rdfSeq` etc.
   ///
   /// [itemType] - Explicitly specifies the item type for collection mapping when
   /// it cannot be automatically extracted from the field's generic type parameters.

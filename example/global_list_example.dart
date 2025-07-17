@@ -35,11 +35,11 @@ class Library {
   late final String id;
 
   /// Global rdf:List - collection itself has IRI and can be referenced
-  @RdfProperty(CollectionVocab.collaborators, collection: GListToRdfListMapper)
+  @RdfProperty(CollectionVocab.collaborators, collection: glistRdfList)
   late final GList<String> collaborators;
 
   /// Global rdf:Seq - ordered sequence with persistent IRI
-  @RdfProperty(CollectionVocab.tags, collection: GListToRdfSeqMapper)
+  @RdfProperty(CollectionVocab.tags, collection: glistRdfSeq)
   late final GList<String> tags;
 }
 
@@ -53,6 +53,8 @@ class GList<T> {
 
   GList(this.iri, this.items);
 }
+
+const glistRdfList = CollectionMapping.mapper(GListToRdfListMapper);
 
 /// Mapper for `GList<T>` as rdf:List with persistent IRI.
 class GListToRdfListMapper<T>
@@ -81,6 +83,8 @@ class GListToRdfListMapper<T>
     return GList<T>(subject, list);
   }
 }
+
+const glistRdfSeq = CollectionMapping.mapper(GListToRdfSeqMapper);
 
 /// Mapper for `GList<T>` as rdf:Seq with persistent IRI.
 class GListToRdfSeqMapper<T>

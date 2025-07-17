@@ -38,19 +38,17 @@ class Library {
 
   /// Strategy 1: Map to rdf:List (ordered linked list structure)
   /// RDF: `<list> rdf:first "item1" ; rdf:rest <next>` .
-  @RdfProperty(CollectionVocab.collaborators,
-      collection: ImmutableListMapperRdfList)
+  @RdfProperty(CollectionVocab.collaborators, collection: immutableListRdfList)
   late final ImmutableList<String> collaborators;
 
   /// Strategy 2: Map to rdf:Seq (ordered sequence with numbered properties)
   /// RDF: `<seq> rdf:type rdf:Seq ; rdf:_1 "item1" ; rdf:_2 "item2"` .
-  @RdfProperty(CollectionVocab.tags, collection: ImmutableListMapperRdfSeq)
+  @RdfProperty(CollectionVocab.tags, collection: immutableListRdfSeq)
   late final ImmutableList<String> tags;
 
   /// Strategy 3: Map to unordered items (multiple separate triples)
   /// RDF: `<subject> <predicate> "item1" . <subject> <predicate> "item2"` .
-  @RdfProperty(CollectionVocab.members,
-      collection: ImmutableListMapperUnorderedItems)
+  @RdfProperty(CollectionVocab.members, collection: immutableListUnorderedItems)
   late final ImmutableList<String> members;
 }
 
@@ -75,6 +73,9 @@ class ImmutableList<T> with Iterable<T> {
 // =============================================================================
 // MAPPING STRATEGY 1: RDF LIST (rdf:first/rdf:rest/rdf:nil)
 // =============================================================================
+
+const immutableListRdfList =
+    CollectionMapping.mapper(ImmutableListMapperRdfList);
 
 /// Maps `ImmutableList<T>` to rdf:List structure.
 ///
@@ -114,6 +115,7 @@ class ImmutableListMapperRdfList<T>
 // =============================================================================
 // MAPPING STRATEGY 2: RDF SEQUENCE (rdf:_1, rdf:_2, rdf:_3...)
 // =============================================================================
+const immutableListRdfSeq = CollectionMapping.mapper(ImmutableListMapperRdfSeq);
 
 /// Maps `ImmutableList<T>` to rdf:Seq structure.
 ///
@@ -158,6 +160,8 @@ class ImmutableListMapperRdfSeq<T>
 // =============================================================================
 // MAPPING STRATEGY 3: UNORDERED ITEMS (multiple separate triples)
 // =============================================================================
+const immutableListUnorderedItems =
+    CollectionMapping.mapper(ImmutableListMapperUnorderedItems);
 
 /// Maps `ImmutableList<T>` to multiple separate triples.
 ///

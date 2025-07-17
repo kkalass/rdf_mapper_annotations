@@ -11,16 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New `LiteralContent` class**: Added helper class for building RDF literals with simplified datatype and language handling
 - **Enhanced datatype support**: `@RdfLiteral.custom` now accepts optional `datatype` parameter for consistent datatype handling
 - **Collection item type specification**: Added `itemType` parameter to `@RdfProperty` for explicit item type control in custom collections
+- **Global collection mapping constants**: Added convenient constants (`rdfList`, `rdfSeq`, `rdfBag`, `rdfAlt`, `unorderedItems`, `unorderedItemsList`, `unorderedItemsSet`) for common collection mapping strategies
 
 ### Changed
 - **BREAKING**: `@RdfLiteral.custom` methods now use `LiteralContent` instead of `LiteralTerm` for parameters and return types
-- **BREAKING**: `@RdfProperty.collection` parameter changed from `RdfCollectionType` enum to `Type?` for direct mapper type specification
-- **BREAKING**: Removed `RdfCollectionType` enum - collection behavior now specified through mapper types
+- **BREAKING**: `@RdfProperty.collection` parameter changed from `RdfCollectionType` enum to `CollectionMapping?` for much more flexibility and better API consistency
+- **BREAKING**: Removed `RdfCollectionType` enum - collection behavior now specified through `CollectionMapping` class
+- **Enhanced collection mapping defaults**: Clarified that collections default to `CollectionMapping.auto()` behavior (multiple triples) unlike other mapping properties which default to registry lookup
 - Adjusted to API changes in rdf_mapper (Iterable<Triple>, datatype property in LiteralTermMapper etc.)
-- Updated examples and documentation to reflect new API patterns
+- Updated examples and documentation to use new global collection constants
 
 ### Removed
-- **BREAKING**: `RdfCollectionType` enum - replaced with direct Type specification for collection mappers
+- **BREAKING**: `RdfCollectionType` enum - replaced with `CollectionMapping` class for collection mapper specification
 
 ## [0.2.4] - 2025-07-10
 

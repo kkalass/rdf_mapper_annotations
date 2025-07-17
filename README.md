@@ -481,6 +481,8 @@ class Book {
 - Each item generates its own triple: `book:123 schema:author person:1`, `book:123 schema:author person:2`
 - **NOT** serialized as RDF Collection structures (rdf:first/rdf:rest/rdf:nil)
 - Use `Iterable<T>` for clarity that order shouldn't be relied upon
+- **Default behavior**: Unlike other mapping properties (`iri`, `literal`, `globalResource`, `localResource`) which default to registry lookup when not specified, collections have a different default. When no `collection` parameter is specified on `Set`, `List`, `Map`, or `Iterable` properties, it defaults to `collection: CollectionMapping.auto()` (which provides the automatic behavior described above)
+- **Registry lookup**: To use registry-based mapper lookup (matching the default behavior of other mapping properties), explicitly specify `collection: CollectionMapping.fromRegistry()`
 
 #### Custom Collection Mappers
 
@@ -489,15 +491,15 @@ Use the `collection` parameter to specify custom collection mapping strategies:
 ```dart
 class Book {
   // Structured RDF List (preserves order)
-  @RdfProperty(SchemaBook.chapters, collection: RdfListMapper)
+  @RdfProperty(SchemaBook.chapters, collection: rdfList)
   final List<Chapter> chapters;
   
   // RDF Sequence structure
-  @RdfProperty(SchemaBook.authors, collection: RdfSeqMapper)
+  @RdfProperty(SchemaBook.authors, collection: rdfSeq)
   final List<Person> authors;
   
   // Custom collection behavior - treating entire collection as single value
-  @RdfProperty(SchemaBook.keywords, collection: StringListMapper)
+  @RdfProperty(SchemaBook.keywords, collection: CollectionMapping.mapper(StringListMapper))
   final List<String> keywords; // Uses custom collection mapper for entire list
 }
 ```
@@ -525,7 +527,7 @@ class Book {
   // Structured collection with custom item mapping
   @RdfProperty(
     SchemaBook.chapters,
-    collection: RdfListMapper,
+    collection: rdfList,
     globalResource: GlobalResourceMapping.namedMapper('chapterMapper')
   )
   final List<Chapter> chapters;

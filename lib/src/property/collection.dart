@@ -1,5 +1,5 @@
-import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
-
+import 'package:rdf_mapper/rdf_mapper.dart';
+import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 
 /// Designates a property as the key in a mapped `Map<K,V>` collection.
 ///
@@ -257,4 +257,229 @@ class RdfMapEntry extends RdfAnnotation {
   ///
   /// The [itemClass] parameter defines the type used for mapping Map entries.
   const RdfMapEntry(this.itemClass);
+}
+
+/// Configures mapping details for collection properties in RDF.
+///
+/// This class is used within the `@RdfProperty` annotation to customize how collections
+/// (List, Set, Iterable, Map) as well as further custom collection or container classes are serialized in RDF.
+/// Collection mapping controls the
+/// overall structure and behavior of how collection data is represented in the RDF graph.
+///
+/// ## Default Collection Behavior
+///
+/// Unlike other mapping properties (iri, literal, globalResource, localResource) which
+/// default to registry lookup when not specified, collections have different default behavior:
+///
+/// When no `collection` parameter is specified on collection properties:
+/// - `List<T>` defaults to `CollectionMapping.auto()` (uses `UnorderedItemsListMapper`)
+/// - `Set<T>` defaults to `CollectionMapping.auto()` (uses `UnorderedItemsSetMapper`)
+/// - `Iterable<T>` defaults to `CollectionMapping.auto()` (uses `UnorderedItemsMapper`)
+/// - `Map<K,V>` defaults to `CollectionMapping.auto()` (uses entry-based mapping with `@RdfMapEntry`)
+/// - Each item generates a separate triple with the same predicate
+/// - Order is not preserved in RDF representation
+/// - NOT serialized as structured RDF Collections (rdf:List, rdf:Seq, etc.)
+///
+/// To use registry-based mapper lookup (matching other mapping properties), explicitly
+/// specify `collection: CollectionMapping.fromRegistry()`.
+///
+/// ## Collection vs Item Mapping
+///
+/// It's important to understand the distinction:
+/// - **Collection mapping** (this class): Controls how the collection structure itself is serialized
+/// - **Item mapping** (iri, literal, globalResource, localResource): Controls how individual items are serialized
+///
+/// These work together - the collection mapper handles the overall RDF structure,
+/// while item mappers handle the conversion of individual elements.
+///
+/// ## Well-Known Collection Mappers
+///
+/// For common RDF collection structures, use the predefined global constants instead
+/// of the verbose `CollectionMapping.mapper()` syntax:
+///
+/// **Recommended (using global constants):**
+/// ```dart
+/// @RdfProperty(SchemaBook.chapters, collection: rdfList)
+/// @RdfProperty(SchemaBook.authors, collection: rdfSeq)
+/// @RdfProperty(SchemaBook.topics, collection: rdfBag)
+/// @RdfProperty(SchemaBook.formats, collection: rdfAlt)
+/// ```
+///
+/// **Not recommended (verbose syntax), but equivalent:**
+/// ```dart
+/// @RdfProperty(SchemaBook.chapters, collection: CollectionMapping.mapper(RdfListMapper))
+/// @RdfProperty(SchemaBook.authors, collection: CollectionMapping.mapper(RdfSeqMapper))
+/// ```
+///
+/// Available global constants:
+/// - `rdfList` - Ordered RDF List structure (rdf:first/rdf:rest/rdf:nil)
+/// - `rdfSeq` - RDF Sequence structure for numbered sequences
+/// - `rdfBag` - RDF Bag structure for unordered collections
+/// - `rdfAlt` - RDF Alternative structure for alternative values
+/// - `unorderedItems` - Multiple triples (same as default auto behavior)
+/// - `unorderedItemsList` - Multiple triples for `List<T>` specifically
+/// - `unorderedItemsSet` - Multiple triples for `Set<T>` specifically
+///
+/// ## Examples
+///
+/// ```dart
+/// class Book {
+///   // Default: Multiple triples, one per chapter
+///   @RdfProperty(SchemaBook.chapters)
+///   final List<Chapter> chapters;
+///
+///   // Structured RDF List (preserves order)
+///   @RdfProperty(SchemaBook.orderedChapters, collection: rdfList)
+///   final List<Chapter> orderedChapters;
+///
+///   // RDF Sequence structure
+///   @RdfProperty(SchemaBook.authorSequence, collection: rdfSeq)
+///   final List<Person> authorSequence;
+///
+///   // Default collection with custom item mapping
+///   @RdfProperty(
+///     SchemaBook.contributorIds,
+///     iri: IriMapping('{+baseUri}/person/{contributorId}')
+///   )
+///   final List<String> contributorIds; // Each ID → IRI, separate triples
+///
+///   // Custom collection mapper
+///   @RdfProperty(
+///     SchemaBook.keywords,
+///     collection: CollectionMapping.mapper(StringListMapper)
+///   )
+///   final List<String> keywords; // Entire list handled as single value
+/// }
+/// ```
+class CollectionMapping extends BaseMapping<Mapper> {
+  /// Creates automatic collection mapping behavior.
+  ///
+  /// This is the default for collection properties when no explicit collection mapping
+  /// is specified. Uses appropriate unordered mappers based on collection type:
+  /// - `List<T>` → `UnorderedItemsListMapper`
+  /// - `Set<T>` → `UnorderedItemsSetMapper`
+  /// - `Iterable<T>` → `UnorderedItemsMapper`
+  /// - `Map<K,V>` → Entry-based mapping with `@RdfMapEntry`
+  ///
+  /// Results in multiple triples with the same predicate, one per collection item.
+  CollectionMapping.auto();
+
+  /// Creates registry-based collection mapping.
+  ///
+  /// Uses the mapper registry to look up a collection mapper for the property type,
+  /// similar to how other mapping properties (iri, literal, globalResource, localResource)
+  /// behave by default. Only use this when you have registered a specific collection
+  /// mapper for your collection type.
+  CollectionMapping.fromRegistry();
+
+  /// Creates a reference to a named collection mapper that will be injected at runtime.
+  ///
+  /// Use this constructor when you want to provide your own custom collection mapper
+  /// implementation. The mapper you provide will determine how the collection is
+  /// serialized to and deserialized from RDF. When using this approach, you must:
+  /// 1. Implement a collection mapper (e.g., `Mapper<List<T>>`)
+  /// 2. Instantiate the mapper (outside of the generated code)
+  /// 3. Provide the mapper instance as a named parameter to `initRdfMapper`
+  ///
+  /// The `name` will correspond to a parameter in the generated `initRdfMapper` function.
+  /// The mapper will only be used for the specific property annotated with this mapping.
+  ///
+  /// Example:
+  /// ```dart
+  /// class Playlist {
+  ///   @RdfProperty(
+  ///     PlaylistVocab.tracks,
+  ///     collection: CollectionMapping.namedMapper('orderedTrackMapper')
+  ///   )
+  ///   final List<Track> tracks;
+  /// }
+  ///
+  /// // You must implement the collection mapper:
+  /// class OrderedTrackMapper implements UnifiedResourceMapper<List<Track>> {
+  ///   final Serializer<Track> trackSerializer;
+  ///   final Deserializer<Track> trackDeserializer;
+  ///
+  ///   OrderedTrackMapper({
+  ///     required this.trackSerializer,
+  ///     required this.trackDeserializer,
+  ///   });
+  ///
+  ///   // Implementation details...
+  /// }
+  ///
+  /// // In initialization code:
+  /// final trackMapper = OrderedTrackMapper(/* params */);
+  /// final rdfMapper = initRdfMapper(orderedTrackMapper: trackMapper);
+  /// ```
+  const CollectionMapping.namedMapper(String name) : super.namedMapper(name);
+
+  /// Creates a reference to a collection mapper that will be instantiated from the given type.
+  ///
+  /// Use this constructor when you want to provide your own custom collection mapper
+  /// implementation that can be instantiated automatically. The mapper you provide will
+  /// determine how the collection is serialized to and deserialized from RDF.
+  ///
+  /// The generator will create an instance of `mapperType` to handle collection mapping.
+  /// The type must implement `Mapper<C>` where C is the collection type (e.g., `List<T>`)
+  /// and must have a constructor that accepts optional `itemSerializer` and `itemDeserializer`
+  /// parameters: `Mapper<C> Function({Serializer<T>? itemSerializer, Deserializer<T>? itemDeserializer})`
+  ///
+  /// Example:
+  /// ```dart
+  /// class Book {
+  ///   // Using a custom collection mapper for ordered chapters
+  ///   @RdfProperty(
+  ///     SchemaBook.chapters,
+  ///     collection: CollectionMapping.mapper(OrderedChapterListMapper)
+  ///   )
+  ///   final List<Chapter> chapters;
+  /// }
+  ///
+  /// // The mapper implementation must be accessible to the generator:
+  /// class OrderedChapterListMapper implements UnifiedResourceMapper<List<Chapter>> {
+  ///   final Serializer<Chapter> itemSerializer;
+  ///   final Deserializer<Chapter> itemDeserializer;
+  ///
+  ///   OrderedChapterListMapper({
+  ///     Serializer<Chapter>? itemSerializer,
+  ///     Deserializer<Chapter>? itemDeserializer,
+  ///   }) : itemSerializer = itemSerializer ?? throw ArgumentError('itemSerializer required'),
+  ///        itemDeserializer = itemDeserializer ?? throw ArgumentError('itemDeserializer required');
+  ///
+  ///   // Implementation details...
+  /// }
+  /// ```
+  const CollectionMapping.mapper(Type mapperType) : super.mapper(mapperType);
+
+  /// Creates a reference to a directly provided collection mapper instance.
+  ///
+  /// This allows you to supply a pre-existing instance of a collection mapper.
+  /// Useful when your mapper requires constructor parameters or complex setup
+  /// that cannot be handled by simple instantiation.
+  ///
+  /// The mapper will only be used for the specific property annotated with this mapping.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Create a pre-configured collection mapper with const constructor -
+  /// // note that the mapper instance must be a compile-time constant and that
+  /// // it must be a Mapper<List<Track>> in our example here due to the field type:
+  /// const orderedTrackListMapper = CustomOrderedTrackListMapper(
+  ///   preserveOrder: true,
+  ///   validateUniqueness: false,
+  /// );
+  ///
+  /// class Playlist {
+  ///   @RdfProperty(
+  ///     PlaylistVocab.tracks,
+  ///     collection: CollectionMapping.mapperInstance(orderedTrackListMapper)
+  ///   )
+  ///   final List<Track> tracks;
+  /// }
+  /// ```
+  ///
+  /// Note: Since annotations in Dart must be evaluated at compile-time,
+  /// the mapper instance must be a compile-time constant.
+  const CollectionMapping.mapperInstance(Mapper instance)
+      : super.mapperInstance(instance);
 }

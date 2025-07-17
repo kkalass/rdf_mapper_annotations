@@ -9,16 +9,15 @@
 ///
 /// **Quick Reference:**
 /// - For most collections: Use default behavior (multiple triples)
-/// - For ordered lists: Use collection: RdfListMapper
-/// - For numbered sequences: Use collection: RdfSeqMapper
-/// - For unordered collections: Use collection: RdfBagMapper
-/// - For alternatives: Use collection: RdfAltMapper
+/// - For ordered lists: Use collection: rdfList
+/// - For numbered sequences: Use collection: rdfSeq
+/// - For unordered collections: Use collection: rdfBag
+/// - For alternatives: Use collection: rdfAlt
 /// - For custom handling: Implement your own collection mapper
 /// - For item-specific mapping: Use iri/literal/globalResource/localResource parameters
 library;
 
 import 'package:rdf_core/rdf_core.dart';
-import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 import 'package:rdf_vocabularies/schema.dart';
 
@@ -75,7 +74,7 @@ class Playlist {
 
   /// Creates ordered rdf:List structure (rdf:first/rdf:rest/rdf:nil)
   /// Preserves order in RDF representation
-  @RdfProperty(CollectionVocab.orderedTracks, collection: RdfListMapper)
+  @RdfProperty(CollectionVocab.orderedTracks, collection: rdfList)
   final List<Track> orderedTracks;
 
   Playlist({
@@ -94,15 +93,15 @@ class Course {
   final String id;
 
   /// RDF Sequence - ordered collection with numeric properties
-  @RdfProperty(CollectionVocab.modules, collection: RdfSeqMapper)
+  @RdfProperty(CollectionVocab.modules, collection: rdfSeq)
   final List<Module> modules;
 
   /// RDF Bag - unordered collection allowing duplicates
-  @RdfProperty(CollectionVocab.prerequisites, collection: RdfBagMapper)
+  @RdfProperty(CollectionVocab.prerequisites, collection: rdfBag)
   final List<String> prerequisites;
 
   /// RDF Alternative - represents alternative values
-  @RdfProperty(CollectionVocab.alternatives, collection: RdfAltMapper)
+  @RdfProperty(CollectionVocab.alternatives, collection: rdfAlt)
   final List<String> alternatives;
 
   Course({
@@ -133,7 +132,7 @@ class BookCollection {
   /// Structured collection with custom item mapping
   @RdfProperty(
     SchemaBook.datePublished,
-    collection: RdfListMapper,
+    collection: rdfList,
     literal: LiteralMapping.withType(
         IriTerm.prevalidated('http://www.w3.org/2001/XMLSchema#date')),
   )
@@ -236,10 +235,10 @@ Collection Mapping Strategy Summary:
    - Uses UnorderedItemsListMapper, UnorderedItemsSetMapper, etc.
 
 2. STRUCTURED RDF COLLECTIONS:
-   - collection: RdfListMapper → ordered rdf:List with rdf:first/rdf:rest/rdf:nil
-   - collection: RdfSeqMapper → rdf:Seq with numeric properties
-   - collection: RdfBagMapper → rdf:Bag for unordered collections
-   - collection: RdfAltMapper → rdf:Alt for alternative values
+   - collection: rdfList → ordered rdf:List with rdf:first/rdf:rest/rdf:nil
+   - collection: rdfSeq → rdf:Seq with numeric properties
+   - collection: rdfBag → rdf:Bag for unordered collections
+   - collection: rdfAlt → rdf:Alt for alternative values
 
 3. CUSTOM COLLECTION HANDLING:
    - Implement custom mapper for specific collection behavior
