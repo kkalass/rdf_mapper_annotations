@@ -424,15 +424,16 @@ class Rating {
 @RdfLiteral.custom(
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
+  datatype: IriTerm.prevalidated('http://example.org/temperature')
 )
 class Temperature {
   final double celsius;
   
   Temperature(this.celsius);
   
-  LiteralTerm formatCelsius() =&gt; LiteralTerm('$celsius°C', datatype: IriTerm.prevalidated('http://example.org/temperature'));
+  LiteralContent formatCelsius() =&gt; LiteralContent('$celsius°C');
   
-  static Temperature parse(LiteralTerm term) {
+  static Temperature parse(LiteralContent term) {
     return Temperature(double.parse(term.value.replaceAll('°C', '')));
   }
 }
@@ -452,6 +453,75 @@ class LocalizedText {
   // Convenience constructors
   LocalizedText.en(String text) : this(text, 'en');
   LocalizedText.de(String text) : this(text, 'de');
+}
+</code></pre>
+<h3 id="collection-handling">Collection Handling</h3>
+<p>RDF Mapper provides flexible support for collection types (List, Set, Iterable) and Map collections with different serialization strategies.</p>
+<h4 id="standard-collections-list-set-iterable">Standard Collections (List, Set, Iterable)</h4>
+<p>By default, standard Dart collections are serialized as multiple separate RDF triples with the same predicate:</p>
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Uses UnorderedItemsListMapper automatically - each author generates a separate triple
+  @RdfProperty(SchemaBook.author)
+  final List&lt;Person&gt; authors;
+  
+  // Uses UnorderedItemsSetMapper automatically - each keyword as separate triple
+  @RdfProperty(SchemaBook.keywords)
+  final Set&lt;String&gt; keywords;
+  
+  // Uses UnorderedItemsMapper automatically - recommended for semantic clarity
+  @RdfProperty(SchemaBook.contributors)
+  final Iterable&lt;Person&gt; contributors;
+}
+</code></pre>
+<p><strong>Important notes about default collection behavior:</strong></p>
+<ul>
+<li><strong>Order is not preserved</strong> in RDF representation</li>
+<li>Each item generates its own triple: <code>book:123 schema:author person:1</code>, <code>book:123 schema:author person:2</code></li>
+<li><strong>NOT</strong> serialized as RDF Collection structures (rdf:first/rdf:rest/rdf:nil)</li>
+<li>Use <code>Iterable&lt;T&gt;</code> for clarity that order shouldn't be relied upon</li>
+<li><strong>Default behavior</strong>: Unlike other mapping properties (<code>iri</code>, <code>literal</code>, <code>globalResource</code>, <code>localResource</code>) which default to registry lookup when not specified, collections have a different default. When no <code>collection</code> parameter is specified on <code>Set</code>, <code>List</code>, <code>Map</code>, or <code>Iterable</code> properties, it defaults to <code>collection: CollectionMapping.auto()</code> (which provides the automatic behavior described above)</li>
+<li><strong>Registry lookup</strong>: To use registry-based mapper lookup (matching the default behavior of other mapping properties), explicitly specify <code>collection: CollectionMapping.fromRegistry()</code></li>
+</ul>
+<h4 id="custom-collection-mappers">Custom Collection Mappers</h4>
+<p>Use the <code>collection</code> parameter to specify custom collection mapping strategies:</p>
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Structured RDF List (preserves order)
+  @RdfProperty(SchemaBook.chapters, collection: rdfList)
+  final List&lt;Chapter&gt; chapters;
+  
+  // RDF Sequence structure
+  @RdfProperty(SchemaBook.authors, collection: rdfSeq)
+  final List&lt;Person&gt; authors;
+  
+  // Custom collection behavior - treating entire collection as single value
+  @RdfProperty(SchemaBook.keywords, collection: CollectionMapping.mapper(StringListMapper))
+  final List&lt;String&gt; keywords; // Uses custom collection mapper for entire list
+}
+</code></pre>
+<h4 id="item-mapping-within-collections">Item Mapping within Collections</h4>
+<p>The <code>iri</code>, <code>literal</code>, <code>globalResource</code>, and <code>localResource</code> parameters configure how individual items are mapped:</p>
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Default collection behavior (multiple triples) with custom item mapping
+  @RdfProperty(
+    SchemaBook.authors,
+    iri: IriMapping('{+baseUri}/person/{authorId}')
+  )
+  final List&lt;String&gt; authorIds; // Each ID converted to IRI, separate triples
+  
+  // Default collection with custom literal mapping for each item
+  @RdfProperty(
+    SchemaBook.tags,
+    literal: LiteralMapping.withLanguage('en')
+  )
+  final List&lt;String&gt; tags; // Each tag as separate literal with @en language tag
+  
+  // Structured collection with custom item mapping
+  @RdfProperty(
+    SchemaBook.chapters,
+    collection: rdfList,
+    globalResource: GlobalResourceMapping.namedMapper('chapterMapper')
+  )
+  final List&lt;Chapter&gt; chapters;
 }
 </code></pre>
 <h3 id="map-collections">Map Collections</h3>
@@ -684,7 +754,6 @@ final eventGraph = rdfMapper.encodeObject(event);
 </ul>
 <h2 id="-roadmap--next-steps">🛣️ Roadmap / Next Steps</h2>
 <ul>
-<li>Catch-All both for entire (child) instances and for "all non-mapped triples of this subject" as e.g. RdfGraph (probably mapper based, so you can use your own catch-all types)</li>
 <li>Schema generating based on annotations, for example <code>@RdfProperty.schemaDefine('https://my.app.com/vocab/MyType/myProp')</code> or similar</li>
 </ul>
 <h2 id="-contributing">🤝 Contributing</h2>
@@ -704,6 +773,13 @@ final eventGraph = rdfMapper.encodeObject(event);
       <section class="summary">
           <h2>Libraries</h2>
         <dl>
+          <dt id="collection_constants">
+  <span class="name"><a href="collection_constants/">collection_constants</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="rdf_mapper_annotations">
   <span class="name"><a href="rdf_mapper_annotations/">rdf_mapper_annotations</a></span> 
 
@@ -728,6 +804,7 @@ final eventGraph = rdfMapper.encodeObject(event);
     <h5 class="hidden-xs"><span class="package-name">rdf_mapper_annotations</span> <span class="package-kind">package</span></h5>
     <ol>
       <li class="section-title">Libraries</li>
+      <li><a href="collection_constants/">collection_constants</a></li>
       <li><a href="rdf_mapper_annotations/">rdf_mapper_annotations</a></li>
 </ol>
 
@@ -738,7 +815,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.4
+      0.3.0
   </span>
   
 </footer>

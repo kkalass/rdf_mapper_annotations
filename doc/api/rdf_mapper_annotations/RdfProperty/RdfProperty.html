@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfProperty</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.4/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span></li>
+      <span class="name ">RdfProperty</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.5/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span></li>
 <li><span class="parameter" id="-param-include"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">include</span> = <span class="default-value">true</span>, </span></li>
 <li><span class="parameter" id="-param-defaultValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">defaultValue</span>, </span></li>
 <li><span class="parameter" id="-param-includeDefaultsInSerialization"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeDefaultsInSerialization</span> = <span class="default-value">false</span>, </span></li>
@@ -62,7 +62,8 @@
 <li><span class="parameter" id="-param-localResource"><span class="type-annotation"><a href="../../rdf_mapper_annotations/LocalResourceMapping-class.html">LocalResourceMapping</a>?</span> <span class="parameter-name">localResource</span>, </span></li>
 <li><span class="parameter" id="-param-literal"><span class="type-annotation"><a href="../../rdf_mapper_annotations/LiteralMapping-class.html">LiteralMapping</a>?</span> <span class="parameter-name">literal</span>, </span></li>
 <li><span class="parameter" id="-param-globalResource"><span class="type-annotation"><a href="../../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a>?</span> <span class="parameter-name">globalResource</span>, </span></li>
-<li><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../../rdf_mapper_annotations/RdfCollectionType.html">RdfCollectionType</a></span> <span class="parameter-name">collection</span> = <span class="default-value">RdfCollectionType.auto</span>, </span></li>
+<li><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a>?</span> <span class="parameter-name">collection</span> = <span class="default-value">const CollectionMapping.auto()</span>, </span></li>
+<li><span class="parameter" id="-param-itemType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a>?</span> <span class="parameter-name">itemType</span>, </span></li>
 </ol>})
     </section>
     
@@ -87,7 +88,21 @@ match their default value. When false (default), omits them for more compact RDF
 </ul>
 <p>Most properties work with automatic type-based mapping without these advanced
 parameters. Only use them to override default behavior for specific cases.</p>
-<p><code>collection</code> - Controls how collection types (List, Set, Map) are serialized.</p>
+<p><code>collection</code> - Specifies a custom collection mapper Type for handling collections.
+When provided, the Type must implement <code>Mapper&lt;C&gt;</code> and have a constructor that matches
+the <code>Mapper&lt;C&gt; Function({Deserializer&lt;T&gt;? itemDeserializer, Serializer&lt;T&gt;? itemSerializer})</code> signature where <code>T</code> is the item type and <code>C</code> the collection type (e.g. <code>List&lt;T&gt;</code>).
+If not specified, standard collections
+use their respective default mappers: <code>List&lt;T&gt;</code> → UnorderedItemsListMapper,
+<code>Set&lt;T&gt;</code> → UnorderedItemsSetMapper, <code>Iterable&lt;T&gt;</code> → UnorderedItemsMapper.</p>
+<p>Well-known collection mappers include:</p>
+<ul>
+<li>Default mappers (multiple triples): <code>unorderedItems</code>, <code>unorderedItemsList</code>, <code>unorderedItemsSet</code></li>
+<li>RDF structures (single collection): <code>rdfList</code>, <code>rdfSeq</code>, <code>rdfBag</code>, <code>rdfAlt</code></li>
+<li>Custom mappers: Implement <code>Mapper&lt;C&gt;</code> with constructor matching <code>Mapper&lt;C&gt; Function({Deserializer&lt;T&gt;? itemDeserializer, Serializer&lt;T&gt;? itemSerializer})</code> signature and refer to that type with <code>(MyMapper) - you can of course also store the result of that call in a global const variable to have a shortcut, like we do for </code>rdfList<code>, </code>rdfSeq` etc.</li>
+</ul>
+<p><code>itemType</code> - Explicitly specifies the item type for collection mapping when
+it cannot be automatically extracted from the field's generic type parameters.
+Only needed for custom collection types or complex generics.</p>
 </section>
 
 
@@ -103,7 +118,8 @@ parameters. Only use them to override default behavior for specific cases.</p>
   this.localResource,
   this.literal,
   this.globalResource,
-  this.collection = RdfCollectionType.auto,
+  this.collection = const CollectionMapping.auto(),
+  this.itemType,
 });</code></pre>
 </section>
 
@@ -132,7 +148,7 @@ parameters. Only use them to override default behavior for specific cases.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.4
+      0.3.0
   </span>
   
 </footer>

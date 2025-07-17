@@ -225,7 +225,7 @@ while supporting domain-specific RDF vocabularies.</p>
       <h2>Classes</h2>
       <dl>
           <dt id="BaseMapping">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.8.7/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.9.0/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
@@ -233,11 +233,19 @@ while supporting domain-specific RDF vocabularies.</p>
 </dd>
 
           <dt id="BaseMappingAnnotation">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.8.7/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.9.0/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
   
+</dd>
+
+          <dt id="CollectionMapping">
+  <span class="name "><a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span> 
+
+</dt>
+<dd>
+  Configures mapping details for collection properties in RDF.
 </dd>
 
           <dt id="GlobalResourceMapping">
@@ -262,6 +270,14 @@ while supporting domain-specific RDF vocabularies.</p>
 </dt>
 <dd>
   Defines the strategy for generating IRIs for RDF resources.
+</dd>
+
+          <dt id="LiteralContent">
+  <span class="name "><a href="../rdf_mapper_annotations/LiteralContent-class.html">LiteralContent</a></span> 
+
+</dt>
+<dd>
+  Represents the content for building an RDF Literal.
 </dd>
 
           <dt id="LiteralMapping">
@@ -413,23 +429,99 @@ conversion.
       </dl>
     </section>
 
-    <section class="summary offset-anchor" id="enums">
-      <h2>Enums</h2>
-      <dl>
-          <dt id="RdfCollectionType">
-  <span class="name "><a href="../rdf_mapper_annotations/RdfCollectionType.html">RdfCollectionType</a></span> 
+
+
+
+
+    <section class="summary offset-anchor" id="constants">
+      <h2>Constants</h2>
+      <dl class="properties">
+          <dt id="rdfAlt" class="constant">
+    <span class="name "><a href="../collection_constants/rdfAlt-constant.html">rdfAlt</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
 
 </dt>
 <dd>
-  Specifies how Dart collection properties are represented in the RDF graph.
+  
+  
+
+</dd>
+
+          <dt id="rdfBag" class="constant">
+    <span class="name "><a href="../collection_constants/rdfBag-constant.html">rdfBag</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+</dd>
+
+          <dt id="rdfList" class="constant">
+    <span class="name "><a href="../collection_constants/rdfList-constant.html">rdfList</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+</dd>
+
+          <dt id="rdfSeq" class="constant">
+    <span class="name "><a href="../collection_constants/rdfSeq-constant.html">rdfSeq</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+</dd>
+
+          <dt id="unorderedItems" class="constant">
+    <span class="name "><a href="../collection_constants/unorderedItems-constant.html">unorderedItems</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+</dd>
+
+          <dt id="unorderedItemsList" class="constant">
+    <span class="name "><a href="../collection_constants/unorderedItemsList-constant.html">unorderedItemsList</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+</dd>
+
+          <dt id="unorderedItemsSet" class="constant">
+    <span class="name "><a href="../collection_constants/unorderedItemsSet-constant.html">unorderedItemsSet</a></span>
+  <span class="signature">&#8594; const <a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a></span>
+  
+
+</dt>
+<dd>
+  
+  
+
 </dd>
 
       </dl>
     </section>
-
-
-
-
 
 
 
@@ -450,6 +542,7 @@ conversion.
     <h5><span class="package-name">rdf_mapper_annotations</span> <span class="package-kind">package</span></h5>
     <ol>
       <li class="section-title">Libraries</li>
+      <li><a href="../collection_constants/">collection_constants</a></li>
       <li><a href="../rdf_mapper_annotations/">rdf_mapper_annotations</a></li>
 </ol>
 
@@ -461,7 +554,7 @@ conversion.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.4
+      0.3.0
   </span>
   
 </footer>

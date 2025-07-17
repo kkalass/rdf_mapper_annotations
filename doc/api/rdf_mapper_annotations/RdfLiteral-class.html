@@ -101,14 +101,15 @@ class Rating {
 <pre class="language-dart"><code class="language-dart">@RdfLiteral.custom(
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
+  datatype: Xsd.string
 )
 class Temperature {
   final double celsius;
   Temperature(this.celsius);
 
-  LiteralTerm formatCelsius() =&gt; LiteralTerm('$celsius°C');
+  LiteralContent formatCelsius() =&gt; LiteralContent('$celsius°C');
 
-  static Temperature parse(LiteralTerm term) =&gt;
+  static Temperature parse(LiteralContent term) =&gt;
     Temperature(double.parse(term.value.replaceAll('°C', '')));
 }
 </code></pre>
@@ -129,15 +130,16 @@ class Rating {
 <pre class="language-dart"><code class="language-dart">@RdfLiteral.custom(
   toLiteralTermMethod: 'toRdf',
   fromLiteralTermMethod: 'fromRdf',
+  datatype: Xsd.string
 )
 class Temperature {
   final double celsius;
 
   Temperature(this.celsius);
 
-  LiteralTerm toRdf() =&gt; LiteralTerm('$celsius°C');
+  LiteralContent toRdf() =&gt; LiteralContent('$celsius°C');
 
-  static Temperature fromRdf(LiteralTerm term) =&gt;
+  static Temperature fromRdf(LiteralContent term) =&gt;
     Temperature(double.parse(term.value.replaceAll('°C', '')));
 }
 </code></pre>
@@ -196,8 +198,8 @@ class Product {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.7/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.7/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.9.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.9.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span></li>
       <li>RdfLiteral</li>
     </ul>
   </dd>
@@ -224,14 +226,14 @@ class Product {
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfLiteral.new" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.html">RdfLiteral.new</a></span><span class="signature">([<span class="parameter" id="-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.4/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">datatype</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>])</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.html">RdfLiteral.new</a></span><span class="signature">([<span class="parameter" id="-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.5/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">datatype</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>])</span>
         </dt>
         <dd>
           Creates an annotation for a class or enum to be mapped to a literal term.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLiteral.custom" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.custom.html">RdfLiteral.custom</a></span><span class="signature">({<span class="parameter" id="custom-param-toLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">toLiteralTermMethod</span>, </span><span class="parameter" id="custom-param-fromLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fromLiteralTermMethod</span></span>})</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.custom.html">RdfLiteral.custom</a></span><span class="signature">({<span class="parameter" id="custom-param-toLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">toLiteralTermMethod</span>, </span><span class="parameter" id="custom-param-fromLiteralTermMethod"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fromLiteralTermMethod</span>, </span><span class="parameter" id="custom-param-datatype"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.5/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">datatype</span></span>})</span>
         </dt>
         <dd>
           Creates an annotation for a class using custom methods for literal conversion.
@@ -245,7 +247,7 @@ class Product {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfLiteral.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.mapperInstance.html">RdfLiteral.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.8.7/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/RdfLiteral.mapperInstance.html">RdfLiteral.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.9.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this literal
@@ -269,7 +271,7 @@ term.
     <dl class="properties">
         <dt id="datatype" class="property">
   <span class="name"><a href="../rdf_mapper_annotations/RdfLiteral/datatype.html">datatype</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rdf_core/0.9.4/rdf/IriTerm-class.html">IriTerm</a>?</span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rdf_core/0.9.5/rdf/IriTerm-class.html">IriTerm</a>?</span>
   
 
 </dt>
@@ -286,7 +288,7 @@ term.
 
 </dt>
 <dd>
-  Optional static method name to use for converting a <a href="https://pub.dev/documentation/rdf_core/0.9.4/rdf/LiteralTerm-class.html">LiteralTerm</a> back to
+  Optional static method name to use for converting a <a href="https://pub.dev/documentation/rdf_core/0.9.5/rdf/LiteralTerm-class.html">LiteralTerm</a> back to
 the object type.
   <div class="features"><span class="feature">final</span></div>
 
@@ -306,7 +308,7 @@ the object type.
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.8.7/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.9.0/rdf_mapper/LiteralTermMapper-class.html">LiteralTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -348,7 +350,7 @@ in the <code>initRdfMapper</code> function.
 
 </dt>
 <dd>
-  Optional method name to use for converting the object to a <a href="https://pub.dev/documentation/rdf_core/0.9.4/rdf/LiteralTerm-class.html">LiteralTerm</a>.
+  Optional method name to use for converting the object to a <a href="https://pub.dev/documentation/rdf_core/0.9.5/rdf/LiteralTerm-class.html">LiteralTerm</a>.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -438,7 +440,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.2.4
+      0.3.0
   </span>
   
 </footer>
