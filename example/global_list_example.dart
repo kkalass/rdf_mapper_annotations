@@ -54,7 +54,7 @@ class GList<T> {
   GList(this.iri, this.items);
 }
 
-const glistRdfList = CollectionMapping.mapper(GListToRdfListMapper);
+const glistRdfList = CollectionMapping.withItemMappers(GListToRdfListMapper);
 
 /// Mapper for `GList<T>` as rdf:List with persistent IRI.
 class GListToRdfListMapper<T>
@@ -84,7 +84,7 @@ class GListToRdfListMapper<T>
   }
 }
 
-const glistRdfSeq = CollectionMapping.mapper(GListToRdfSeqMapper);
+const glistRdfSeq = CollectionMapping.withItemMappers(GListToRdfSeqMapper);
 
 /// Mapper for `GList<T>` as rdf:Seq with persistent IRI.
 class GListToRdfSeqMapper<T>

@@ -1,10 +1,12 @@
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/property/collection.dart';
 
-const rdfList = CollectionMapping.mapper(RdfListMapper);
-const rdfSeq = CollectionMapping.mapper(RdfSeqMapper);
-const rdfBag = CollectionMapping.mapper(RdfBagMapper);
-const rdfAlt = CollectionMapping.mapper(RdfAltMapper);
-const unorderedItems = CollectionMapping.mapper(UnorderedItemsMapper);
-const unorderedItemsList = CollectionMapping.mapper(UnorderedItemsListMapper);
-const unorderedItemsSet = CollectionMapping.mapper(UnorderedItemsSetMapper);
+const rdfList = CollectionMapping.withItemMappers(RdfListMapper);
+const rdfSeq = CollectionMapping.withItemMappers(RdfSeqMapper);
+const rdfBag = CollectionMapping.withItemMappers(RdfBagMapper);
+const rdfAlt = CollectionMapping.withItemMappers(RdfAltMapper);
+const unorderedItems = CollectionMapping.withItemMappers(UnorderedItemsMapper);
+const unorderedItemsList =
+    CollectionMapping.withItemMappers(UnorderedItemsListMapper);
+const unorderedItemsSet =
+    CollectionMapping.withItemMappers(UnorderedItemsSetMapper);

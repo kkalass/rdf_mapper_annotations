@@ -75,7 +75,7 @@ class ImmutableList<T> with Iterable<T> {
 // =============================================================================
 
 const immutableListRdfList =
-    CollectionMapping.mapper(ImmutableListMapperRdfList);
+    CollectionMapping.withItemMappers(ImmutableListMapperRdfList);
 
 /// Maps `ImmutableList<T>` to rdf:List structure.
 ///
@@ -115,7 +115,7 @@ class ImmutableListMapperRdfList<T>
 // =============================================================================
 // MAPPING STRATEGY 2: RDF SEQUENCE (rdf:_1, rdf:_2, rdf:_3...)
 // =============================================================================
-const immutableListRdfSeq = CollectionMapping.mapper(ImmutableListMapperRdfSeq);
+const immutableListRdfSeq = CollectionMapping.withItemMappers(ImmutableListMapperRdfSeq);
 
 /// Maps `ImmutableList<T>` to rdf:Seq structure.
 ///
@@ -161,7 +161,7 @@ class ImmutableListMapperRdfSeq<T>
 // MAPPING STRATEGY 3: UNORDERED ITEMS (multiple separate triples)
 // =============================================================================
 const immutableListUnorderedItems =
-    CollectionMapping.mapper(ImmutableListMapperUnorderedItems);
+    CollectionMapping.withItemMappers(ImmutableListMapperUnorderedItems);
 
 /// Maps `ImmutableList<T>` to multiple separate triples.
 ///

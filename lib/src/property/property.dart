@@ -166,7 +166,7 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 /// // Custom collection with explicit item type
 /// @RdfProperty(
 ///   SchemaBook.metadata,
-///   collection: CollectionMapping.mapper(CustomCollectionMapper),
+///   collection: CollectionMapping.withItemMappers(CustomCollectionMapper),
 ///   itemType: MetadataEntry
 /// )
 /// final CustomCollection metadata;
@@ -424,7 +424,7 @@ class RdfProperty implements RdfAnnotation {
   /// // For non-standard collection types, explicit mapper needed
   /// @RdfProperty(
   ///   SchemaBook.metadata,
-  ///   collection: CollectionMapping.mapper(CustomCollectionMapper),
+  ///   collection: (CustomCollectionMapper),
   ///   itemType: MetadataEntry,  // Explicit when type can't be inferred
   ///   globalResource: GlobalResourceMapping.namedMapper('metadataEntryMapper')
   ///   // => We will require a GlobalResourceMapper<MetadataEntry> with the name 'metadataEntryMapper' in the generated initRdfMapper function and pass it as `itemMapper` to `CustomCollectionMapper(itemMapper)`.
@@ -491,7 +491,7 @@ class RdfProperty implements RdfAnnotation {
   /// ```dart
   /// @RdfProperty(
   ///   SchemaBook.customData,
-  ///   collection: CollectionMapping.mapper(CustomCollectionMapper),
+  ///   collection: (CustomCollectionMapper),
   ///   itemType: DataEntry,  // Explicit because CustomCollection doesn't expose item type
   ///   localResource: LocalResourceMapping.namedMapper('dataEntryMapper')
   /// )
@@ -534,7 +534,7 @@ class RdfProperty implements RdfAnnotation {
   /// Well-known collection mappers include:
   /// - Default mappers (multiple triples): `unorderedItems`, `unorderedItemsList`, `unorderedItemsSet`
   /// - RDF structures (single collection): `rdfList`, `rdfSeq`, `rdfBag`, `rdfAlt`
-  /// - Custom mappers: Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature and refer to that type with `CollectionMapping.mapper(MyMapper) - you can of course also store the result of that call in a global const variable to have a shortcut, like we do for `rdfList`, `rdfSeq` etc.
+  /// - Custom mappers: Implement `Mapper<C>` with constructor matching `Mapper<C> Function({Deserializer<T>? itemDeserializer, Serializer<T>? itemSerializer})` signature and refer to that type with `(MyMapper) - you can of course also store the result of that call in a global const variable to have a shortcut, like we do for `rdfList`, `rdfSeq` etc.
   ///
   /// [itemType] - Explicitly specifies the item type for collection mapping when
   /// it cannot be automatically extracted from the field's generic type parameters.
@@ -548,7 +548,7 @@ class RdfProperty implements RdfAnnotation {
     this.localResource,
     this.literal,
     this.globalResource,
-    this.collection,
+    this.collection = const CollectionMapping.auto(),
     this.itemType,
   });
 }

@@ -295,7 +295,7 @@ class RdfMapEntry extends RdfAnnotation {
 /// ## Well-Known Collection Mappers
 ///
 /// For common RDF collection structures, use the predefined global constants instead
-/// of the verbose `CollectionMapping.mapper()` syntax:
+/// of the verbose `CollectionMapping.withItemMappers()` syntax:
 ///
 /// **Recommended (using global constants):**
 /// ```dart
@@ -307,8 +307,8 @@ class RdfMapEntry extends RdfAnnotation {
 ///
 /// **Not recommended (verbose syntax), but equivalent:**
 /// ```dart
-/// @RdfProperty(SchemaBook.chapters, collection: CollectionMapping.mapper(RdfListMapper))
-/// @RdfProperty(SchemaBook.authors, collection: CollectionMapping.mapper(RdfSeqMapper))
+/// @RdfProperty(SchemaBook.chapters, collection: CollectionMapping.withItemMappers(RdfListMapper))
+/// @RdfProperty(SchemaBook.authors, collection: CollectionMapping.withItemMappers(RdfSeqMapper))
 /// ```
 ///
 /// Available global constants:
@@ -352,6 +352,9 @@ class RdfMapEntry extends RdfAnnotation {
 /// }
 /// ```
 class CollectionMapping extends BaseMapping<Mapper> {
+  final bool isAuto;
+  final Type? factory;
+
   /// Creates automatic collection mapping behavior.
   ///
   /// This is the default for collection properties when no explicit collection mapping
@@ -362,7 +365,9 @@ class CollectionMapping extends BaseMapping<Mapper> {
   /// - `Map<K,V>` → Entry-based mapping with `@RdfMapEntry`
   ///
   /// Results in multiple triples with the same predicate, one per collection item.
-  CollectionMapping.auto();
+  const CollectionMapping.auto()
+      : isAuto = true,
+        factory = null;
 
   /// Creates registry-based collection mapping.
   ///
@@ -370,7 +375,9 @@ class CollectionMapping extends BaseMapping<Mapper> {
   /// similar to how other mapping properties (iri, literal, globalResource, localResource)
   /// behave by default. Only use this when you have registered a specific collection
   /// mapper for your collection type.
-  CollectionMapping.fromRegistry();
+  const CollectionMapping.fromRegistry()
+      : isAuto = false,
+        factory = null;
 
   /// Creates a reference to a named collection mapper that will be injected at runtime.
   ///
@@ -411,26 +418,36 @@ class CollectionMapping extends BaseMapping<Mapper> {
   /// final trackMapper = OrderedTrackMapper(/* params */);
   /// final rdfMapper = initRdfMapper(orderedTrackMapper: trackMapper);
   /// ```
-  const CollectionMapping.namedMapper(String name) : super.namedMapper(name);
+  const CollectionMapping.namedMapper(String name)
+      : isAuto = false,
+        factory = null,
+        super.namedMapper(name);
 
   /// Creates a reference to a collection mapper that will be instantiated from the given type.
   ///
   /// Use this constructor when you want to provide your own custom collection mapper
-  /// implementation that can be instantiated automatically. The mapper you provide will
-  /// determine how the collection is serialized to and deserialized from RDF.
+  /// implementation that can be instantiated automatically and needs access to item-level
+  /// serializers/deserializers. The mapper you provide will determine how the collection
+  /// is serialized to and deserialized from RDF.
   ///
   /// The generator will create an instance of `mapperType` to handle collection mapping.
   /// The type must implement `Mapper<C>` where C is the collection type (e.g., `List<T>`)
   /// and must have a constructor that accepts optional `itemSerializer` and `itemDeserializer`
   /// parameters: `Mapper<C> Function({Serializer<T>? itemSerializer, Deserializer<T>? itemDeserializer})`
   ///
+  /// **Use this constructor when**: Your collection mapper needs to delegate item serialization
+  /// to the generated or overridden item mappers (e.g., for complex objects, resources, or custom item mapping).
+  ///
+  /// **Use `CollectionMapping.mapper()` instead when**: Your collection mapper handles the entire
+  /// collection serialization internally without needing item-level delegation.
+  ///
   /// Example:
   /// ```dart
   /// class Book {
-  ///   // Using a custom collection mapper for ordered chapters
+  ///   // Using a custom collection mapper that needs item serializers for complex objects
   ///   @RdfProperty(
   ///     SchemaBook.chapters,
-  ///     collection: CollectionMapping.mapper(OrderedChapterListMapper)
+  ///     collection: CollectionMapping.withItemMappers(OrderedChapterListMapper)
   ///   )
   ///   final List<Chapter> chapters;
   /// }
@@ -449,7 +466,59 @@ class CollectionMapping extends BaseMapping<Mapper> {
   ///   // Implementation details...
   /// }
   /// ```
-  const CollectionMapping.mapper(Type mapperType) : super.mapper(mapperType);
+  const CollectionMapping.withItemMappers(Type mapperType)
+      : isAuto = false,
+        factory = mapperType;
+
+  /// Creates a reference to a collection mapper that will be instantiated from the given type.
+  ///
+  /// Use this constructor when you want to provide your own custom collection mapper
+  /// implementation that handles the entire collection serialization internally without
+  /// needing access to item-level serializers/deserializers.
+  ///
+  /// The generator will create an instance of `mapperType` to handle collection mapping.
+  /// The type must implement `Mapper<C>` where C is the collection type (e.g., `List<T>`)
+  /// and must have a no-argument default constructor.
+  ///
+  /// **Use this constructor when**: Your collection mapper handles the entire collection
+  /// serialization internally (e.g., serializing a `List<String>` as a single JSON array
+  /// literal, or using a custom RDF structure that doesn't require item delegation).
+  ///
+  /// **Use `CollectionMapping.withItemMappers()` instead when**: Your collection mapper
+  /// needs to delegate individual item serialization to the generated item mappers.
+  ///
+  /// Example:
+  /// ```dart
+  /// class Book {
+  ///   // Using a collection mapper that handles entire list as single literal
+  ///   @RdfProperty(
+  ///     SchemaBook.keywords,
+  ///     collection: CollectionMapping.mapper(StringListMapper)
+  ///   )
+  ///   final List<String> keywords; // Serialized as single JSON array literal
+  /// }
+  ///
+  /// // The mapper implementation must be accessible to the generator:
+  /// class StringListMapper implements LiteralTermMapper<List<String>> {
+  ///   StringListMapper(); // No-argument constructor required
+  ///
+  ///   @override
+  ///   List<String> fromRdfTerm(LiteralTerm term, DeserializationContext context) {
+  ///     // Parse JSON array from literal value
+  ///     return (jsonDecode(term.value) as List).cast<String>();
+  ///   }
+  ///
+  ///   @override
+  ///   LiteralTerm toRdfTerm(List<String> value, SerializationContext context) {
+  ///     // Serialize entire list as JSON array literal
+  ///     return LiteralTerm(jsonEncode(value));
+  ///   }
+  /// }
+  /// ```
+  const CollectionMapping.mapper(Type mapperType)
+      : isAuto = false,
+        factory = null,
+        super.mapper(mapperType);
 
   /// Creates a reference to a directly provided collection mapper instance.
   ///
@@ -481,5 +550,7 @@ class CollectionMapping extends BaseMapping<Mapper> {
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
   const CollectionMapping.mapperInstance(Mapper instance)
-      : super.mapperInstance(instance);
+      : isAuto = false,
+        factory = null,
+        super.mapperInstance(instance);
 }
