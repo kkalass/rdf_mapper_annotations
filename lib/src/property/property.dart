@@ -352,10 +352,11 @@ class RdfProperty implements RdfAnnotation {
   /// - `C` is the collection type (e.g., `List<Person>`)
   /// - `T` is the item type (e.g., `Person`)
   /// - The class implements `Mapper<C>` to handle collection serialization/deserialization
-  /// - The constructor takes an optional item mapper parameter
+  /// - The constructor takes optional item serializer and item deserializer parameters
   ///
   /// The collection mapper handles the overall RDF structure of the collection, while
   /// the item mapper (derived from iri/literal/globalResource/localResource parameters)
+  /// is passed as item serializer and item deserializer to the collection mapper and
   /// handles individual item conversion.
   ///
   /// **Default behavior without explicit collection mapper**:
