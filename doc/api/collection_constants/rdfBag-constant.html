@@ -60,6 +60,25 @@
 
         </section>
         
+<section class="desc markdown">
+  <p>Maps Dart collections to RDF Bag structures (unordered collections).</p>
+<p><strong>RDF Structure</strong>: Creates an unordered collection with rdf:Bag type
+<strong>Dart Type</strong>: Works with <code>List&lt;T&gt;</code> - will lead to compile errors in generated mappers if used with other types like <code>Set&lt;T&gt;</code> or <code>Iterable&lt;T&gt;</code>.
+<strong>Order</strong>: NOT preserved - explicitly indicates order is not significant
+<strong>Use Case</strong>: When order doesn't matter and you want to be explicit about it</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.keywords, collection: rdfBag)
+final Set&lt;String&gt; keywords;
+</code></pre>
+<h2 id="generated-rdf">Generated RDF</h2>
+<pre class="language-turtle"><code class="language-turtle">&lt;book&gt; schema:keywords _:bag1 .
+_:bag1 rdf:type rdf:Bag ;
+       rdf:_1 "keyword1" ;
+       rdf:_2 "keyword2" ;
+       rdf:_3 "keyword3" .
+</code></pre>
+<p><strong>Underlying Mapper</strong>: <code>RdfBagMapper&lt;T&gt;</code> from rdf_mapper package</p>
+</section>
 
         
 <section class="summary source-code" id="source">
@@ -92,7 +111,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

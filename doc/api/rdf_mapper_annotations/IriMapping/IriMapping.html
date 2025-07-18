@@ -80,6 +80,44 @@ For non-String types (like value objects or domain-specific types), you have two
 <li>Use one of the mapper constructors: <code>.namedMapper()</code>, <code>.mapper()</code>, or <code>.mapperInstance()</code></li>
 <li>Annotate the value class itself with <code>@RdfIri</code> and implement the template logic there</li>
 </ol>
+<h2 id="collection-item-iri-mapping">Collection Item IRI Mapping</h2>
+<p><strong>Critical Rule</strong>: When using <code>IriMapping</code> for collection properties, template placeholders
+must <strong>exactly match the property name</strong> that contains the collection.</p>
+<p>For collections (<code>List&lt;String&gt;</code>, <code>Set&lt;String&gt;</code>, <code>Iterable&lt;String&gt;</code>), each item in the
+collection becomes a separate IRI using the template:</p>
+<pre class="language-dart"><code class="language-dart">@RdfLocalResource()
+class BookCollection {
+  /// Each author ID becomes an IRI: https://example.org/author/[authorId]
+  @RdfProperty(
+    SchemaBook.author,
+    iri: IriMapping('{+baseUri}/author/{authorIds}'), // ← matches property name
+  )
+  final List&lt;String&gt; authorIds; // ← property name matches placeholder
+
+  /// Combined with collection structure
+  @RdfProperty(
+    SchemaBook.contributors,
+    collection: rdfList, // Ordered list structure
+    iri: IriMapping('{+baseUri}/contributor/{contributorIds}'), // ← matches property name
+  )
+  final List&lt;String&gt; contributorIds; // ← property name matches placeholder
+}
+</code></pre>
+<p><strong>Common Mistake</strong>: Using arbitrary placeholder names that don't match the property:</p>
+<pre class="language-dart"><code class="language-dart">// ❌ WRONG: Placeholder doesn't match property name
+@RdfProperty(
+  MyVocab.items,
+  iri: IriMapping('{+baseUri}/item/{itemId}'), // ← 'itemId' doesn't exist
+)
+final List&lt;String&gt; itemsList; // ← property name is 'itemsList', not 'itemId'
+
+// ✅ CORRECT: Placeholder matches property name exactly
+@RdfProperty(
+  MyVocab.items,
+  iri: IriMapping('{+baseUri}/item/{itemsList}'), // ← matches property name
+)
+final List&lt;String&gt; itemsList;
+</code></pre>
 <h2 id="template-patterns">Template Patterns</h2>
 <ul>
 <li>Property only: <code>IriMapping('http://example.org/users/{userId}')</code></li>
@@ -150,7 +188,7 @@ class UserId {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

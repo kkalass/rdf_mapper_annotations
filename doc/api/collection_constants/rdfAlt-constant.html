@@ -60,6 +60,25 @@
 
         </section>
         
+<section class="desc markdown">
+  <p>Maps Dart collections to RDF Alternative structures (first is preferred).</p>
+<p><strong>RDF Structure</strong>: Creates an alternative collection with rdf:Alt type
+<strong>Dart Type</strong>: Works with <code>List&lt;T&gt;</code> - will lead to compile errors in generated mappers if used with other types like <code>Set&lt;T&gt;</code> or <code>Iterable&lt;T&gt;</code>.
+<strong>Order</strong>: First item is considered the preferred/default choice
+<strong>Use Case</strong>: Representing alternative values where first is preferred</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.availableFormats, collection: rdfAlt)
+final List&lt;String&gt; formats; // ["PDF", "EPUB", "HTML"]
+</code></pre>
+<h2 id="generated-rdf">Generated RDF</h2>
+<pre class="language-turtle"><code class="language-turtle">&lt;book&gt; schema:availableFormats _:alt1 .
+_:alt1 rdf:type rdf:Alt ;
+       rdf:_1 "PDF" ;      # Preferred format
+       rdf:_2 "EPUB" ;
+       rdf:_3 "HTML" .
+</code></pre>
+<p><strong>Underlying Mapper</strong>: <code>RdfAltMapper&lt;T&gt;</code> from rdf_mapper package</p>
+</section>
 
         
 <section class="summary source-code" id="source">
@@ -92,7 +111,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

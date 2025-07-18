@@ -60,6 +60,23 @@
 
         </section>
         
+<section class="desc markdown">
+  <p>Maps Dart Iterable collections to multiple separate triples.</p>
+<p><strong>RDF Structure</strong>: Creates multiple triples with the same predicate
+<strong>Dart Type</strong>: Works with <code>Iterable&lt;T&gt;</code> - will lead to compile errors in generated mappers if used with other types like <code>Set&lt;T&gt;</code> or <code>List&lt;T&gt;</code>.
+<strong>Order</strong>: NOT preserved - each item becomes a separate triple
+<strong>Use Case</strong>: Generic collections where order doesn't matter, maximum compatibility</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.contributors, collection: unorderedItems)
+final Iterable&lt;Person&gt; contributors;
+</code></pre>
+<h2 id="generated-rdf">Generated RDF</h2>
+<pre class="language-turtle"><code class="language-turtle">&lt;book&gt; schema:contributors &lt;person1&gt; .
+&lt;book&gt; schema:contributors &lt;person2&gt; .
+&lt;book&gt; schema:contributors &lt;person3&gt; .
+</code></pre>
+<p><strong>Underlying Mapper</strong>: <code>UnorderedItemsMapper&lt;T&gt;</code> from rdf_mapper package</p>
+</section>
 
         
 <section class="summary source-code" id="source">
@@ -92,7 +109,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

@@ -59,6 +59,88 @@
     </div>
 
     
+<section class="desc markdown">
+  <p>Pre-defined collection mapping constants for common RDF collection strategies.</p>
+<p>This file provides convenient, well-documented constants for the most common
+collection mapping strategies used in RDF serialization. These constants serve
+as the primary entry point for users to configure how Dart collections are
+mapped to different RDF structures.</p>
+<h2 id="quick-reference">Quick Reference</h2>
+<p><strong>Structured RDF Collections</strong> (single collection object):</p>
+<ul>
+<li><code>rdfList</code> - Ordered linked list with rdf:first/rdf:rest/rdf:nil</li>
+<li><code>rdfSeq</code> - Numbered sequence with rdf:_1, rdf:_2, rdf:_3...</li>
+<li><code>rdfBag</code> - Unordered collection for when order doesn't matter</li>
+<li><code>rdfAlt</code> - Alternative values (first is preferred)</li>
+</ul>
+<p><strong>Multiple Triples</strong> (separate triple per item):</p>
+<ul>
+<li><code>unorderedItems</code> - Generic multiple triples for any Iterable</li>
+<li><code>unorderedItemsList</code> - Multiple triples specifically for List<t></t></li>
+<li><code>unorderedItemsSet</code> - Multiple triples specifically for Set<t></t></li>
+</ul>
+<h2 id="usage-example">Usage Example</h2>
+<pre class="language-dart"><code class="language-dart">class Book {
+  // Ordered chapters as RDF List (preserves order)
+  @RdfProperty(SchemaBook.chapters, collection: rdfList)
+  final List&lt;Chapter&gt; chapters;
+
+  // Authors as numbered sequence
+  @RdfProperty(SchemaBook.authors, collection: rdfSeq)
+  final List&lt;Person&gt; authors;
+
+  // Keywords as separate triples (default behavior)
+  @RdfProperty(SchemaBook.keywords, collection: unorderedItems)
+  final List&lt;String&gt; keywords;
+}
+</code></pre>
+<h2 id="dart-type-to-rdf-strategy-mapping">Dart Type to RDF Strategy Mapping</h2>
+<p>Each constant maps Dart collection types to specific RDF serialization strategies:</p>
+<h3 id="structured-collections-single-rdf-object">Structured Collections (Single RDF Object)</h3>
+<ul>
+<li><code>List&lt;T&gt;</code> + <code>rdfList</code> → rdf:List structure</li>
+<li><code>List&lt;T&gt;</code> + <code>rdfSeq</code> → rdf:Seq structure</li>
+<li><code>List&lt;T&gt;</code> + <code>rdfBag</code> → rdf:Bag structure</li>
+<li><code>List&lt;T&gt;</code> + <code>rdfAlt</code> → rdf:Alt structure</li>
+</ul>
+<h3 id="multiple-triples-separate-triple-per-item">Multiple Triples (Separate Triple Per Item)</h3>
+<ul>
+<li><code>List&lt;T&gt;</code> + <code>unorderedItemsList</code> → Multiple triples with same predicate</li>
+<li><code>Set&lt;T&gt;</code> + <code>unorderedItemsSet</code> → Multiple triples with same predicate</li>
+<li><code>Iterable&lt;T&gt;</code> + <code>unorderedItems</code> → Multiple triples with same predicate</li>
+</ul>
+<h2 id="when-to-use-each-strategy">When to Use Each Strategy</h2>
+<p><strong>Use <code>rdfList</code></strong> when:</p>
+<ul>
+<li>Order is important and must be preserved</li>
+<li>RDF consumers understand rdf:List structures</li>
+<li>You need a linked list representation</li>
+</ul>
+<p><strong>Use <code>rdfSeq</code></strong> when:</p>
+<ul>
+<li>Order is important with clear numbering</li>
+<li>You want indexed access (rdf:_1, rdf:_2, etc.)</li>
+<li>RDF consumers prefer numbered sequences</li>
+</ul>
+<p><strong>Use <code>rdfBag</code></strong> when:</p>
+<ul>
+<li>Order doesn't matter</li>
+<li>You want to explicitly indicate unordered collection</li>
+<li>RDF consumers expect rdf:Bag structures</li>
+</ul>
+<p><strong>Use <code>rdfAlt</code></strong> when:</p>
+<ul>
+<li>Representing alternative values</li>
+<li>First item is the preferred choice</li>
+<li>RDF consumers need to pick one alternative</li>
+</ul>
+<p><strong>Use <code>unorderedItems*</code></strong> when:</p>
+<ul>
+<li>Maximum compatibility with RDF consumers</li>
+<li>Order doesn't matter</li>
+<li>You prefer simple triple structure - this is the default behavior</li>
+</ul>
+</section>
 
 
 
@@ -76,7 +158,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart collections to RDF Alternative structures (first is preferred).
   
 
 </dd>
@@ -88,7 +170,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart collections to RDF Bag structures (unordered collections).
   
 
 </dd>
@@ -100,7 +182,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart collections to RDF List structures (rdf:first/rdf:rest/rdf:nil).
   
 
 </dd>
@@ -112,7 +194,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart collections to RDF Sequence structures (rdf:_1, rdf:_2, rdf:_3...).
   
 
 </dd>
@@ -124,7 +206,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart Iterable collections to multiple separate triples.
   
 
 </dd>
@@ -136,7 +218,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart List collections to multiple separate triples.
   
 
 </dd>
@@ -148,7 +230,7 @@
 
 </dt>
 <dd>
-  
+  Maps Dart Set collections to multiple separate triples.
   
 
 </dd>
@@ -187,7 +269,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

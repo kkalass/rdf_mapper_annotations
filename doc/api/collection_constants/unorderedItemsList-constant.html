@@ -60,6 +60,25 @@
 
         </section>
         
+<section class="desc markdown">
+  <p>Maps Dart List collections to multiple separate triples.</p>
+<p><strong>RDF Structure</strong>: Creates multiple triples with the same predicate
+<strong>Dart Type</strong>: Works with <code>List&lt;T&gt;</code> - will lead to compile errors in generated mappers if used with other types like <code>Set&lt;T&gt;</code> or <code>Iterable&lt;T&gt;</code>.
+<strong>Order</strong>: NOT preserved - each item becomes a separate triple
+<strong>Use Case</strong>: When you want explicit control over List serialization as multiple triples</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.tags, collection: unorderedItemsList)
+final List&lt;String&gt; tags;
+</code></pre>
+<h2 id="generated-rdf">Generated RDF</h2>
+<pre class="language-turtle"><code class="language-turtle">&lt;book&gt; schema:tags "tag1" .
+&lt;book&gt; schema:tags "tag2" .
+&lt;book&gt; schema:tags "tag3" .
+</code></pre>
+<p><strong>Note</strong>: This is the default behavior for List<t> when no collection is specified.
+Only use explicitly when you need to override other collection mapping defaults.</t></p>
+<p><strong>Underlying Mapper</strong>: <code>UnorderedItemsListMapper&lt;T&gt;</code> from rdf_mapper package</p>
+</section>
 
         
 <section class="summary source-code" id="source">
@@ -93,7 +112,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

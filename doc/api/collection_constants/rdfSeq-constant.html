@@ -60,6 +60,25 @@
 
         </section>
         
+<section class="desc markdown">
+  <p>Maps Dart collections to RDF Sequence structures (rdf:_1, rdf:_2, rdf:_3...).</p>
+<p><strong>RDF Structure</strong>: Creates numbered properties for ordered sequences
+<strong>Dart Type</strong>: Works with <code>List&lt;T&gt;</code> - will lead to compile errors in generated mappers if used with other types like <code>Set&lt;T&gt;</code> or <code>Iterable&lt;T&gt;</code>.
+<strong>Order</strong>: Preserved - items are numbered consecutively starting from rdf:_1
+<strong>Use Case</strong>: When order matters and you want clear indexing/numbering</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.authors, collection: rdfSeq)
+final List&lt;Person&gt; authors;
+</code></pre>
+<h2 id="generated-rdf">Generated RDF</h2>
+<pre class="language-turtle"><code class="language-turtle">&lt;book&gt; schema:authors _:seq1 .
+_:seq1 rdf:type rdf:Seq ;
+       rdf:_1 &lt;person1&gt; ;
+       rdf:_2 &lt;person2&gt; ;
+       rdf:_3 &lt;person3&gt; .
+</code></pre>
+<p><strong>Underlying Mapper</strong>: <code>RdfSeqMapper&lt;T&gt;</code> from rdf_mapper package</p>
+</section>
 
         
 <section class="summary source-code" id="source">
@@ -92,7 +111,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>

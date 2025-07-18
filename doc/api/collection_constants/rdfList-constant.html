@@ -60,6 +60,25 @@
 
         </section>
         
+<section class="desc markdown">
+  <p>Maps Dart collections to RDF List structures (rdf:first/rdf:rest/rdf:nil).</p>
+<p><strong>RDF Structure</strong>: Creates an ordered linked list using rdf:first/rdf:rest/rdf:nil
+<strong>Dart Type</strong>: Works with <code>List&lt;T&gt;</code> - will lead to compile errors in generated mappers if used with other types like <code>Set&lt;T&gt;</code> or <code>Iterable&lt;T&gt;</code>.
+<strong>Order</strong>: Preserved - items appear in RDF in the same order as in the Dart List
+<strong>Use Case</strong>: When order matters and RDF consumers understand rdf:List structures</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">@RdfProperty(SchemaBook.chapters, collection: rdfList)
+final List&lt;Chapter&gt; chapters;
+</code></pre>
+<h2 id="generated-rdf">Generated RDF</h2>
+<pre class="language-turtle"><code class="language-turtle">&lt;book&gt; schema:chapters _:list1 .
+_:list1 rdf:first &lt;chapter1&gt; ;
+        rdf:rest _:list2 .
+_:list2 rdf:first &lt;chapter2&gt; ;
+        rdf:rest rdf:nil .
+</code></pre>
+<p><strong>Underlying Mapper</strong>: <code>RdfListMapper&lt;T&gt;</code> from rdf_mapper package</p>
+</section>
 
         
 <section class="summary source-code" id="source">
@@ -92,7 +111,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.3.0
+      0.3.1-dev
   </span>
   
 </footer>
