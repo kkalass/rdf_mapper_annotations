@@ -563,6 +563,51 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// 1. Use one of the mapper constructors: `.namedMapper()`, `.mapper()`, or `.mapperInstance()`
   /// 2. Annotate the value class itself with `@RdfIri` and implement the template logic there
   ///
+  /// ## Collection Item IRI Mapping
+  ///
+  /// **Critical Rule**: When using `IriMapping` for collection properties, template placeholders
+  /// must **exactly match the property name** that contains the collection.
+  ///
+  /// For collections (`List<String>`, `Set<String>`, `Iterable<String>`), each item in the
+  /// collection becomes a separate IRI using the template:
+  ///
+  /// ```dart
+  /// @RdfLocalResource()
+  /// class BookCollection {
+  ///   /// Each author ID becomes an IRI: https://example.org/author/[authorId]
+  ///   @RdfProperty(
+  ///     SchemaBook.author,
+  ///     iri: IriMapping('{+baseUri}/author/{authorIds}'), // ← matches property name
+  ///   )
+  ///   final List<String> authorIds; // ← property name matches placeholder
+  ///
+  ///   /// Combined with collection structure
+  ///   @RdfProperty(
+  ///     SchemaBook.contributors,
+  ///     collection: rdfList, // Ordered list structure
+  ///     iri: IriMapping('{+baseUri}/contributor/{contributorIds}'), // ← matches property name
+  ///   )
+  ///   final List<String> contributorIds; // ← property name matches placeholder
+  /// }
+  /// ```
+  ///
+  /// **Common Mistake**: Using arbitrary placeholder names that don't match the property:
+  /// ```dart
+  /// // ❌ WRONG: Placeholder doesn't match property name
+  /// @RdfProperty(
+  ///   MyVocab.items,
+  ///   iri: IriMapping('{+baseUri}/item/{itemId}'), // ← 'itemId' doesn't exist
+  /// )
+  /// final List<String> itemsList; // ← property name is 'itemsList', not 'itemId'
+  ///
+  /// // ✅ CORRECT: Placeholder matches property name exactly
+  /// @RdfProperty(
+  ///   MyVocab.items,
+  ///   iri: IriMapping('{+baseUri}/item/{itemsList}'), // ← matches property name
+  /// )
+  /// final List<String> itemsList;
+  /// ```
+  ///
   /// ## Template Patterns
   /// - Property only: `IriMapping('http://example.org/users/{userId}')`
   /// - With context: `IriMapping('{+baseUri}/users/{userId}')`
