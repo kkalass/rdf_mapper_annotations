@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-07-18
+
+### Added
+- **Comprehensive collection mapping documentation**: Added extensive documentation with examples for all collection mapping constants (`rdfList`, `rdfSeq`, `rdfBag`, `rdfAlt`, `unorderedItems`, `unorderedItemsList`, `unorderedItemsSet`)
+- **Public collection constants library**: New `collection_constants.dart` library file for convenient access to collection mapping constants
+- **Enhanced IRI mapping documentation**: Added detailed documentation for collection item IRI mapping with template placeholder requirements and common usage patterns
+
+### Enhanced
+- **Improved API documentation**: Complete documentation overhaul for collection mapping constants with RDF structure examples, use cases, and underlying mapper information
+- **Better example quality**: Fixed template placeholder names in examples to match property names correctly
+- **Documentation coverage**: Added comprehensive library-level documentation explaining when and how to use each collection mapping strategy
+
 ## [0.3.0] - 2025-07-17
 
 ### Added
