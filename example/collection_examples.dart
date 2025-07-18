@@ -118,7 +118,7 @@ class BookCollection {
   /// Default collection with custom IRI mapping for each item
   @RdfProperty(
     SchemaBook.author,
-    iri: IriMapping('{+baseUri}/author/{authorId}'),
+    iri: IriMapping('{+baseUri}/author/{authorIds}'),
   )
   final List<String> authorIds;
 
@@ -159,12 +159,12 @@ class Book {
 
 @RdfLocalResource()
 class Track {
-  @RdfProperty(SchemaCreativeWork.name)
+  @RdfProperty(SchemaMediaObject.name)
   final String title;
 
   /// Duration property - using appropriate schema term
   @RdfProperty(
-      SchemaCreativeWork.name) // Placeholder for actual duration property
+      SchemaMediaObject.duration) // Placeholder for actual duration property
   final Duration duration;
 
   Track({required this.title, required this.duration});
