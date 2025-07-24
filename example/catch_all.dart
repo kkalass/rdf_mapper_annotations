@@ -65,14 +65,14 @@ class Person {
 }
 
 /// Example usage showing both lossless mapping and RdfGraph properties:
-/// 
+///
 /// ```dart
 /// void main() {
 ///   // Sample RDF data with more properties than our Dart class maps
 ///   final turtle = '''
 ///     @prefix schema: <https://schema.org/> .
 ///     @prefix ex: <https://example.org/> .
-///     
+///
 ///     <https://example.org/people/123> a schema:Person ;
 ///       schema:name "John Doe" ;
 ///       schema:age 30 ;
@@ -86,24 +86,24 @@ class Person {
 ///       schema:telephone "+1-555-0123" ;
 ///       ex:customProperty "custom value" .
 ///   ''';
-/// 
+///
 ///   // Initialize the generated mapper
 ///   final rdfMapper = initRdfMapper();
-/// 
+///
 ///   // Decode - both address subgraph and unmapped properties are preserved
 ///   final person = rdfMapper.decodeObject<Person>(turtle);
 ///   print('Name: ${person.name}');  // "John Doe"
 ///   print('Age: ${person.age}');    // 30
-///   
+///
 ///   // Address is captured as an RdfGraph containing the blank node subgraph
 ///   print('Address triples: ${person.address?.triples.length}'); // 4 (street, city, postal, buildingType)
-///   
+///
 ///   // Unmapped properties (email, telephone, customProperty) are preserved separately
 ///   print('Unmapped triples: ${person.unmappedProperties.triples.length}'); // 3
-/// 
+///
 ///   // Encode back - all original data is preserved (address subgraph + unmapped properties)
 ///   final roundTripTurtle = rdfMapper.encodeObject(person);
-///   
+///
 ///   // Perfect lossless round-trip!
 ///   final person2 = rdfMapper.decodeObject<Person>(roundTripTurtle);
 ///   assert(person.address?.triples.length == person2.address?.triples.length);
@@ -112,12 +112,12 @@ class Person {
 /// ```
 ///
 /// Key benefits of this approach:
-/// 
+///
 /// 1. **@RdfUnmappedTriples**: Preserves unknown/additional properties for true lossless mapping
 /// 2. **RdfGraph properties**: Handle known subgraphs without creating custom classes
 /// 3. **Flexibility**: Mix strongly-typed properties (name, age) with graph-based ones (address)
 /// 4. **Future-proof**: Your application can handle RDF data evolution gracefully
-/// 
+///
 /// When to use each approach:
 /// - Use **@RdfUnmappedTriples** for truly unknown/variable properties
 /// - Use **RdfGraph properties** for known subgraphs that are too complex or variable for custom classes

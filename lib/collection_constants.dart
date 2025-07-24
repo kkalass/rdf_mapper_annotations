@@ -15,8 +15,8 @@
 ///
 /// **Multiple Triples** (separate triple per item):
 /// - `unorderedItems` - Generic multiple triples for any Iterable
-/// - `unorderedItemsList` - Multiple triples specifically for List<T>
-/// - `unorderedItemsSet` - Multiple triples specifically for Set<T>
+/// - `unorderedItemsList` - Multiple triples specifically for `List<T>`
+/// - `unorderedItemsSet` - Multiple triples specifically for `Set<T>`
 ///
 /// ## Usage Example
 ///

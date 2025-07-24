@@ -15,8 +15,8 @@
 ///
 /// **Multiple Triples** (separate triple per item):
 /// - `unorderedItems` - Generic multiple triples for any Iterable
-/// - `unorderedItemsList` - Multiple triples specifically for List<T>
-/// - `unorderedItemsSet` - Multiple triples specifically for Set<T>
+/// - `unorderedItemsList` - Multiple triples specifically for `List<T>`
+/// - `unorderedItemsSet` - Multiple triples specifically for `Set<T>`
 ///
 /// ## Usage Example
 ///
@@ -225,7 +225,7 @@ const unorderedItems = CollectionMapping.withItemMappers(UnorderedItemsMapper);
 /// <book> schema:tags "tag3" .
 /// ```
 ///
-/// **Note**: This is the default behavior for List<T> when no collection is specified.
+/// **Note**: This is the default behavior for `List<T>` when no collection is specified.
 /// Only use explicitly when you need to override other collection mapping defaults.
 ///
 /// **Underlying Mapper**: `UnorderedItemsListMapper<T>` from rdf_mapper package
@@ -252,7 +252,7 @@ const unorderedItemsList =
 /// <book> schema:genres "Thriller" .
 /// ```
 ///
-/// **Note**: This is the default behavior for Set<T> when no collection is specified.
+/// **Note**: This is the default behavior for `Set<T>` when no collection is specified.
 /// Only use explicitly when you need to override other collection mapping defaults.
 ///
 /// **Underlying Mapper**: `UnorderedItemsSetMapper<T>` from rdf_mapper package
