@@ -1,7 +1,7 @@
 # RDF Mapper Annotations for Dart
 
 > **🎯 Code Generation Now Available**  
-> This library provides the annotation system for mapping Dart objects to RDF graphs. Use it with the `rdf_mapper_generator` package (v0.2.1+) to automatically generate type-safe mapping code from your annotated classes.
+> This library provides the annotation system for mapping Dart objects to RDF graphs. Use it with the `rdf_mapper_generator` package to automatically generate type-safe mapping code from your annotated classes.
 
 [![pub package](https://img.shields.io/pub/v/rdf_mapper_annotations.svg)](https://pub.dev/packages/rdf_mapper_annotations)
 [![build](https://github.com/kkalass/rdf_mapper_annotations/actions/workflows/ci.yml/badge.svg)](https://github.com/kkalass/rdf_mapper_annotations/actions)
