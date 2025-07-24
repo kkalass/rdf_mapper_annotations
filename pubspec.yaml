@@ -1,5 +1,5 @@
 name: rdf_mapper_annotations
-version: 0.3.3-dev
+version: 0.10.0-dev
 homepage: https://kkalass.github.io/rdf_mapper_annotations/
 repository: https://github.com/kkalass/rdf_mapper_annotations
 issue_tracker: https://github.com/kkalass/rdf_mapper_annotations/issues
@@ -21,8 +21,9 @@ environment:
   sdk: '^3.6.0'
 dependencies:
   rdf_core: ^0.9.11
-  rdf_vocabularies: ^0.3.0 
-  rdf_mapper: ^0.9.3
+  rdf_vocabularies_core: ^0.4.1 
+  rdf_vocabularies_schema: ^0.4.1 
+  rdf_mapper: ^0.10.0
   logging: ^1.2.0
 
 dev_dependencies:

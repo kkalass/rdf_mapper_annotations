@@ -2,7 +2,7 @@ import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
-import 'package:rdf_vocabularies/rdf.dart';
+import 'package:rdf_vocabularies_core/rdf.dart';
 
 /// Marks a Dart class or enum as representing an RDF literal term.
 ///

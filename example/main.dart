@@ -1,7 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
-import 'package:rdf_vocabularies/schema.dart';
+import 'package:rdf_vocabularies_schema/schema.dart';
 
 /// This file demonstrates how the annotations can be used to mark up model classes
 /// for automatic mapper generation.

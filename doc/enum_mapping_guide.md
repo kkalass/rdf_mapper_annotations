@@ -232,7 +232,7 @@ Similarly, custom datatypes work by delegating to the registered enum mapper:
 ```dart
 import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 import 'package:rdf_core/rdf_core.dart';
-import 'package:rdf_vocabularies/xsd.dart';
+import 'package:rdf_vocabularies_core/xsd.dart';
 
 // Enum with global mapper
 @RdfLiteral()
@@ -493,7 +493,7 @@ Previously, you had to implement a full custom mapper class extending the base m
 ```dart
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
-import 'package:rdf_vocabularies/xsd.dart';
+import 'package:rdf_vocabularies_core/xsd.dart';
 
 // Define your enum without annotations
 enum Priority {

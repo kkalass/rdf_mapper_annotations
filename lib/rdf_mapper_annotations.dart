@@ -26,7 +26,7 @@
 /// Example using annotations (recommended for most cases):
 /// ```dart
 /// import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
-/// import 'package:rdf_vocabularies/foaf.dart'; // Contains RDF vocabulary terms
+/// import 'package:rdf_vocabularies_core/foaf.dart'; // Contains RDF vocabulary terms
 ///
 /// // Define your class with annotations
 /// @RdfGlobalResource(FoafPerson.classIri, IriStrategy('http://example.org/people/{id}'))
