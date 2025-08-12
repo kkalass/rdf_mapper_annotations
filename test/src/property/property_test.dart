@@ -76,5 +76,31 @@ void main() {
       expect(annotation.iri, equals(mockIri));
       expect(annotation.literal, equals(mockLiteral));
     });
+
+    test('constructor with contextual parameter', () {
+      final predicate = IriTerm('http://example.org/predicate');
+      final contextual = ContextualMapping.named('example');
+
+      final annotation = RdfProperty(
+        predicate,
+        contextual: contextual,
+      );
+
+      expect(annotation.predicate, equals(predicate));
+      expect(annotation.contextual, equals(contextual));
+      expect(annotation.contextual?.name, equals('example'));
+      expect(annotation.include, isTrue);
+      expect(annotation.globalResource, isNull);
+      expect(annotation.localResource, isNull);
+      expect(annotation.iri, isNull);
+      expect(annotation.literal, isNull);
+    });
+
+    test('basic constructor has null contextual by default', () {
+      final predicate = IriTerm('http://example.org/predicate');
+      final annotation = RdfProperty(predicate);
+
+      expect(annotation.contextual, isNull);
+    });
   });
 }

@@ -174,6 +174,7 @@ export 'src/base/rdf_annotation.dart';
 
 export 'src/property/collection.dart';
 export 'src/property/collection_mapping_constants.dart';
+export 'src/property/contextual_mapping.dart';
 export 'src/property/rdf_unmapped_triples.dart';
 export 'src/property/property.dart';
 export 'src/property/provides.dart';

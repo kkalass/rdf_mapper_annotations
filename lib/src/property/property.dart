@@ -1,6 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 import 'package:rdf_mapper_annotations/src/property/collection.dart';
+import 'package:rdf_mapper_annotations/src/property/contextual_mapping.dart';
 import 'package:rdf_mapper_annotations/src/resource/global_resource.dart';
 import 'package:rdf_mapper_annotations/src/resource/local_resource.dart';
 import 'package:rdf_mapper_annotations/src/term/iri.dart';
@@ -151,6 +152,30 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 ///   literal: LiteralMapping.namedMapper('priceMapper')
 /// )
 /// final Price price;
+/// ```
+///
+/// ### Contextual Property Mapping
+/// ```dart
+/// // Properties that need access to parent object/subject during mapping
+/// class Document<T> {
+///   @RdfProperty(FoafDocument.primaryTopic)
+///   final String documentIri;
+///
+///   // Property mapped with access to parent context
+///   @RdfProperty(
+///     FoafDocument.primaryTopic,
+///     contextual: ContextualMapping.named("primaryTopic")
+///   )
+///   final T primaryTopic;
+/// }
+///
+/// // Mapper instantiation with contextual factory functions
+/// final mapper = DocumentMapper<Person>(
+///   primaryTopicContextualSerializer: (parent, parentSubject, context) =>
+///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+///   primaryTopicContextualDeserializer: (parentSubject, context) =>
+///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+/// );
 /// ```
 ///
 /// ### Collection Handling
@@ -499,6 +524,65 @@ class RdfProperty implements RdfAnnotation {
   /// ```
   final Type? itemType;
 
+  /// Optional contextual mapping configuration.
+  ///
+  /// When provided, the generated mapper will require contextual serializer
+  /// and deserializer factory functions that have access to the parent
+  /// object, parent subject, and full context during RDF operations.
+  ///
+  /// This enables complex mapping scenarios where the property's serialization
+  /// or deserialization depends on:
+  /// - The parent object's state and other properties
+  /// - The parent resource's IRI (for global resources) or blank node (for local resources)
+  /// - The full serialization/deserialization context
+  ///
+  /// **Usage**:
+  /// ```dart
+  /// class Document<T> {
+  ///   @RdfProperty(FoafDocument.primaryTopic)
+  ///   final String documentIri;
+  ///
+  ///   @RdfProperty(
+  ///     FoafDocument.primaryTopic,
+  ///     contextual: ContextualMapping.named("primaryTopic")
+  ///   )
+  ///   final T primaryTopic;
+  /// }
+  /// ```
+  ///
+  /// **Generated Code**:
+  /// The mapper constructor will require factory functions:
+  /// ```dart
+  /// DocumentMapper<T>({
+  ///   required Serializer<T> Function(
+  ///     Document<T> parent,
+  ///     IriTerm parentSubject,        // or BlankNodeTerm for local resources
+  ///     SerializationContext context
+  ///   ) primaryTopicContextualSerializer,
+  ///   required Deserializer<T> Function(
+  ///     IriTerm parentSubject,        // or BlankNodeTerm for local resources
+  ///     DeserializationContext context
+  ///   ) primaryTopicContextualDeserializer,
+  /// });
+  /// ```
+  ///
+  /// **Consumer Implementation**:
+  /// ```dart
+  /// final mapper = DocumentMapper<Person>(
+  ///   primaryTopicContextualSerializer: (parent, parentSubject, context) =>
+  ///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+  ///   primaryTopicContextualDeserializer: (parentSubject, context) =>
+  ///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+  /// );
+  /// ```
+  ///
+  /// The contextual factory functions are called during serialization/deserialization
+  /// to obtain the appropriate mapper for the current context.
+  ///
+  /// **Compatibility**: Cannot be used together with iri/literal/globalResource/localResource
+  /// parameters as contextual mapping provides its own serialization strategy.
+  final ContextualMapping? contextual;
+
   /// Creates an RDF property mapping annotation.
   ///
   /// [predicate] - The RDF predicate IRI that identifies this property in the graph,
@@ -520,6 +604,8 @@ class RdfProperty implements RdfAnnotation {
   /// - [localResource] - Treats property as a nested anonymous resource
   /// - [literal] - Applies custom literal serialization
   /// - [globalResource] - Treats property as a resource with its own IRI
+  /// - [contextual] - Enables contextual property mapping where serializers and deserializers
+  ///   have access to the parent object, parent subject, and full context
   ///
   /// Most properties work with automatic type-based mapping without these advanced
   /// parameters. Only use them to override default behavior for specific cases.
@@ -550,5 +636,6 @@ class RdfProperty implements RdfAnnotation {
     this.globalResource,
     this.collection = const CollectionMapping.auto(),
     this.itemType,
+    this.contextual,
   });
 }
