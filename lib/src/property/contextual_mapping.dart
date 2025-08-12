@@ -94,8 +94,7 @@ class ContextualMapping {
   /// This generates constructor parameters:
   /// - `primaryTopicContextualSerializer`
   /// - `primaryTopicContextualDeserializer`
-  static ContextualMapping named(String mapperName) =>
-      ContextualMapping._(mapperName);
+  const ContextualMapping.named(String mapperName) : this._(mapperName);
 
   @override
   bool operator ==(Object other) =>
