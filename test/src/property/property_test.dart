@@ -79,7 +79,7 @@ void main() {
 
     test('constructor with contextual parameter', () {
       final predicate = IriTerm('http://example.org/predicate');
-      final contextual = ContextualMapping.named('example');
+      final contextual = ContextualMapping.namedProvider('example');
 
       final annotation = RdfProperty(
         predicate,
@@ -88,7 +88,7 @@ void main() {
 
       expect(annotation.predicate, equals(predicate));
       expect(annotation.contextual, equals(contextual));
-      expect(annotation.contextual?.name, equals('example'));
+      expect(annotation.contextual?.mapper?.name, equals('example'));
       expect(annotation.include, isTrue);
       expect(annotation.globalResource, isNull);
       expect(annotation.localResource, isNull);

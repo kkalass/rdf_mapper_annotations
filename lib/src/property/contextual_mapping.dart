@@ -1,3 +1,6 @@
+import 'package:rdf_mapper/rdf_mapper.dart';
+import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
+
 /// Configuration for contextual property mapping.
 ///
 /// Contextual mapping allows a property's serializer and deserializer
@@ -26,7 +29,7 @@
 ///
 ///   @RdfProperty(
 ///     FoafDocument.primaryTopic,
-///     contextual: ContextualMapping.named("primaryTopic")
+///     contextual: ContextualMapping.namedProvider("primaryTopic")
 ///   )
 ///   final T primaryTopic;
 /// }
@@ -36,7 +39,7 @@
 ///
 /// ```dart
 /// final mapper = DocumentMapper<Person>(
-///   primaryTopicSerializationProvider:
+///   primaryTopic:
 ///     SerializationProvider.iriContextual((IriTerm iri) =>
 ///       PersonMapper(documentIriProvider: () => iri.iri)),
 /// );
@@ -44,19 +47,19 @@
 ///
 /// ## Generated Code Contract
 ///
-/// When using `ContextualMapping.named("example")`, the generator creates:
+/// When using `ContextualMapping.namedProvider("example")`, the generator creates:
 ///
 /// **Constructor Parameter:**
 /// ```dart
-/// final SerializationProvider<ParentType, T> exampleSerializationProvider;
+/// final SerializationProvider<ParentType, T> example;
 /// ```
 ///
 /// **Generated Mapper Constructor:**
 /// ```dart
 /// const DocumentMapper({
 ///   required SerializationProvider<Document<T>, T>
-///       primaryTopicSerializationProvider,
-/// }) : _primaryTopicSerializationProvider = primaryTopicSerializationProvider;
+///       primaryTopic,
+/// }) : _primaryTopicSerializationProvider = primaryTopic;
 /// ```
 ///
 /// **Usage During Serialization:**
@@ -71,22 +74,14 @@
 /// **Usage During Deserialization:**
 /// ```dart
 /// deserializer: _primaryTopicSerializationProvider.deserializer(
-///   subject,       // The parent's IRI or blank node  
+///   subject,       // The parent's IRI or blank node
 ///   context,       // Full deserialization context
 /// )
 /// ```
 ///
 /// The SerializationProvider encapsulates both serializer and deserializer creation
 /// based on the parent context, providing a more cohesive API.
-class ContextualMapping {
-  /// The name identifier for the contextual mapping parameter.
-  ///
-  /// This name is used to generate parameter names in the mapper constructor:
-  /// - `{name}SerializationProvider` - for the SerializationProvider parameter
-  final String name;
-
-  const ContextualMapping._(this.name);
-
+class ContextualMapping extends BaseMapping<SerializationProvider> {
   /// Creates a named contextual mapping configuration.
   ///
   /// The [mapperName] will be used to generate parameter names:
@@ -96,25 +91,18 @@ class ContextualMapping {
   /// ```dart
   /// @RdfProperty(
   ///   FoafDocument.primaryTopic,
-  ///   contextual: ContextualMapping.named("primaryTopic")
+  ///   contextual: ContextualMapping.namedProvider("primaryTopic")
   /// )
   /// final T primaryTopic;
   /// ```
   ///
   /// This generates constructor parameter:
-  /// - `primaryTopicSerializationProvider`
-  const ContextualMapping.named(String mapperName) : this._(mapperName);
+  /// - `primaryTopic`
+  const ContextualMapping.namedProvider(String mapperName)
+      : super.namedMapper(mapperName);
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ContextualMapping &&
-          runtimeType == other.runtimeType &&
-          name == other.name;
+  const ContextualMapping.providerInstance(SerializationProvider instance)
+      : super.mapperInstance(instance);
 
-  @override
-  int get hashCode => name.hashCode;
-
-  @override
-  String toString() => 'ContextualMapping.named("$name")';
+  const ContextualMapping.provider(Type type) : super.mapper(type);
 }

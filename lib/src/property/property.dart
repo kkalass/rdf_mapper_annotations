@@ -164,15 +164,14 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 ///   // Property mapped with access to parent context
 ///   @RdfProperty(
 ///     FoafDocument.primaryTopic,
-///     contextual: ContextualMapping.named("primaryTopic")
+///     contextual: ContextualMapping.namedProvider("primaryTopic")
 ///   )
 ///   final T primaryTopic;
 /// }
 ///
 /// // Mapper instantiation with SerializationProvider
 /// final mapper = DocumentMapper<Person>(
-///   primaryTopicSerializationProvider:
-///     SerializationProvider.iriContextual((IriTerm iri) =>
+///   primaryTopic: SerializationProvider.iriContextual((IriTerm iri) =>
 ///       PersonMapper(documentIriProvider: () => iri.iri)),
 /// );
 /// ```
@@ -542,7 +541,7 @@ class RdfProperty implements RdfAnnotation {
   ///
   ///   @RdfProperty(
   ///     FoafDocument.primaryTopic,
-  ///     contextual: ContextualMapping.named("primaryTopic")
+  ///     contextual: ContextualMapping.namedProvider("primaryTopic")
   ///   )
   ///   final T primaryTopic;
   /// }
@@ -552,15 +551,14 @@ class RdfProperty implements RdfAnnotation {
   /// The mapper constructor will require a SerializationProvider:
   /// ```dart
   /// DocumentMapper<T>({
-  ///   required SerializationProvider<Document<T>, T> primaryTopicSerializationProvider,
+  ///   required SerializationProvider<Document<T>, T> primaryTopic,
   /// });
   /// ```
   ///
   /// **Consumer Implementation**:
   /// ```dart
   /// final mapper = DocumentMapper<Person>(
-  ///   primaryTopicSerializationProvider:
-  ///     SerializationProvider.iriContextual((IriTerm iri) =>
+  ///   primaryTopic: SerializationProvider.iriContextual((IriTerm iri) =>
   ///       PersonMapper(documentIriProvider: () => iri.iri)),
   /// );
   /// ```

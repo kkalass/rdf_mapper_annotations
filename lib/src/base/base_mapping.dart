@@ -17,7 +17,7 @@ import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 ///
 /// This base class is not intended to be used directly, but rather serves as the
 /// foundation for specialized mapping classes.
-abstract class BaseMapping<M extends Mapper> {
+abstract class BaseMapping<M> {
   /// The name to use for the mapper parameter in the generated `initRdfMapper`
   /// method when using named mapper injection.
   final String? _mapperName;

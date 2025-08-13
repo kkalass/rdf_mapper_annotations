@@ -9,9 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Contextual Property Mapping**: New `contextual` parameter for `@RdfProperty` annotation enables properties to access parent object, parent subject, and full context during RDF operations
-- **ContextualMapping class**: Configuration class for contextual property mapping with `ContextualMapping.named()` factory method
+- **ContextualMapping class**: Configuration class for contextual property mapping with `ContextualMapping.namedProvider()` factory method
 - Enables complex scenarios like computing dependent object IRIs based on parent properties or creating nested resources that reference their container
 - **Global Unmapped Triples**: New `globalUnmapped` parameter for `@RdfUnmappedTriples` annotation enables collecting unmapped triples from entire graph instead of just current subject. Designed for top-level document classes like Solid WebID/Profile Documents.
+- **Document-level lossless mapping example**: Added `example/document_example.dart` demonstrating global unmapped triples preservation for complete document round-trip fidelity
+
+### Changed
+- **ContextualMapping API refinement**: Unified mapping class hierarchy by extending `BaseMapping<SerializationProvider>` for consistent constructor patterns and type safety
+- **Enhanced `BaseMapping` generics**: Removed `Mapper` constraint from generic parameter to support broader range of mapping configurations including `SerializationProvider`
+- **Improved documentation**: Enhanced `@RdfUnmappedTriples` documentation with performance considerations, usage guidelines, and clear distinction between subject-scoped and global unmapped triples
+- **Updated dependencies**: Upgraded `rdf_vocabularies_core` and `rdf_vocabularies_schema` to version `^0.4.4` and switched to local path dependency for `rdf_mapper` for development
+
+### Enhanced
+- **Comprehensive lossless mapping guide**: Expanded README documentation with detailed comparison of different unmapped triples strategies and when to use each approach
+- **Better example organization**: Enhanced documentation structure with clear sections for subject-scoped vs global unmapped triples with practical use cases
 
 ## [0.10.0] - 2025-07-25
 

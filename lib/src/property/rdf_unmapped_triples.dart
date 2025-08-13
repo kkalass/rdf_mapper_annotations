@@ -14,6 +14,17 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// weren't consumed by other `@RdfProperty` annotations. During serialization,
 /// these triples will be restored to maintain the complete RDF graph.
 ///
+/// A triple is considered "unmapped" if:
+/// - Its predicate is not used by any `@RdfProperty` annotation in the current class
+/// - Its predicate is not `rdf:type` when used with `@RdfGlobalResource` or `@RdfLocalResource`
+/// - It's not part of the object's structural metadata (e.g., blank node connections)
+///
+/// ## Performance Considerations
+///
+/// When `globalUnmapped` is `false` (default), only triples with the current subject
+/// are collected, making this feature lightweight. When `globalUnmapped` is `true`,
+/// the entire graph must be traversed, which may impact performance on large graphs.
+///
 /// ## Global Unmapped Triples
 ///
 /// When [globalUnmapped] is `true`, the annotation collects unmapped triples from
@@ -66,5 +77,24 @@ class RdfUnmappedTriples implements RdfAnnotation {
   /// Defaults to `false` for subject-scoped collection.
   final bool globalUnmapped;
 
+  /// Creates an `@RdfUnmappedTriples` annotation.
+  ///
+  /// When applied to a property of type `RdfGraph` (or a custom type with registered
+  /// `UnmappedTriplesMapper`), this annotation instructs the RDF mapper to capture
+  /// and preserve unmapped RDF triples during object serialization/deserialization.
+  ///
+  /// **Parameters:**
+  /// - [globalUnmapped]: When `true`, collects unmapped triples from the entire
+  ///   RDF graph instead of just the current subject. Should only be used on
+  ///   top-level document containers. Defaults to `false`.
+  ///
+  /// **Example:**
+  /// ```dart
+  /// @RdfUnmappedTriples() // Subject-scoped (default)
+  /// late final RdfGraph unmappedTriples;
+  ///
+  /// @RdfUnmappedTriples(globalUnmapped: true) // Global scope
+  /// late final RdfGraph globalUnmappedTriples;
+  /// ```
   const RdfUnmappedTriples({this.globalUnmapped = false});
 }

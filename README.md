@@ -28,7 +28,7 @@ With this declarative approach, you can define how your domain model maps to RDF
 - **Declarative annotations** for clean, maintainable code
 - **Type-safe mapping** between Dart classes and RDF resources
 - **Support for code generation** (via rdf_mapper_generator)
-- **Lossless RDF mapping** with `@RdfUnmappedTriples` for perfect round-trip preservation
+- **Lossless RDF mapping** with `@RdfUnmappedTriples` - both subject-scoped and global document-level preservation
 - **Flexible IRI generation strategies** for resource identification
 - **Comprehensive collection support** for lists, sets, and maps
 - **Native enum support** with custom values and IRI templates
@@ -625,6 +625,40 @@ class Person {
 }
 ```
 
+#### Global Unmapped Triples - Document-Level Preservation
+
+For complete document preservation, use `@RdfUnmappedTriples(globalUnmapped: true)` on document-level containers. This captures **all** unmapped triples from the entire RDF graph, not just the current subject:
+
+```dart
+@RdfGlobalResource(
+  FoafPersonalProfileDocument.classIri, 
+  IriStrategy()
+)
+class ProfileDocument {
+  @RdfIriPart()
+  final String documentIri;
+
+  @RdfProperty(FoafPersonalProfileDocument.primaryTopic)
+  final Person primaryTopic;
+
+  @RdfProperty(FoafPersonalProfileDocument.maker)
+  final Uri maker;
+
+  // Captures ALL unmapped triples from the entire document
+  @RdfUnmappedTriples(globalUnmapped: true)
+  final RdfGraph globalUnmappedTriples;
+
+  ProfileDocument({
+    required this.documentIri,
+    required this.primaryTopic,
+    required this.maker,
+    RdfGraph? globalUnmappedTriples,
+  }) : globalUnmappedTriples = globalUnmappedTriples ?? RdfGraph(triples: []);
+}
+```
+
+**Important:** Only use `globalUnmapped: true` on a single top-level document class to avoid duplicate data collection.
+
 #### RdfGraph as Property Type
 
 Use `RdfGraph` as a regular property type to capture structured subgraphs without creating custom classes:
@@ -665,7 +699,45 @@ final restoredTurtle = mapper.encodeObjectLossless((person, remainderGraph));
 - **Flexibility**: Mix strongly-typed properties with flexible graph storage
 - **Document integrity**: Preserve entire RDF documents, not just individual objects
 
-See `example/catch_all.dart` for a complete demonstration.
+See `example/catch_all.dart` for subject-scoped unmapped triples and `example/document_example.dart` for global document-level preservation.
+
+#### When to Use Which Approach
+
+Choose the right unmapped triples strategy based on your use case:
+
+**Subject-scoped (`@RdfUnmappedTriples()`)**:
+- ✅ Individual objects with unknown/evolving properties
+- ✅ Multiple instances of the same class in a document
+- ✅ Lightweight preservation with minimal performance impact
+- ✅ Standard object-level lossless mapping
+
+**Global unmapped (`@RdfUnmappedTriples(globalUnmapped: true)`)**:
+- ✅ Document-level containers (WebID profiles, configuration files)
+- ✅ Complete preservation of entire RDF documents
+- ✅ Capturing unrelated entities and document metadata
+- ⚠️ Only use on a single top-level document class
+- ⚠️ Higher performance cost due to full graph traversal
+
+**RdfGraph properties (`@RdfProperty(...) RdfGraph subgraph`)**:
+- ✅ Known subgraphs that are too complex for custom classes
+- ✅ Variable structure that doesn't justify strong typing
+- ✅ Mix of structured and flexible data handling
+
+**Document-level lossless methods (`decodeObjectLossless`, `encodeObjectLossless`)**:
+- ✅ Working with documents that contain unmapped data outside your object model
+- ✅ Need to capture entities not represented by your classes
+- ✅ Perfect round-trip preservation without needing global unmapped annotations
+- ✅ Programmatic control over remainder graph handling
+- ✅ Use when you want lossless mapping without modifying class definitions
+
+```dart
+// Document-level lossless workflow
+final (person, remainderGraph) = mapper.decodeObjectLossless<Person>(turtle);
+// remainderGraph contains all triples not consumed by Person mapping
+
+// Perfect round-trip preservation
+final restoredTurtle = mapper.encodeObjectLossless((person, remainderGraph));
+```
 
 ### Enum Support
 
