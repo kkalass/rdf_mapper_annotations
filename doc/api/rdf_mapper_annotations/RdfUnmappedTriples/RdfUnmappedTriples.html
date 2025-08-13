@@ -54,15 +54,35 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfUnmappedTriples</span>(<wbr>)
+      <span class="name ">RdfUnmappedTriples</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="-param-globalUnmapped"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">globalUnmapped</span> = <span class="default-value">false</span>, </span></li>
+</ol>})
     </section>
     
+<section class="desc markdown">
+  <p>Creates an <code>@RdfUnmappedTriples</code> annotation.</p>
+<p>When applied to a property of type <code>RdfGraph</code> (or a custom type with registered
+<code>UnmappedTriplesMapper</code>), this annotation instructs the RDF mapper to capture
+and preserve unmapped RDF triples during object serialization/deserialization.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>globalUnmapped</code>: When <code>true</code>, collects unmapped triples from the entire
+RDF graph instead of just the current subject. Should only be used on
+top-level document containers. Defaults to <code>false</code>.</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-dart"><code class="language-dart">@RdfUnmappedTriples() // Subject-scoped (default)
+late final RdfGraph unmappedTriples;
+
+@RdfUnmappedTriples(globalUnmapped: true) // Global scope
+late final RdfGraph globalUnmappedTriples;
+</code></pre>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfUnmappedTriples();</code></pre>
+  <pre class="language-dart"><code class="language-dart">const RdfUnmappedTriples({this.globalUnmapped = false});</code></pre>
 </section>
 
 
@@ -90,7 +110,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.0
+      0.10.1
   </span>
   
 </footer>

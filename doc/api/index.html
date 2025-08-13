@@ -46,7 +46,7 @@
   <h1 id="rdf-mapper-annotations-for-dart">RDF Mapper Annotations for Dart</h1>
 <blockquote>
 <p><strong>🎯 Code Generation Now Available</strong><br>
-This library provides the annotation system for mapping Dart objects to RDF graphs. Use it with the <code>rdf_mapper_generator</code> package (v0.2.1+) to automatically generate type-safe mapping code from your annotated classes.</p>
+This library provides the annotation system for mapping Dart objects to RDF graphs. Use it with the <code>rdf_mapper_generator</code> package to automatically generate type-safe mapping code from your annotated classes.</p>
 </blockquote>
 <p><a href="https://pub.dev/packages/rdf_mapper_annotations"><img src="https://img.shields.io/pub/v/rdf_mapper_annotations.svg" alt="pub package"></a>
 <a href="https://github.com/kkalass/rdf_mapper_annotations/actions"><img src="https://github.com/kkalass/rdf_mapper_annotations/actions/workflows/ci.yml/badge.svg" alt="build"></a>
@@ -68,7 +68,7 @@ This library provides the annotation system for mapping Dart objects to RDF grap
 <li><strong>Declarative annotations</strong> for clean, maintainable code</li>
 <li><strong>Type-safe mapping</strong> between Dart classes and RDF resources</li>
 <li><strong>Support for code generation</strong> (via rdf_mapper_generator)</li>
-<li><strong>Lossless RDF mapping</strong> with <code>@RdfUnmappedTriples</code> for perfect round-trip preservation</li>
+<li><strong>Lossless RDF mapping</strong> with <code>@RdfUnmappedTriples</code> - both subject-scoped and global document-level preservation</li>
 <li><strong>Flexible IRI generation strategies</strong> for resource identification</li>
 <li><strong>Comprehensive collection support</strong> for lists, sets, and maps</li>
 <li><strong>Native enum support</strong> with custom values and IRI templates</li>
@@ -597,6 +597,35 @@ class Person {
     : unmappedProperties = unmappedProperties ?? RdfGraph(triples: []);
 }
 </code></pre>
+<h4 id="global-unmapped-triples---document-level-preservation">Global Unmapped Triples - Document-Level Preservation</h4>
+<p>For complete document preservation, use <code>@RdfUnmappedTriples(globalUnmapped: true)</code> on document-level containers. This captures <strong>all</strong> unmapped triples from the entire RDF graph, not just the current subject:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  FoafPersonalProfileDocument.classIri, 
+  IriStrategy()
+)
+class ProfileDocument {
+  @RdfIriPart()
+  final String documentIri;
+
+  @RdfProperty(FoafPersonalProfileDocument.primaryTopic)
+  final Person primaryTopic;
+
+  @RdfProperty(FoafPersonalProfileDocument.maker)
+  final Uri maker;
+
+  // Captures ALL unmapped triples from the entire document
+  @RdfUnmappedTriples(globalUnmapped: true)
+  final RdfGraph globalUnmappedTriples;
+
+  ProfileDocument({
+    required this.documentIri,
+    required this.primaryTopic,
+    required this.maker,
+    RdfGraph? globalUnmappedTriples,
+  }) : globalUnmappedTriples = globalUnmappedTriples ?? RdfGraph(triples: []);
+}
+</code></pre>
+<p><strong>Important:</strong> Only use <code>globalUnmapped: true</code> on a single top-level document class to avoid duplicate data collection.</p>
 <h4 id="rdfgraph-as-property-type">RdfGraph as Property Type</h4>
 <p>Use <code>RdfGraph</code> as a regular property type to capture structured subgraphs without creating custom classes:</p>
 <pre class="language-dart"><code class="language-dart">class Person {
@@ -630,7 +659,45 @@ final restoredTurtle = mapper.encodeObjectLossless((person, remainderGraph));
 <li><strong>Flexibility</strong>: Mix strongly-typed properties with flexible graph storage</li>
 <li><strong>Document integrity</strong>: Preserve entire RDF documents, not just individual objects</li>
 </ul>
-<p>See <code>example/catch_all.dart</code> for a complete demonstration.</p>
+<p>See <code>example/catch_all.dart</code> for subject-scoped unmapped triples and <code>example/document_example.dart</code> for global document-level preservation.</p>
+<h4 id="when-to-use-which-approach">When to Use Which Approach</h4>
+<p>Choose the right unmapped triples strategy based on your use case:</p>
+<p><strong>Subject-scoped (<code>@RdfUnmappedTriples()</code>)</strong>:</p>
+<ul>
+<li>✅ Individual objects with unknown/evolving properties</li>
+<li>✅ Multiple instances of the same class in a document</li>
+<li>✅ Lightweight preservation with minimal performance impact</li>
+<li>✅ Standard object-level lossless mapping</li>
+</ul>
+<p><strong>Global unmapped (<code>@RdfUnmappedTriples(globalUnmapped: true)</code>)</strong>:</p>
+<ul>
+<li>✅ Document-level containers (WebID profiles, configuration files)</li>
+<li>✅ Complete preservation of entire RDF documents</li>
+<li>✅ Capturing unrelated entities and document metadata</li>
+<li>⚠️ Only use on a single top-level document class</li>
+<li>⚠️ Higher performance cost due to full graph traversal</li>
+</ul>
+<p><strong>RdfGraph properties (<code>@RdfProperty(...) RdfGraph subgraph</code>)</strong>:</p>
+<ul>
+<li>✅ Known subgraphs that are too complex for custom classes</li>
+<li>✅ Variable structure that doesn't justify strong typing</li>
+<li>✅ Mix of structured and flexible data handling</li>
+</ul>
+<p><strong>Document-level lossless methods (<code>decodeObjectLossless</code>, <code>encodeObjectLossless</code>)</strong>:</p>
+<ul>
+<li>✅ Working with documents that contain unmapped data outside your object model</li>
+<li>✅ Need to capture entities not represented by your classes</li>
+<li>✅ Perfect round-trip preservation without needing global unmapped annotations</li>
+<li>✅ Programmatic control over remainder graph handling</li>
+<li>✅ Use when you want lossless mapping without modifying class definitions</li>
+</ul>
+<pre class="language-dart"><code class="language-dart">// Document-level lossless workflow
+final (person, remainderGraph) = mapper.decodeObjectLossless&lt;Person&gt;(turtle);
+// remainderGraph contains all triples not consumed by Person mapping
+
+// Perfect round-trip preservation
+final restoredTurtle = mapper.encodeObjectLossless((person, remainderGraph));
+</code></pre>
 <h3 id="enum-support">Enum Support</h3>
 <p>RDF Mapper provides comprehensive support for mapping Dart enums to RDF literals and IRIs with type safety and custom serialization values.</p>
 <h4 id="basic-enum-mapping">Basic Enum Mapping</h4>
@@ -815,7 +882,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.0
+      0.10.1
   </span>
   
 </footer>

@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfProperty</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.11/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span></li>
+      <span class="name ">RdfProperty</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.14/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span></li>
 <li><span class="parameter" id="-param-include"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">include</span> = <span class="default-value">true</span>, </span></li>
 <li><span class="parameter" id="-param-defaultValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">defaultValue</span>, </span></li>
 <li><span class="parameter" id="-param-includeDefaultsInSerialization"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeDefaultsInSerialization</span> = <span class="default-value">false</span>, </span></li>
@@ -64,6 +64,7 @@
 <li><span class="parameter" id="-param-globalResource"><span class="type-annotation"><a href="../../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a>?</span> <span class="parameter-name">globalResource</span>, </span></li>
 <li><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a>?</span> <span class="parameter-name">collection</span> = <span class="default-value">const CollectionMapping.auto()</span>, </span></li>
 <li><span class="parameter" id="-param-itemType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a>?</span> <span class="parameter-name">itemType</span>, </span></li>
+<li><span class="parameter" id="-param-contextual"><span class="type-annotation"><a href="../../rdf_mapper_annotations/ContextualMapping-class.html">ContextualMapping</a>?</span> <span class="parameter-name">contextual</span>, </span></li>
 </ol>})
     </section>
     
@@ -85,6 +86,8 @@ match their default value. When false (default), omits them for more compact RDF
 <li><code>localResource</code> - Treats property as a nested anonymous resource</li>
 <li><code>literal</code> - Applies custom literal serialization</li>
 <li><code>globalResource</code> - Treats property as a resource with its own IRI</li>
+<li><code>contextual</code> - Enables contextual property mapping where serializers and deserializers
+have access to the parent object, parent subject, and full context</li>
 </ul>
 <p>Most properties work with automatic type-based mapping without these advanced
 parameters. Only use them to override default behavior for specific cases.</p>
@@ -120,6 +123,7 @@ Only needed for custom collection types or complex generics.</p>
   this.globalResource,
   this.collection = const CollectionMapping.auto(),
   this.itemType,
+  this.contextual,
 });</code></pre>
 </section>
 
@@ -148,7 +152,7 @@ Only needed for custom collection types or complex generics.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.0
+      0.10.1
   </span>
   
 </footer>
