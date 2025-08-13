@@ -32,14 +32,13 @@
 /// }
 /// ```
 ///
-/// This generates a mapper constructor that requires contextual factory functions:
+/// This generates a mapper constructor that requires a SerializationProvider:
 ///
 /// ```dart
 /// final mapper = DocumentMapper<Person>(
-///   primaryTopicContextualSerializer: (parent, parentSubject, context) =>
-///     PersonMapper(documentIriProvider: () => parentSubject.iri),
-///   primaryTopicContextualDeserializer: (parentSubject, context) =>
-///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+///   primaryTopicSerializationProvider:
+///     SerializationProvider.iriContextual((IriTerm iri) =>
+///       PersonMapper(documentIriProvider: () => iri.iri)),
 /// );
 /// ```
 ///
@@ -47,31 +46,43 @@
 ///
 /// When using `ContextualMapping.named("example")`, the generator creates:
 ///
-/// **Serializer Factory Function:**
+/// **Constructor Parameter:**
 /// ```dart
-/// final Serializer<T> Function(
-///   ParentType parent,        // The parent object being serialized
-///   SubjectType parentSubject, // IriTerm for global resources, BlankNodeTerm for local resources
-///   SerializationContext context // Full serialization context
-/// ) exampleContextualSerializer;
+/// final SerializationProvider<ParentType, T> exampleSerializationProvider;
 /// ```
 ///
-/// **Deserializer Factory Function:**
+/// **Generated Mapper Constructor:**
 /// ```dart
-/// final Deserializer<T> Function(
-///   SubjectType parentSubject, // IriTerm for global resources, BlankNodeTerm for local resources
-///   DeserializationContext context // Full deserialization context
-/// ) exampleContextualDeserializer;
+/// const DocumentMapper({
+///   required SerializationProvider<Document<T>, T>
+///       primaryTopicSerializationProvider,
+/// }) : _primaryTopicSerializationProvider = primaryTopicSerializationProvider;
 /// ```
 ///
-/// The factory functions are called during serialization/deserialization to obtain
-/// the appropriate serializer/deserializer for the current context.
+/// **Usage During Serialization:**
+/// ```dart
+/// serializer: _primaryTopicSerializationProvider.serializer(
+///   resource,      // The parent object being serialized
+///   subject,       // The parent's IRI or blank node
+///   context,       // Full serialization context
+/// )
+/// ```
+///
+/// **Usage During Deserialization:**
+/// ```dart
+/// deserializer: _primaryTopicSerializationProvider.deserializer(
+///   subject,       // The parent's IRI or blank node  
+///   context,       // Full deserialization context
+/// )
+/// ```
+///
+/// The SerializationProvider encapsulates both serializer and deserializer creation
+/// based on the parent context, providing a more cohesive API.
 class ContextualMapping {
   /// The name identifier for the contextual mapping parameter.
   ///
   /// This name is used to generate parameter names in the mapper constructor:
-  /// - `{name}ContextualSerializer` - for the serializer factory function
-  /// - `{name}ContextualDeserializer` - for the deserializer factory function
+  /// - `{name}SerializationProvider` - for the SerializationProvider parameter
   final String name;
 
   const ContextualMapping._(this.name);
@@ -79,8 +90,7 @@ class ContextualMapping {
   /// Creates a named contextual mapping configuration.
   ///
   /// The [mapperName] will be used to generate parameter names:
-  /// - `{mapperName}ContextualSerializer`
-  /// - `{mapperName}ContextualDeserializer`
+  /// - `{mapperName}SerializationProvider`
   ///
   /// Example:
   /// ```dart
@@ -91,9 +101,8 @@ class ContextualMapping {
   /// final T primaryTopic;
   /// ```
   ///
-  /// This generates constructor parameters:
-  /// - `primaryTopicContextualSerializer`
-  /// - `primaryTopicContextualDeserializer`
+  /// This generates constructor parameter:
+  /// - `primaryTopicSerializationProvider`
   const ContextualMapping.named(String mapperName) : this._(mapperName);
 
   @override

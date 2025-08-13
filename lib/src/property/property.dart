@@ -169,12 +169,11 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 ///   final T primaryTopic;
 /// }
 ///
-/// // Mapper instantiation with contextual factory functions
+/// // Mapper instantiation with SerializationProvider
 /// final mapper = DocumentMapper<Person>(
-///   primaryTopicContextualSerializer: (parent, parentSubject, context) =>
-///     PersonMapper(documentIriProvider: () => parentSubject.iri),
-///   primaryTopicContextualDeserializer: (parentSubject, context) =>
-///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+///   primaryTopicSerializationProvider:
+///     SerializationProvider.iriContextual((IriTerm iri) =>
+///       PersonMapper(documentIriProvider: () => iri.iri)),
 /// );
 /// ```
 ///
@@ -526,9 +525,8 @@ class RdfProperty implements RdfAnnotation {
 
   /// Optional contextual mapping configuration.
   ///
-  /// When provided, the generated mapper will require contextual serializer
-  /// and deserializer factory functions that have access to the parent
-  /// object, parent subject, and full context during RDF operations.
+  /// When provided, the generated mapper will require a SerializationProvider
+  /// that has access to the parent object, parent subject, and full context during RDF operations.
   ///
   /// This enables complex mapping scenarios where the property's serialization
   /// or deserialization depends on:
@@ -551,33 +549,24 @@ class RdfProperty implements RdfAnnotation {
   /// ```
   ///
   /// **Generated Code**:
-  /// The mapper constructor will require factory functions:
+  /// The mapper constructor will require a SerializationProvider:
   /// ```dart
   /// DocumentMapper<T>({
-  ///   required Serializer<T> Function(
-  ///     Document<T> parent,
-  ///     IriTerm parentSubject,        // or BlankNodeTerm for local resources
-  ///     SerializationContext context
-  ///   ) primaryTopicContextualSerializer,
-  ///   required Deserializer<T> Function(
-  ///     IriTerm parentSubject,        // or BlankNodeTerm for local resources
-  ///     DeserializationContext context
-  ///   ) primaryTopicContextualDeserializer,
+  ///   required SerializationProvider<Document<T>, T> primaryTopicSerializationProvider,
   /// });
   /// ```
   ///
   /// **Consumer Implementation**:
   /// ```dart
   /// final mapper = DocumentMapper<Person>(
-  ///   primaryTopicContextualSerializer: (parent, parentSubject, context) =>
-  ///     PersonMapper(documentIriProvider: () => parentSubject.iri),
-  ///   primaryTopicContextualDeserializer: (parentSubject, context) =>
-  ///     PersonMapper(documentIriProvider: () => parentSubject.iri),
+  ///   primaryTopicSerializationProvider:
+  ///     SerializationProvider.iriContextual((IriTerm iri) =>
+  ///       PersonMapper(documentIriProvider: () => iri.iri)),
   /// );
   /// ```
   ///
-  /// The contextual factory functions are called during serialization/deserialization
-  /// to obtain the appropriate mapper for the current context.
+  /// The SerializationProvider encapsulates both serializer and deserializer creation
+  /// based on the parent context, providing a more cohesive API.
   ///
   /// **Compatibility**: Cannot be used together with iri/literal/globalResource/localResource
   /// parameters as contextual mapping provides its own serialization strategy.
