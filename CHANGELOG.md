@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Contextual Property Mapping**: New `contextual` parameter for `@RdfProperty` annotation enables properties to access parent object, parent subject, and full context during RDF operations
 - **ContextualMapping class**: Configuration class for contextual property mapping with `ContextualMapping.named()` factory method
 - Enables complex scenarios like computing dependent object IRIs based on parent properties or creating nested resources that reference their container
+- **Global Unmapped Triples**: New `globalUnmapped` parameter for `@RdfUnmappedTriples` annotation enables collecting unmapped triples from entire graph instead of just current subject. Designed for top-level document classes like Solid WebID/Profile Documents.
 
 ## [0.10.0] - 2025-07-25
 

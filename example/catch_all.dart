@@ -52,6 +52,7 @@ class Person {
   /// - https://example.org/customProperty "custom value"
   ///
   /// These properties are preserved during round-trip serialization.
+  /// Note: This uses the default subject-scoped collection.
   @RdfUnmappedTriples()
   final RdfGraph unmappedProperties;
 
@@ -62,6 +63,48 @@ class Person {
     this.address,
     RdfGraph? unmappedProperties,
   }) : unmappedProperties = unmappedProperties ?? RdfGraph(triples: []);
+}
+
+/// Example of a top-level document class using global unmapped triples collection.
+///
+/// This demonstrates the recommended pattern for using @RdfUnmappedTriples with
+/// globalUnmapped=true - only on a single, top-level document container class
+/// like a Solid WebID/Profile Document.
+@RdfGlobalResource(
+  IriTerm.prevalidated("https://example.org/vocab/ProfileDocument"),
+  IriStrategy("https://example.org/profiles/{profileId}"),
+)
+class ProfileDocument {
+  /// Unique identifier for the profile document
+  @RdfIriPart("profileId")
+  final String profileId;
+
+  /// The primary person described by this profile document
+  @RdfProperty(IriTerm.prevalidated("https://example.org/vocab/primaryTopic"))
+  final Person primaryTopic;
+
+  /// Additional people mentioned in the profile (just URIs, not full data)
+  @RdfProperty(IriTerm.prevalidated("https://example.org/vocab/knows"))
+  final List<Uri> knownPeople;
+
+  /// Captures ALL unmapped triples from the entire document graph.
+  ///
+  /// This includes unmapped triples from:
+  /// - The document itself
+  /// - The primary person (full object data)
+  /// - Any other subjects referenced in the document
+  /// - Any blank nodes referenced by these entities
+  ///
+  /// WARNING: Only use globalUnmapped=true on ONE top-level class per application.
+  @RdfUnmappedTriples(globalUnmapped: true)
+  final RdfGraph globalUnmappedTriples;
+
+  ProfileDocument({
+    required this.profileId,
+    required this.primaryTopic,
+    this.knownPeople = const [],
+    RdfGraph? globalUnmappedTriples,
+  }) : globalUnmappedTriples = globalUnmappedTriples ?? RdfGraph(triples: []);
 }
 
 /// Example usage showing both lossless mapping and RdfGraph properties:
