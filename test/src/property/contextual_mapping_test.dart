@@ -4,7 +4,8 @@ import 'package:rdf_mapper_annotations/src/property/contextual_mapping.dart';
 
 void main() {
   group('ContextualMapping', () {
-    test('namedProvider constructor creates mapping with correct mapper name', () {
+    test('namedProvider constructor creates mapping with correct mapper name',
+        () {
       final mapping = ContextualMapping.namedProvider('example');
       expect(mapping.mapper, isNotNull);
       expect(mapping.mapper!.name, equals('example'));
@@ -36,7 +37,8 @@ void main() {
       expect(mapping1.mapper!.name, equals(mapping2.mapper!.name));
     });
 
-    test('named mappings with different names have different mapper references', () {
+    test('named mappings with different names have different mapper references',
+        () {
       final mapping1 = ContextualMapping.namedProvider('first');
       final mapping2 = ContextualMapping.namedProvider('second');
 
@@ -45,13 +47,14 @@ void main() {
       expect(mapping1.mapper!.name, isNot(equals(mapping2.mapper!.name)));
     });
 
-    test('different constructor types create different mapping configurations', () {
+    test('different constructor types create different mapping configurations',
+        () {
       final namedMapping = ContextualMapping.namedProvider('test');
       final typeMapping = ContextualMapping.provider(SerializationProvider);
-      
+
       expect(namedMapping.mapper!.name, isNotNull);
       expect(namedMapping.mapper!.type, isNull);
-      
+
       expect(typeMapping.mapper!.name, isNull);
       expect(typeMapping.mapper!.type, isNotNull);
     });

@@ -116,7 +116,7 @@ class Person {
 /// void main() {
 ///   // Initialize the RDF mapper
 ///   RdfMapper mapper = initRdfMapper();
-///   
+///
 ///   // Create a Person instance with realistic data
 ///   final person = Person(
 ///     name: 'Klas Kalass',
@@ -152,11 +152,11 @@ class Person {
 ///   // Now test round-trip with additional unmapped data
 ///   final extendedTurtle = '''
 ///     ${turtle}
-///     
+///
 ///     # Additional document metadata (will be captured in unmapped)
 ///     <http://example.org/card> <https://example.org/version> "1.2" .
 ///     <http://example.org/card> <https://example.org/lastModified> "2025-08-13T10:30:00Z" .
-///     
+///
 ///     # Additional unrelated entity (will be captured in unmapped)
 ///     <http://example.org/workOrg> a <http://xmlns.com/foaf/0.1/Organization> ;
 ///       <http://xmlns.com/foaf/0.1/name> "Example Corp" ;

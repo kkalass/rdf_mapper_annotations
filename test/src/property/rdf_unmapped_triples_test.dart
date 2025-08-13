@@ -35,7 +35,8 @@ void main() {
     test('instances with different globalUnmapped values are different', () {
       const annotation1 = RdfUnmappedTriples(globalUnmapped: true);
       const annotation2 = RdfUnmappedTriples(globalUnmapped: false);
-      expect(annotation1.globalUnmapped, isNot(equals(annotation2.globalUnmapped)));
+      expect(annotation1.globalUnmapped,
+          isNot(equals(annotation2.globalUnmapped)));
     });
 
     test('constructor is const', () {
@@ -43,7 +44,7 @@ void main() {
       const annotation1 = RdfUnmappedTriples();
       const annotation2 = RdfUnmappedTriples(globalUnmapped: false);
       const annotation3 = RdfUnmappedTriples(globalUnmapped: true);
-      
+
       expect(annotation1, isA<RdfUnmappedTriples>());
       expect(annotation2, isA<RdfUnmappedTriples>());
       expect(annotation3, isA<RdfUnmappedTriples>());
