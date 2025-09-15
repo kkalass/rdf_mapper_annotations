@@ -63,6 +63,7 @@ It provides a unified approach to specify mapper selection strategies:</p>
 <li>By name: Use dependency injection to supply a mapper at runtime</li>
 <li>By type: Automatically instantiate a mapper from a given class type</li>
 <li>By instance: Use a pre-configured mapper instance directly</li>
+<li>By factory: Use a factory function to create mappers with optional configuration</li>
 </ol>
 <p>This abstraction enables consistent constructor patterns across all mapping types
 while maintaining type safety with the generic parameter <code>M</code> defining the expected
@@ -103,7 +104,7 @@ foundation for specialized mapping classes.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="BaseMapping.new" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/BaseMapping.html">BaseMapping.new</a></span><span class="signature">({<span class="parameter" id="-param-mapperName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">mapperName</span>, </span><span class="parameter" id="-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a>?</span> <span class="parameter-name">mapperType</span>, </span><span class="parameter" id="-param-mapperInstance"><span class="type-annotation">M?</span> <span class="parameter-name">mapperInstance</span></span>})</span>
+          <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/BaseMapping.html">BaseMapping.new</a></span><span class="signature">({<span class="parameter" id="-param-mapperName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">mapperName</span>, </span><span class="parameter" id="-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a>?</span> <span class="parameter-name">mapperType</span>, </span><span class="parameter" id="-param-mapperInstance"><span class="type-annotation">M?</span> <span class="parameter-name">mapperInstance</span>, </span><span class="parameter" id="-param-factoryName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">factoryName</span>, </span><span class="parameter" id="-param-factoryConfigInstance"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">factoryConfigInstance</span></span>})</span>
         </dt>
         <dd>
           Creates a base resource mapping with the specified class IRI and mapper configuration.
@@ -121,6 +122,13 @@ foundation for specialized mapping classes.</p>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+        <dt id="BaseMapping.namedFactory" class="callable">
+          <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/BaseMapping.namedFactory.html">BaseMapping.namedFactory</a></span><span class="signature">(<span class="parameter" id="namedFactory-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, [</span><span class="parameter" id="namedFactory-param-configInstance"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">configInstance</span></span>])</span>
+        </dt>
+        <dd>
+          Creates a reference to a named factory function for creating mappers.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="BaseMapping.namedMapper" class="callable">
@@ -259,7 +267,7 @@ foundation for specialized mapping classes.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.1
+      0.10.2
   </span>
   
 </footer>

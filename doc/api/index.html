@@ -407,6 +407,33 @@ class ChapterIdMapper implements IriTermMapper&lt;(String bookId, int chapterId)
 </ul>
 <hr>
 <h2 id="advanced-features">Advanced Features</h2>
+<h3 id="custom-annotation-classes">Custom Annotation Classes</h3>
+<p>Create domain-specific annotations by subclassing existing annotation classes:</p>
+<pre class="language-dart"><code class="language-dart">enum PodIriStrategy { twoTwoDigitDirs, noDirs }
+
+class PodResource extends RdfGlobalResource {
+  const PodResource.twoTwoDigits(IriTerm classIri)
+      : super(
+            classIri,
+            const IriStrategy.namedFactory(r'$podIriStrategyFactory$', PodIriStrategy.twoTwoDigitDirs),
+            registerGlobally: true);
+
+  const PodResource.noDirs(IriTerm classIri)
+      : super(
+            classIri,
+            const IriStrategy.namedFactory(r'$podIriStrategyFactory$', PodIriStrategy.noDirs),
+            registerGlobally: true);
+}
+
+// Usage
+@PodResource.twoTwoDigits(SchemaPerson.classIri)
+class Person {
+  @RdfIriPart()
+  final String id;
+  // ...
+}
+</code></pre>
+<p><strong>Important limitations</strong>: Due to Dart's const requirements for annotations, subclassing is only useful for predefined configurations switched between using named constructors. You can only pass through parameters to the super constructor and provide compile-time constants to the super constructor - no dynamic parameterization is possible.</p>
 <h3 id="custom-types-and-literals">Custom Types and Literals</h3>
 <p>Create custom types with specialized serialization:</p>
 <pre class="language-dart"><code class="language-dart">@RdfLiteral()
@@ -882,7 +909,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.1
+      0.10.2
   </span>
   
 </footer>
