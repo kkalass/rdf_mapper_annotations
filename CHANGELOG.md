@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2025-09-15
+
+### Added
+- **Factory constructor support**: New `IriStrategy.namedFactory()` and `IriMapping.namedFactory()` constructors enable factory functions with generic type parameters for type-safe coordination between mappers
+- **Enhanced factory pattern**: Factory functions can receive configuration instances for coordinated IRI generation, particularly useful for pod-based URI coordination use cases
+- **Custom annotation documentation**: Added comprehensive documentation for creating domain-specific annotations by subclassing existing annotation classes like `RdfGlobalResource`, with practical examples including const requirements and limitations
+
+### Enhanced
+- **Improved base mapping infrastructure**: Enhanced `BaseMapping` class to support factory pattern with better type safety and configuration passing
+- **Extended IRI strategy examples**: Updated `example/example_iri_strategies.dart` with pod-coordinated IRI generation demonstrations
+- **Better development tooling**: Updated README with clearer guidance on custom annotation creation via subclassing
+
+### Changed
+- **Dependency updates**: Updated `build_runner` to `^2.8.0` and `mockito` to `^5.5.1` for latest tooling improvements
+- **Enhanced testing**: Added comprehensive tests for new factory constructors and coordination patterns
+
 ## [0.10.1] - 2025-08-13
 
 ### Added
