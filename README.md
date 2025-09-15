@@ -396,6 +396,38 @@ This is especially valuable for:
 
 ## Advanced Features
 
+### Custom Annotation Classes
+
+Create domain-specific annotations by subclassing existing annotation classes:
+
+```dart
+enum PodIriStrategy { twoTwoDigitDirs, noDirs }
+
+class PodResource extends RdfGlobalResource {
+  const PodResource.twoTwoDigits(IriTerm classIri)
+      : super(
+            classIri,
+            const IriStrategy.namedFactory(r'$podIriStrategyFactory$', PodIriStrategy.twoTwoDigitDirs),
+            registerGlobally: true);
+
+  const PodResource.noDirs(IriTerm classIri)
+      : super(
+            classIri,
+            const IriStrategy.namedFactory(r'$podIriStrategyFactory$', PodIriStrategy.noDirs),
+            registerGlobally: true);
+}
+
+// Usage
+@PodResource.twoTwoDigits(SchemaPerson.classIri)
+class Person {
+  @RdfIriPart()
+  final String id;
+  // ...
+}
+```
+
+**Important limitations**: Due to Dart's const requirements for annotations, subclassing is only useful for predefined configurations switched between using named constructors. You can only pass through parameters to the super constructor and provide compile-time constants to the super constructor - no dynamic parameterization is possible.
+
 ### Custom Types and Literals
 
 Create custom types with specialized serialization:
