@@ -101,6 +101,33 @@ void main() {
       expect(mapping.mapper!.type, isNull);
       expect(mapping.mapper!.instance, equals(mapperInstance));
     });
+
+    test('namedFactory constructor without config type', () {
+      const factoryName = 'testFactory';
+      final mapping = IriMapping.namedFactory(factoryName);
+
+      expect(mapping.template, isNull);
+      expect(mapping.mapper, isNotNull);
+      expect(mapping.mapper!.name, isNull);
+      expect(mapping.mapper!.type, isNull);
+      expect(mapping.mapper!.instance, isNull);
+      expect(mapping.mapper!.factoryName, equals(factoryName));
+      expect(mapping.mapper!.factoryConfigInstance, isNull);
+    });
+
+    test('namedFactory constructor with config instance', () {
+      const factoryName = 'testFactory';
+      const configInstance = 'testConfig';
+      final mapping = IriMapping.namedFactory(factoryName, configInstance);
+
+      expect(mapping.template, isNull);
+      expect(mapping.mapper, isNotNull);
+      expect(mapping.mapper!.name, isNull);
+      expect(mapping.mapper!.type, isNull);
+      expect(mapping.mapper!.instance, isNull);
+      expect(mapping.mapper!.factoryName, equals(factoryName));
+      expect(mapping.mapper!.factoryConfigInstance, equals(configInstance));
+    });
   });
 
   group('IriStrategy', () {
@@ -142,6 +169,32 @@ void main() {
       expect(strategy.mapper!.name, isNull);
       expect(strategy.mapper!.type, isNull);
       expect(strategy.mapper!.instance, equals(mapperInstance));
+    });
+
+    test('namedFactory constructor without config type', () {
+      const factoryName = 'testStrategyFactory';
+      final strategy = IriStrategy.namedFactory(factoryName);
+
+      expect(strategy.template, isNull);
+      expect(strategy.mapper, isNotNull);
+      expect(strategy.mapper!.name, isNull);
+      expect(strategy.mapper!.type, isNull);
+      expect(strategy.mapper!.instance, isNull);
+      expect(strategy.mapper!.factoryName, equals(factoryName));
+      expect(strategy.mapper!.factoryConfigInstance, isNull);
+    });
+
+    test('namedFactory constructor with type as config instance', () {
+      const factoryName = 'testStrategyFactory';
+      final strategy = IriStrategy.namedFactory(factoryName, String);
+
+      expect(strategy.template, isNull);
+      expect(strategy.mapper, isNotNull);
+      expect(strategy.mapper!.name, isNull);
+      expect(strategy.mapper!.type, isNull);
+      expect(strategy.mapper!.instance, isNull);
+      expect(strategy.mapper!.factoryName, equals(factoryName));
+      expect(strategy.mapper!.factoryConfigInstance, equals(String));
     });
   });
 

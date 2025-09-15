@@ -39,6 +39,25 @@ class UserReference {
   UserReference(this.username);
 }
 
+// The actual document type that uses pod-coordinated IRI generation
+// This demonstrates how solid-crdt-sync coordinates storage for actual entities
+@RdfGlobalResource(
+  SchemaBook.classIri,
+  IriStrategy.namedFactory('podIriStrategyFactory')
+)
+class Document {
+  @RdfIriPart()
+  final String id;
+
+  @RdfProperty(SchemaBook.name)
+  final String title;
+
+  @RdfProperty(SchemaBook.text)
+  final String content;
+
+  Document({required this.id, required this.title, required this.content});
+}
+
 // This represents a custom mapper implementation for UserProfile that needs
 // to be provided by the developer at runtime.
 class UserReferenceMapper implements IriTermMapper<UserReference> {
@@ -62,6 +81,49 @@ class UserReferenceMapper implements IriTermMapper<UserReference> {
     }
 
     throw FormatException('Invalid UserProfile IRI format: ${term.iri}');
+  }
+}
+
+// Factory function for pod IRI strategy - receives the target type
+// Called when instantiating mappers for Document class
+IriTermMapper<(String,)> createPodIriStrategyMapper<T>() {
+  return IriStrategyMapper(targetType: T);
+}
+
+// Generic IRI strategy mapper - works with any target type
+// Receives the target type (e.g., Document) as constructor parameter
+class IriStrategyMapper implements IriTermMapper<(String,)> {
+  final Type targetType;
+  // In real implementation: final PodCoordinator coordinator; final Config config;
+
+  IriStrategyMapper({required this.targetType});
+
+  @override
+  IriTerm toRdfTerm((String,) value, SerializationContext context) {
+    final (id,) = value;
+    // In a real solid-crdt-sync implementation, this would:
+    // 1. Look up targetType (e.g., Document) in the pod's type index
+    // 2. Apply storage policies specific to this type
+    // 3. Coordinate with other instances to avoid conflicts
+    // 4. Use pod-specific namespace strategies
+
+    // For this example, simulate type-aware coordination:
+    final typeName = targetType.toString().toLowerCase();
+    return IriTerm('https://alice.pod.example.org/$typeName/${id.substring(0, 2)}/$id');
+  }
+
+  @override
+  (String,) fromRdfTerm(IriTerm term, DeserializationContext context) {
+    final uri = Uri.parse(term.iri);
+    final segments = uri.pathSegments;
+
+    // Parse the pod-coordinated IRI structure for any type
+    if (segments.length >= 3) {
+      final id = segments[2];
+      return (id,);
+    }
+
+    throw FormatException('Invalid pod IRI format for ${targetType}: ${term.iri}');
   }
 }
 
@@ -169,13 +231,17 @@ class ChapterIdMapper implements IriTermMapper<(String bookId, int chapterId)> {
 void initRdfMapper({
   required IriTermMapper<UserReference> userReferenceMapper,
   required IriTermMapper<(String bookId, int chapterId)> chapterIdMapper,
+  required IriTermMapper<(String,)> Function<T>() podIriStrategyFactory,
 }) {
   // Register the custom mappers with the RDF mapper system
   print('Registering UserReferenceMapper: $userReferenceMapper');
-  print('Registering SectionIdMapper: $chapterIdMapper');
+  print('Registering ChapterIdMapper: $chapterIdMapper');
+  print('Registering PodIriStrategyFactory: $podIriStrategyFactory');
 
   // In a real implementation, these would be registered with a mapper registry
-  // ...
+  // The Document class would use the strategy factory for its IRI generation
+  final documentIriMapper = podIriStrategyFactory<Document>();
+  print('Created pod-coordinated Document IRI mapper for type ${Document}: $documentIriMapper');
 }
 
 // -- Back to your code --
@@ -188,6 +254,7 @@ void main() {
   initRdfMapper(
     userReferenceMapper: UserReferenceMapper(baseUrl: baseUrl),
     chapterIdMapper: ChapterIdMapper(baseUrl: baseUrl),
+    podIriStrategyFactory: createPodIriStrategyMapper, // Pod-coordinated IRI strategy
   );
 
   // Create sample data
@@ -196,6 +263,7 @@ void main() {
   final user = UserReference('johndoe');
   final book = SimpleBook('hobbit', 'The Hobbit');
   final chapter = Chapter('hobbit', 3, 'Riddles in the Dark');
+  final document = Document(id: 'abc123def', title: 'My Document', content: 'Some content');
 
   // Example IRIs that would be generated
   print('ISBN IRI: ${isbn.value} => urn:isbn:9780261102217');
@@ -203,8 +271,11 @@ void main() {
   print(
     'User Profile IRI: ${user.username} => https://example.org/users/johndoe',
   );
-  print('Book IRI: ${book.id} => https://library.example.org/books/hobbit');
+  print('Book IRI: ${book.id} => https://library.example.org/books/hobbit.ttl');
   print(
-    'Chapter IRI: ${chapter.chapterNumber} => https://example.org/books/hobbit/chapters/3/sections/riddles',
+    'Chapter IRI: ${chapter.bookId}/${chapter.chapterNumber} => https://example.org/books/hobbit/chapters/3',
+  );
+  print(
+    'Document IRI: ${document.id} => https://alice.pod.example.org/document/ab/abc123def (pod-coordinated)',
   );
 }

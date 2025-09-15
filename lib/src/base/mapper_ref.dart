@@ -19,6 +19,19 @@ class MapperRef<M> {
   /// instances with specific behaviors.
   final M? instance;
 
+  /// The name to use for the factory parameter in the generated `initRdfMapper`
+  /// method. Enables dependency injection of factory functions that create mappers.
+  final String? factoryName;
+
+  /// The configuration instance to pass to the factory function, if any.
+  final Object? factoryConfigInstance;
+
   /// Creates a mapper reference with optional injection configuration.
-  const MapperRef({this.name, this.type, this.instance});
+  const MapperRef({
+    this.name,
+    this.type,
+    this.instance,
+    this.factoryName,
+    this.factoryConfigInstance,
+  });
 }

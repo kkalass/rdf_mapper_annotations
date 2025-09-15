@@ -18,6 +18,9 @@ dart tool/run_tests.dart
 
 # Run specific test
 dart test test/path/to/specific_test.dart
+
+# Run tests with coverage (CI equivalent)
+dart test --coverage=coverage
 ```
 
 ### Code Quality
@@ -93,3 +96,5 @@ The annotation system supports multiple mapping approaches:
 - Generated code assumes this package's types are available at runtime
 - Examples in `/example/` directory demonstrate real-world usage patterns
 - Comprehensive test coverage maintained with target >90%
+- The project uses Dart SDK '^3.6.0' and follows standard Dart package conventions
+- CI runs on every push/PR and includes coverage reporting to Codecov

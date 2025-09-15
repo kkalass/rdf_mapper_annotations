@@ -773,6 +773,95 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   const IriMapping.mapperInstance(IriTermMapper instance)
       : template = null,
         super.mapperInstance(instance);
+
+  /// Creates a reference to a named factory function for creating IRI mappers.
+  ///
+  /// Use this constructor when you want to provide a factory function that creates
+  /// `IriTermMapper` instances dynamically for this specific property. This is
+  /// particularly useful when the property mapping needs to be coordinated with
+  /// other systems or requires runtime configuration.
+  ///
+  /// The factory function is called with the type of the property this mapping
+  /// is applied to, and optionally a configuration object if [configInstance] is
+  /// specified. This allows sophisticated mapping strategies that adapt to the
+  /// specific property type and context.
+  ///
+  /// When using this approach, you must:
+  /// 1. Implement a factory function with the appropriate signature
+  /// 2. Provide the factory function as a named parameter to `initRdfMapper`
+  ///
+  /// This approach is ideal for:
+  /// - Property-specific mapping that needs coordination with external systems
+  /// - IRI generation that depends on runtime configuration or storage policies
+  ///
+  /// **Important**: The mapper created by this factory is only used for the specific
+  /// property where this mapping is applied. It is not registered globally and won't
+  /// be available for other mappers or direct lookup.
+  ///
+  /// ## Factory Function Signatures
+  ///
+  /// The generated factory function signature depends on whether [configInstance] is provided:
+  ///
+  /// **Without configuration:**
+  /// ```dart
+  /// IriTermMapper<T> Function<T>() factoryName
+  /// ```
+  ///
+  /// **With configuration:**
+  /// ```dart
+  /// IriTermMapper<T> Function<T>(ConfigType config) factoryName
+  /// ```
+  ///
+  /// Where `T` is the type of the property this mapping is applied to (currently only String is supported),
+  /// and `ConfigType` is the type of the configuration object provided.
+  ///
+  /// ## Example
+  ///
+  /// **Factory with the target type as configuration object:**
+  /// 
+  /// This works together with the Solid Pod example from [IriStrategy.namedFactory]
+  /// where a single strategy mapper implements complex, pod specific IRI logic.
+  /// The IriMapping is for creating IRIs for properties as a reference, so in
+  /// this example we want to reference a User in the same Pod. So we also use
+  /// a namedFactory, but we pass the target type (User) as configInstance to tell
+  /// the named factory that we need references to Users. The named factory `podIriReferenceFactory` here
+  /// is expected to work together with the named factory `podIriFactory` for the [IriStrategy.namedFactory] example,
+  /// so that the same Pod IRI logic is used for both creating the User resource
+  /// and for creating references to Users.
+  ///
+  /// ```dart
+  ///
+  /// @RdfProperty(
+  ///   SchemaPerson.identifier,
+  ///   iri: IriMapping.namedFactory('podIriReferenceFactory', User)
+  /// )
+  /// final String userRef;
+  ///
+  /// // Factory function with generic type parameter and config:
+  /// IriTermMapper<T> createPodIriReferenceMapper<T>(Type targetType) {
+  ///   // actually, we can only support String properties here
+  ///   if (T != String) {
+  ///     throw ArgumentError('Only String properties are supported for IriMapping');
+  ///   }
+  ///   return PodIriReferenceMapper(
+  ///     targetType: targetType,
+  ///     // podCoordinator would be available in the scope where the factory is defined
+  ///     coordinator: podCoordinator,
+  ///   );
+  /// }
+  ///
+  /// final rdfMapper = initRdfMapper(
+  ///   podIriReferenceFactory: createPodIriReferenceMapper,
+  ///   // Note: userConfig is embedded in generated code, not passed here
+  /// );
+  /// // Generated code within initRdfMapper calls: podIriReferenceFactory<String>(User)
+  /// ```
+  ///
+  /// This factory approach enables sophisticated property-level coordination while
+  /// maintaining clean separation between global and property-specific mapping strategies.
+  const IriMapping.namedFactory(String name, [Object? configInstance])
+      : template = null,
+        super.namedFactory(name, configInstance);
 }
 
 /// Defines the strategy for generating IRIs for RDF resources.
@@ -1076,6 +1165,104 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   const IriStrategy.mapperInstance(IriTermMapper instance)
       : template = null,
         super.mapperInstance(instance);
+
+  /// Creates a reference to a named factory function for creating IRI mappers.
+  ///
+  /// Use this constructor when you want to provide a factory function that creates
+  /// `IriTermMapper` instances dynamically. This is particularly useful for libraries
+  /// that need to coordinate IRI generation across multiple types with a single,
+  /// shared configuration and strategy.
+  ///
+  /// The factory function is called with the specific record type inferred from this
+  /// class's `@RdfIriPart` annotations, and optionally a configuration object if
+  /// [configInstance] is specified. This allows a single factory to handle different
+  /// classes while maintaining type safety.
+  ///
+  /// When using this approach, you must:
+  /// 1. Implement a factory function with the appropriate signature
+  /// 2. Provide the factory function as a named parameter to `initRdfMapper`
+  ///
+  /// This approach is ideal for:
+  /// - Libraries that need to coordinate IRI generation across all stored types
+  /// - Pod-based storage systems where IRI allocation requires coordination
+  ///
+  /// **Important:** When using custom factories with multiple IRI part properties,
+  /// use `@RdfIriPart.position(index)` to specify the order of fields in the record
+  /// that will be passed to your factory-created mapper.
+  ///
+  /// ## Factory Function Signatures
+  ///
+  /// The generated factory function signature depends on whether [configInstance] is provided:
+  ///
+  /// **Without configuration:**
+  /// ```dart
+  /// IriTermMapper<RecordType> Function<T>() factoryName
+  /// ```
+  ///
+  /// **With configuration:**
+  /// ```dart
+  /// IriTermMapper<RecordType> Function<T>(ConfigType config) factoryName
+  /// ```
+  ///
+  /// Where `RecordType` is inferred from the `@RdfIriPart` annotations on this specific class,
+  /// `T` is the class of the resource being mapped, and `ConfigType` is the type of the configuration object.
+  ///
+  /// ## Examples
+  ///
+  /// **Simple factory without configuration:**
+  /// ```dart
+  /// @RdfGlobalResource(Person.classIri, IriStrategy.namedFactory('podIriFactory'))
+  /// class Person {
+  ///   @RdfIriPart()
+  ///   final String id;
+  ///   // ...
+  /// }
+  ///
+  /// // Factory function with generic type parameter:
+  /// IriTermMapper<(String,)> createIriMapper<T>() {
+  ///   return IriStrategyMapper<(String,)>(targetType: T, coordinator: globalPodCoordinator);
+  /// }
+  ///
+  /// final rdfMapper = initRdfMapper(podIriFactory: createIriMapper);
+  /// ```
+  ///
+  /// **Factory with configuration:**
+  /// ```dart
+  /// @RdfGlobalResource(
+  ///   Document.classIri,
+  ///   IriStrategy.namedFactory('podIriFactory', PodConfig(storagePolicy: 'distributed'))
+  /// )
+  /// class Document {
+  ///   @RdfIriPart.position(1)
+  ///   final String documentId;
+  ///   // ...
+  /// }
+  ///
+  /// // Factory function with generic type parameter and config:
+  /// IriTermMapper<(String,)> createIriMapper<T>(PodConfig config) {
+  ///   return DocumentIriMapper<(String,)>(
+  ///     targetType: T,
+  ///     // podCoordinator would be available in the scope where the factory is defined
+  ///     coordinator: podCoordinator,
+  ///     storagePolicy: config.storagePolicy
+  ///   );
+  /// }
+  ///
+  /// final rdfMapper = initRdfMapper(
+  ///   podIriFactory: createDocumentIriMapper,
+  ///   // Note: podConfig is embedded in generated code, not passed here
+  /// );
+  /// // Generated code within initRdfMapper calls `podIriFactory<Document>(PodConfig(storagePolicy: 'distributed'))`
+  /// // and provides the returned mapper to the Document resource mapper
+  /// ```
+  ///
+  /// The factory approach enables sophisticated coordination strategies while maintaining
+  /// the simplicity of annotation-driven configuration. The factory function can access
+  /// shared resources, configuration, or coordination services to ensure consistent
+  /// IRI allocation patterns across your application.
+  const IriStrategy.namedFactory(String name, [Object? configInstance])
+      : template = null,
+        super.namedFactory(name, configInstance);
 }
 
 /// Marks a property as a part of the IRI for the enclosing class.

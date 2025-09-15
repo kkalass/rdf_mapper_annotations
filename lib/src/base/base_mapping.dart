@@ -10,6 +10,7 @@ import 'package:rdf_mapper_annotations/rdf_mapper_annotations.dart';
 /// 1. By name: Use dependency injection to supply a mapper at runtime
 /// 2. By type: Automatically instantiate a mapper from a given class type
 /// 3. By instance: Use a pre-configured mapper instance directly
+/// 4. By factory: Use a factory function to create mappers with optional configuration
 ///
 /// This abstraction enables consistent constructor patterns across all mapping types
 /// while maintaining type safety with the generic parameter [M] defining the expected
@@ -28,27 +29,42 @@ abstract class BaseMapping<M> {
   /// The mapper instance to use directly when provided.
   final M? _mapperInstance;
 
+  /// The name to use for the factory parameter in the generated `initRdfMapper`
+  /// method when using named factory injection.
+  final String? _factoryName;
+
+  /// The configuration instance to pass to the factory function, if any.
+  final Object? _factoryConfigInstance;
+
   /// Creates a base resource mapping with the specified class IRI and mapper configuration.
   const BaseMapping({
     String? mapperName,
     Type? mapperType,
     M? mapperInstance,
+    String? factoryName,
+    Object? factoryConfigInstance,
   })  : _mapperName = mapperName,
         _mapperType = mapperType,
-        _mapperInstance = mapperInstance;
+        _mapperInstance = mapperInstance,
+        _factoryName = factoryName,
+        _factoryConfigInstance = factoryConfigInstance;
 
   /// Provides a [MapperRef] if a custom mapper is specified.
   ///
   /// Returns a MapperRef instance if any mapper configuration is provided
-  /// (name, type, or instance), otherwise returns null.
-  MapperRef<M>? get mapper =>
-      (_mapperName != null || _mapperInstance != null || _mapperType != null)
-          ? MapperRef(
-              name: _mapperName,
-              instance: _mapperInstance,
-              type: _mapperType,
-            )
-          : null;
+  /// (name, type, instance, or factory), otherwise returns null.
+  MapperRef<M>? get mapper => (_mapperName != null ||
+          _mapperInstance != null ||
+          _mapperType != null ||
+          _factoryName != null)
+      ? MapperRef(
+          name: _mapperName,
+          instance: _mapperInstance,
+          type: _mapperType,
+          factoryName: _factoryName,
+          factoryConfigInstance: _factoryConfigInstance,
+        )
+      : null;
 
   /// Creates a reference to a named mapper that will be injected at runtime.
   ///
@@ -78,7 +94,9 @@ abstract class BaseMapping<M> {
   const BaseMapping.namedMapper(String name)
       : _mapperName = name,
         _mapperType = null,
-        _mapperInstance = null;
+        _mapperInstance = null,
+        _factoryName = null,
+        _factoryConfigInstance = null;
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
   ///
@@ -104,7 +122,9 @@ abstract class BaseMapping<M> {
   const BaseMapping.mapper(Type mapperType)
       : _mapperName = null,
         _mapperType = mapperType,
-        _mapperInstance = null;
+        _mapperInstance = null,
+        _factoryName = null,
+        _factoryConfigInstance = null;
 
   /// Creates a reference to a directly provided mapper instance.
   ///
@@ -133,7 +153,65 @@ abstract class BaseMapping<M> {
   const BaseMapping.mapperInstance(M instance)
       : _mapperName = null,
         _mapperType = null,
-        _mapperInstance = instance;
+        _mapperInstance = instance,
+        _factoryName = null,
+        _factoryConfigInstance = null;
+
+  /// Creates a reference to a named factory function for creating mappers.
+  ///
+  /// Use this constructor when you want to provide a factory function that creates
+  /// mapper instances dynamically. This is particularly useful for libraries that
+  /// need to coordinate mapping across multiple types with a single, shared
+  /// configuration and strategy.
+  ///
+  /// The factory function is called with the specific type information for this
+  /// class, and optionally the configuration object if [configInstance] is specified.
+  /// This allows a single factory to handle different classes while maintaining
+  /// type safety.
+  ///
+  /// When using this approach, you must:
+  /// 1. Implement a factory function with the appropriate signature
+  /// 2. Provide the factory function as a named parameter to `initRdfMapper`
+  ///
+  /// This approach is ideal for:
+  /// - Libraries that need to coordinate mapping across all stored types
+  /// - Cases where a single authority needs to manage resource allocation
+  ///
+  /// The [name] will appear as a parameter name in the generated `initRdfMapper` function.
+  /// The optional [configInstance] specifies the configuration object instance that will
+  /// be passed to the factory function and thus influences the type signature of the factory function.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Configuration for pod coordination
+  /// const podConfig = PodConfig(storagePolicy: 'distributed');
+  ///
+  /// // Used in annotation
+  /// @RdfGlobalResource(
+  ///   Document.classIri,
+  ///   IriStrategy.namedFactory('podIriFactory', podConfig)
+  /// )
+  /// class Document { /* ... */ }
+  ///
+  /// // Factory function with type parameter and config:
+  /// IriTermMapper<(String,)> createPodIriMapper<T>(PodConfig config) {
+  ///   return PodIriMapper<(String,)>(
+  ///     targetType: T,
+  ///     storagePolicy: config.storagePolicy
+  ///   );
+  /// }
+  ///
+  /// // Generated initRdfMapper calls: podIriFactory<Document>(podConfig)
+  /// final rdfMapper = initRdfMapper(
+  ///   podIriFactory: createPodIriMapper,
+  /// );
+  /// ```
+  const BaseMapping.namedFactory(String name, [Object? configInstance])
+      : _mapperName = null,
+        _mapperType = null,
+        _mapperInstance = null,
+        _factoryName = name,
+        _factoryConfigInstance = configInstance;
 }
 
 abstract class BaseMappingAnnotation<M extends Mapper> extends BaseMapping<M>
@@ -165,4 +243,9 @@ abstract class BaseMappingAnnotation<M extends Mapper> extends BaseMapping<M>
   const BaseMappingAnnotation.mapperInstance(M instance)
       : registerGlobally = true,
         super.mapperInstance(instance);
+
+  const BaseMappingAnnotation.namedFactory(String name,
+      [Object? configInstance, bool registerGlobally = true])
+      : registerGlobally = registerGlobally,
+        super.namedFactory(name, configInstance);
 }
