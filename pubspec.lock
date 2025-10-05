@@ -341,10 +341,10 @@ packages:
     dependency: "direct main"
     description:
       name: rdf_mapper
-      sha256: "86eda5c4a70c5647e00015c161285c47c5d2089e1e944ed170d87534942e73aa"
+      sha256: c0814bdaf420f2c80a6af64e66556bf096e3584624afe64c4bf508ba11534a33
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.1"
+    version: "0.10.2"
   rdf_vocabularies_core:
     dependency: "direct main"
     description:
