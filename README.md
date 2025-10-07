@@ -394,7 +394,7 @@ For resources within the same document that differ only by their fragment identi
 ```dart
 @RdfGlobalResource(
   DocumentClass.classIri,
-  IriStrategy('tag:example.org,2025:document-{docId}', providedAs: 'documentIri')
+  IriStrategy('tag:example.org,2025:document-{docId}', 'documentIri')
 )
 class Document {
   @RdfIriPart()

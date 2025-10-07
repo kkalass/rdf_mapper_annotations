@@ -465,7 +465,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///
   /// @RdfGlobalResource(
   ///   DocumentClass.classIri,
-  ///   IriStrategy('tag:example.org,2025:document-{id}', providedAs: 'documentIri')
+  ///   IriStrategy('tag:example.org,2025:document-{id}', 'documentIri')
   /// )
   /// class Document {
   ///   @RdfIriPart()
@@ -971,7 +971,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// ```dart
   /// @RdfGlobalResource(
   ///   DocumentClass.classIri,
-  ///   IriStrategy('tag:example.org,2025:document-{docId}', providedAs: 'documentIri')
+  ///   IriStrategy('tag:example.org,2025:document-{docId}', 'documentIri')
   /// )
   /// class Document {
   ///   @RdfIriPart()
@@ -1520,7 +1520,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// ```dart
   /// @RdfGlobalResource(
   ///   DocumentClass.classIri,
-  ///   IriStrategy('tag:example.org,2025:document-{docId}', providedAs: 'documentIri')
+  ///   IriStrategy('tag:example.org,2025:document-{docId}', 'documentIri')
   /// )
   /// class Document {
   ///   @RdfIriPart()
@@ -1546,7 +1546,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// ```dart
   /// @RdfGlobalResource(
   ///   PageClass.classIri,
-  ///   IriStrategy('{+baseUri}/page/{pageId}', providedAs: 'pageIri')
+  ///   IriStrategy('{+baseUri}/page/{pageId}', 'pageIri')
   /// )
   /// class Page {
   ///   @RdfIriPart()
