@@ -418,6 +418,48 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   const RdfIri.mapperInstance(IriTermMapper instance)
       : template = null,
         super.mapperInstance(instance);
+
+  /// Creates an IRI mapping by appending a fragment to a base IRI.
+  ///
+  /// This constructor is specifically designed for classes that represent IRI terms which differ
+  /// from a base IRI only by their fragment identifier. It works with any URI scheme (hierarchical
+  /// like `https://` or non-hierarchical like `tag:`), making it ideal for identifier classes
+  /// that represent fragment-based references within a document.
+  ///
+  /// The [baseIriTemplate] is processed first and any existing fragment is automatically stripped.
+  /// Then the [fragmentTemplate] is appended with a `#` separator to create the final IRI.
+  ///
+  /// Both templates support the standard placeholder system:
+  /// - Property placeholders from `@RdfIriPart` annotated properties
+  /// - Context variables from global providers, `@RdfProvides`, or parent's `providedAs`
+  /// - Reserved expansion with `{+variable}` to preserve URI structure
+  ///
+  /// Example usage:
+  /// ```dart
+  /// @RdfIri.withFragment('{+documentIri}', 'section-{sectionId}')
+  /// class SectionReference {
+  ///   @RdfIriPart()
+  ///   final String sectionId;
+  ///
+  ///   SectionReference(this.sectionId);
+  /// }
+  ///
+  /// @RdfGlobalResource(
+  ///   DocumentClass.classIri,
+  ///   IriStrategy('tag:example.org,2025:document-{id}', providedAs: 'documentIri')
+  /// )
+  /// class Document {
+  ///   @RdfIriPart()
+  ///   final String id;
+  ///
+  ///   @RdfProperty(Vocab.currentSection)
+  ///   final SectionReference section;
+  ///   // Section IRI will be: tag:example.org,2025:document-123#section-intro
+  /// }
+  /// ```
+  const RdfIri.withFragment(String baseIriTemplate, String fragmentTemplate)
+      : template = '$baseIriTemplate#$fragmentTemplate',
+        super();
 }
 
 /// Configures mapping details for IRI terms in RDF at the property level.
@@ -868,6 +910,43 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   const IriMapping.namedFactory(String name, [Object? configInstance])
       : template = null,
         super.namedFactory(name, configInstance);
+
+  /// Creates a mapping for generating IRIs by appending a fragment to a base IRI.
+  ///
+  /// This constructor is specifically designed for creating property IRIs that differ from a base IRI
+  /// only by their fragment identifier. It works with any URI scheme (hierarchical like `https://`
+  /// or non-hierarchical like `tag:`), making it ideal for properties that reference resources
+  /// within the same document distinguished by fragments.
+  ///
+  /// The [baseIriTemplate] is processed first and any existing fragment is automatically stripped.
+  /// Then the [fragmentTemplate] is appended with a `#` separator to create the final IRI.
+  ///
+  /// Both templates support the standard placeholder system:
+  /// - Property placeholders corresponding to the annotated property's value
+  /// - Context variables from global providers, `@RdfProvides`, or parent's `providedAs`
+  /// - Reserved expansion with `{+variable}` to preserve URI structure
+  ///
+  /// Example usage:
+  /// ```dart
+  /// @RdfGlobalResource(
+  ///   DocumentClass.classIri,
+  ///   IriStrategy('tag:example.org,2025:document-{docId}', providedAs: 'documentIri')
+  /// )
+  /// class Document {
+  ///   @RdfIriPart()
+  ///   final String docId;
+  ///
+  ///   @RdfProperty(
+  ///     Vocab.relatedItem,
+  ///     iri: IriMapping.withFragment('{+documentIri}', 'item-{itemId}')
+  ///   )
+  ///   final String itemId;
+  ///   // Property IRI will be: tag:example.org,2025:document-123#item-456
+  /// }
+  /// ```
+  const IriMapping.withFragment(String baseIriTemplate, String fragmentTemplate)
+      : template = '$baseIriTemplate#$fragmentTemplate',
+        super();
 }
 
 /// Defines the strategy for generating IRIs for RDF resources.
@@ -1355,6 +1434,81 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
       : template = null,
         providedAs = providedAs,
         super.namedFactory(name, configInstance);
+
+  /// Creates a strategy for generating IRIs by appending a fragment to a base IRI.
+  ///
+  /// This constructor is specifically designed for creating IRIs that differ from a base IRI
+  /// only by their fragment identifier. It works with any URI scheme (hierarchical like `https://`
+  /// or non-hierarchical like `tag:`), making it ideal for resources within the same document
+  /// that are distinguished by fragments.
+  ///
+  /// The [baseIriTemplate] is processed first and any existing fragment is automatically stripped.
+  /// Then the [fragmentTemplate] is appended with a `#` separator to create the final IRI.
+  ///
+  /// Both templates support the standard placeholder system:
+  /// - Property placeholders from `@RdfIriPart` annotated properties
+  /// - Context variables from global providers, `@RdfProvides`, or parent's `providedAs`
+  /// - Reserved expansion with `{+variable}` to preserve URI structure
+  ///
+  /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
+  /// mappers under the specified name.
+  ///
+  /// Example with `tag:` URI:
+  /// ```dart
+  /// @RdfGlobalResource(
+  ///   DocumentClass.classIri,
+  ///   IriStrategy('tag:example.org,2025:document-{docId}', providedAs: 'documentIri')
+  /// )
+  /// class Document {
+  ///   @RdfIriPart()
+  ///   final String docId;
+  ///
+  ///   @RdfProperty(Vocab.hasItem)
+  ///   final List<Item> items;
+  /// }
+  ///
+  /// @RdfGlobalResource(
+  ///   ItemClass.classIri,
+  ///   IriStrategy.withFragment('{+documentIri}', 'item-{itemId}'),
+  ///   registerGlobally: false
+  /// )
+  /// class Item {
+  ///   @RdfIriPart()
+  ///   final String itemId;
+  ///   // IRI will be: tag:example.org,2025:document-123#item-456
+  /// }
+  /// ```
+  ///
+  /// Example with `https://` URI:
+  /// ```dart
+  /// @RdfGlobalResource(
+  ///   PageClass.classIri,
+  ///   IriStrategy('{+baseUri}/page/{pageId}', providedAs: 'pageIri')
+  /// )
+  /// class Page {
+  ///   @RdfIriPart()
+  ///   final String pageId;
+  ///
+  ///   @RdfProperty(Vocab.hasSection)
+  ///   final List<Section> sections;
+  /// }
+  ///
+  /// @RdfGlobalResource(
+  ///   SectionClass.classIri,
+  ///   IriStrategy.withFragment('{+pageIri}', 'section-{sectionId}'),
+  ///   registerGlobally: false
+  /// )
+  /// class Section {
+  ///   @RdfIriPart()
+  ///   final String sectionId;
+  ///   // IRI will be: https://example.org/page/123#section-intro
+  /// }
+  /// ```
+  const IriStrategy.withFragment(
+      String baseIriTemplate, String fragmentTemplate,
+      {this.providedAs})
+      : template = '$baseIriTemplate#$fragmentTemplate',
+        super();
 }
 
 /// Marks a property as a part of the IRI for the enclosing class.

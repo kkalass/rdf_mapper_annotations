@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Parent IRI Provider**: New `providedAs` parameter on `IriStrategy` enables resources to provide their own IRI to dependent mappers. This facilitates hierarchical IRI patterns where child resources need to reference their parent's IRI in their own IRI construction.
+- **Fragment-based IRI constructors**: New `withFragment` constructors for `IriStrategy`, `IriMapping`, and `RdfIri` enable creating IRIs by appending a fragment identifier to a base IRI. Works with any URI scheme (hierarchical like `https://` or non-hierarchical like `tag:`), making it ideal for resources within the same document that are distinguished by fragments.
 - **Complete context variable documentation**: Added comprehensive documentation across all relevant annotations (`IriStrategy`, `IriMapping`, `RdfIri`, `@RdfProvides`, `@RdfGlobalResource`, `@RdfProperty`) explaining all three methods of providing context variables: global providers, `@RdfProvides`, and the new `providedAs` parameter.
 - **README examples**: Added practical examples demonstrating all three context variable resolution approaches with real-world use cases.
 
