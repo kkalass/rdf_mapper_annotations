@@ -20,9 +20,9 @@ import 'package:rdf_vocabularies_core/rdf.dart' show Rdf;
 class CollectionVocab {
   static const _base = 'http://example.org/vocab#';
 
-  static const Library = IriTerm.prevalidated(_base + 'Library');
-  static const tags = IriTerm.prevalidated(_base + 'tags');
-  static const collaborators = IriTerm.prevalidated(_base + 'collaborators');
+  static const Library = IriTerm(_base + 'Library');
+  static const tags = IriTerm(_base + 'tags');
+  static const collaborators = IriTerm(_base + 'collaborators');
 }
 
 /// Library with global collections that have persistent IRIs.

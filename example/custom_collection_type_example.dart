@@ -21,10 +21,10 @@ import 'package:rdf_vocabularies_core/rdf.dart' show Rdf;
 class CollectionVocab {
   static const _base = 'http://example.org/vocab#';
 
-  static const Library = IriTerm.prevalidated(_base + 'Library');
-  static const tags = IriTerm.prevalidated(_base + 'tags');
-  static const collaborators = IriTerm.prevalidated(_base + 'collaborators');
-  static const members = IriTerm.prevalidated(_base + 'members');
+  static const Library = IriTerm(_base + 'Library');
+  static const tags = IriTerm(_base + 'tags');
+  static const collaborators = IriTerm(_base + 'collaborators');
+  static const members = IriTerm(_base + 'members');
 }
 
 /// Library demonstrating different RDF mapping strategies for the same custom collection type.

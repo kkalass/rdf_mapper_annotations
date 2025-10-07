@@ -42,7 +42,7 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// ```dart
 /// @RdfLocalResource()
 /// class Person {
-///   @RdfProperty(IriTerm.prevalidated("https://example.org/vocab/name"))
+///   @RdfProperty(IriTerm("https://example.org/vocab/name"))
 ///   late final String name;
 ///
 ///   @RdfUnmappedTriples()
@@ -53,14 +53,14 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// Global usage (entire graph unmapped triples - use only on top-level document):
 /// ```dart
 /// @RdfGlobalResource(
-///   IriTerm.prevalidated("http://xmlns.com/foaf/0.1/PersonalProfileDocument"),
+///   IriTerm("http://xmlns.com/foaf/0.1/PersonalProfileDocument"),
 ///   IriStrategy("https://example.org/profile/{id}"),
 /// )
 /// class ProfileDocument {
 ///   @RdfIriPart("id")
 ///   final String id;
 ///
-///   @RdfProperty(IriTerm.prevalidated("http://xmlns.com/foaf/0.1/primaryTopic"))
+///   @RdfProperty(IriTerm("http://xmlns.com/foaf/0.1/primaryTopic"))
 ///   final Person primaryTopic;
 ///
 ///   /// Captures ALL unmapped triples from the entire document graph

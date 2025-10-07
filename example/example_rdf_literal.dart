@@ -27,7 +27,7 @@ class EnhancedRating {
   /// If you leave out the datatype, it will be `Xsd.string` by default.
   /// Note that you may have compatibility issues with other RDF libraries
   /// if you use a datatype that is not in the `Xsd` namespace.
-  datatype: IriTerm.prevalidated('http://example.org/temperature'),
+  datatype: IriTerm('http://example.org/temperature'),
 )
 class Temperature {
   final double celsius;
@@ -86,8 +86,7 @@ class GeneratedEnhancedRatingMapper
 
 /// This class would be automatically generated based on Temperature annotations
 class GeneratedTemperatureMapper implements LiteralTermMapper<Temperature> {
-  final IriTerm datatype =
-      IriTerm.prevalidated('http://example.org/temperature');
+  final IriTerm datatype = IriTerm('http://example.org/temperature');
   @override
   LiteralTerm toRdfTerm(Temperature temp, SerializationContext context) {
     return temp.formatCelsius().toLiteralTerm(

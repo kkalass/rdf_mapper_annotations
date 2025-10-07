@@ -55,7 +55,7 @@
 /// class PersonMapper implements GlobalResourceMapper<Person> {
 ///   @override
 ///   (IriTerm, List<Triple>) toRdfResource(Person instance, SerializationContext context, {RdfSubject? parentSubject}) {
-///     return context.resourceBuilder(IriTerm(instance.id))
+///     return context.resourceBuilder(context.createIriTerm(instance.id))
 ///       .addValue(FoafPerson.name, instance.name)
 ///       .build();
 ///   }

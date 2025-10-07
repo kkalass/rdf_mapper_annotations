@@ -41,7 +41,7 @@ class MockLiteralMapping implements LiteralMapping {
 void main() {
   group('RdfProperty', () {
     test('basic constructor with predicate', () {
-      final predicate = IriTerm('http://example.org/predicate');
+      final predicate = const IriTerm('http://example.org/predicate');
       final annotation = RdfProperty(predicate);
 
       expect(annotation.predicate, equals(predicate));
@@ -53,7 +53,7 @@ void main() {
     });
 
     test('constructor with all parameters', () {
-      final predicate = IriTerm('http://example.org/predicate');
+      final predicate = const IriTerm('http://example.org/predicate');
       const mockGlobalResource = MockGlobalResourceMapping();
       const mockLocalResource = MockLocalResourceMapping();
       const mockIri = MockIriMapping();
@@ -78,7 +78,7 @@ void main() {
     });
 
     test('constructor with contextual parameter', () {
-      final predicate = IriTerm('http://example.org/predicate');
+      final predicate = const IriTerm('http://example.org/predicate');
       final contextual = ContextualMapping.namedProvider('example');
 
       final annotation = RdfProperty(
@@ -97,7 +97,7 @@ void main() {
     });
 
     test('basic constructor has null contextual by default', () {
-      final predicate = IriTerm('http://example.org/predicate');
+      final predicate = const IriTerm('http://example.org/predicate');
       final annotation = RdfProperty(predicate);
 
       expect(annotation.contextual, isNull);

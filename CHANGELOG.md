@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Replaced deprecated `IriTerm.prevalidated()` constructor with standard `IriTerm()` constructor throughout codebase
+- Updated examples and documentation to use `context.createIriTerm()` for creating IRI terms from strings in mapper implementations
+- Updated to access IRI value via `term.value` property instead of deprecated `term.iri` property
+
 ## [0.10.2] - 2025-09-15
 
 ### Added

@@ -350,7 +350,7 @@ class ChapterIdMapper implements IriTermMapper<(String bookId, int chapterId)> {
   
   @override
   IriTerm toRdfTerm((String, int) value, SerializationContext context) {
-    return IriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
+    return context.createIriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
   }
   
   @override
@@ -448,7 +448,7 @@ class Rating {
 @RdfLiteral.custom(
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
-  datatype: IriTerm.prevalidated('http://example.org/temperature')
+  datatype: IriTerm('http://example.org/temperature')
 )
 class Temperature {
   final double celsius;
@@ -867,10 +867,10 @@ class EventMapper implements GlobalResourceMapper<Event> {
   @override
   RdfSubject toRdfResource(Event instance, SerializationContext context, {RdfSubject? parentSubject}) {
     // Custom serialization logic here
-    return context.resourceBuilder(IriTerm('http://example.org/events/${instance.id}'))
+    return context.resourceBuilder(context.createIriTerm('http://example.org/events/${instance.id}'))
       .addValue(EventVocab.timestamp, instance.timestamp)
       .addValues(instance.customData.entries.map(
-        (e) => MapEntry(IriTerm('http://example.org/property/${e.key}'), e.value)))
+        (e) => MapEntry(context.createIriTerm('http://example.org/property/${e.key}'), e.value)))
       .build();
   }
   

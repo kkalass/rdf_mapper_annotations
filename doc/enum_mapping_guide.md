@@ -178,13 +178,13 @@ class Book {
 
 class MyBookVocab {
   static const String namespace = 'http://example.org/vocab/';
-  static const IriTerm classIri = IriTerm.prevalidated('${namespace}Book');
+  static const IriTerm classIri = IriTerm('${namespace}Book');
   static const IriTerm bookFormat =
-      IriTerm.prevalidated('${namespace}bookFormat');
+      IriTerm('${namespace}bookFormat');
   static const IriTerm itemCondition =
-      IriTerm.prevalidated('${namespace}itemCondition');
-  static const IriTerm priority = IriTerm.prevalidated('${namespace}priority');
-  static const IriTerm status = IriTerm.prevalidated('${namespace}status');
+      IriTerm('${namespace}itemCondition');
+  static const IriTerm priority = IriTerm('${namespace}priority');
+  static const IriTerm status = IriTerm('${namespace}status');
 }
 ```
 
@@ -196,7 +196,7 @@ You can override enum mapping at the property level:
 
 ```dart
 @RdfProperty(
-  IriTerm.prevalidated('http://example.org/status'),
+  IriTerm('http://example.org/status'),
   literal: LiteralMapping.namedMapper('customStatusMapper')
 )
 final Status status;
@@ -219,7 +219,7 @@ enum LocalizedStatus {
 
 // Then you can use language tag override
 @RdfProperty(
-  IriTerm.prevalidated('http://example.org/condition'),
+  IriTerm('http://example.org/condition'),
   literal: LiteralMapping.withLanguage('en')
 )
 final LocalizedStatus condition; // Uses the global enum mapper + adds @en language tag
@@ -249,7 +249,7 @@ enum Priority {
 
 // Property using custom datatype
 @RdfProperty(
-  IriTerm.prevalidated('http://example.org/priority'),
+  IriTerm('http://example.org/priority'),
   literal: LiteralMapping.withType(Xsd.string)
 )
 final Priority priority; // Uses enum mapper result + applies xsd:string datatype
@@ -270,12 +270,12 @@ enum LocalEnum {
 }
 
 // This would NOT work - no global mapper to delegate to:
-// @RdfProperty(IriTerm.prevalidated('http://example.org/value'), literal: LiteralMapping.withLanguage('en'))
+// @RdfProperty(IriTerm('http://example.org/value'), literal: LiteralMapping.withLanguage('en'))
 // final LocalEnum value;
 
 // Instead, use a custom mapper:
 @RdfProperty(
-  IriTerm.prevalidated('http://example.org/value'),
+  IriTerm('http://example.org/value'),
   literal: LiteralMapping.namedMapper('localEnumMapperWithLanguage')
 )
 final LocalEnum value;

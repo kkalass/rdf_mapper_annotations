@@ -15,7 +15,7 @@ class MockGlobalResourceMapper implements GlobalResourceMapper {
 void main() {
   group('RdfGlobalResource', () {
     test('standard constructor with classIri and iriStrategy', () {
-      final classIri = IriTerm('http://example.org/classIri');
+      final classIri = const IriTerm('http://example.org/classIri');
       final iriStrategy = IriStrategy('http://example.org/resource/{id}');
 
       final annotation = RdfGlobalResource(classIri, iriStrategy);

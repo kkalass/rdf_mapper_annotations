@@ -370,7 +370,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// class StandardIsbnMapper implements IriTermMapper<ISBN> {
   ///   @override
   ///   IriTerm toRdfTerm(ISBN isbn, SerializationContext context) {
-  ///     return IriTerm('urn:isbn:${isbn.value}');
+  ///     return context.createIriTerm('urn:isbn:${isbn.value}');
   ///   }
   ///
   ///   @override
@@ -677,7 +677,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// class UserReferenceMapper implements IriTermMapper<UserReference> {
   ///   @override
   ///   IriTerm toRdfTerm(UserReference value, SerializationContext context) {
-  ///     return IriTerm('https://example.org/users/${value.username}');
+  ///     return context.createIriTerm('https://example.org/users/${value.username}');
   ///   }
   ///
   ///   @override
@@ -722,7 +722,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// class IsbnMapper implements IriTermMapper<ISBN> {
   ///   @override
   ///   IriTerm toRdfTerm(ISBN isbn, SerializationContext context) {
-  ///     return IriTerm('urn:isbn:${isbn.value}');
+  ///     return context.createIriTerm('urn:isbn:${isbn.value}');
   ///   }
   ///
   ///   @override
@@ -1064,7 +1064,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   ///   @override
   ///   IriTerm toRdfTerm((String, String) record, SerializationContext context) {
   ///     final (category, id) = record;
-  ///     return IriTerm('https://example.org/products/$category/$id');
+  ///     return context.createIriTerm('https://example.org/products/$category/$id');
   ///   }
   ///
   ///   @override
@@ -1116,7 +1116,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   ///   @override
   ///   IriTerm toRdfTerm((String, String) record, SerializationContext context) {
   ///     final (category, id) = record;
-  ///     return IriTerm('https://example.org/products/$category/$id');
+  ///     return context.createIriTerm('https://example.org/products/$category/$id');
   ///   }
   ///
   ///   @override

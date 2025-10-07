@@ -71,7 +71,7 @@ class Person {
 /// globalUnmapped=true - only on a single, top-level document container class
 /// like a Solid WebID/Profile Document.
 @RdfGlobalResource(
-  IriTerm.prevalidated("https://example.org/vocab/ProfileDocument"),
+  IriTerm("https://example.org/vocab/ProfileDocument"),
   IriStrategy("https://example.org/profiles/{profileId}"),
 )
 class ProfileDocument {
@@ -80,11 +80,11 @@ class ProfileDocument {
   final String profileId;
 
   /// The primary person described by this profile document
-  @RdfProperty(IriTerm.prevalidated("https://example.org/vocab/primaryTopic"))
+  @RdfProperty(IriTerm("https://example.org/vocab/primaryTopic"))
   final Person primaryTopic;
 
   /// Additional people mentioned in the profile (just URIs, not full data)
-  @RdfProperty(IriTerm.prevalidated("https://example.org/vocab/knows"))
+  @RdfProperty(IriTerm("https://example.org/vocab/knows"))
   final List<Uri> knownPeople;
 
   /// Captures ALL unmapped triples from the entire document graph.

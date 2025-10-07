@@ -15,7 +15,7 @@ class MockLocalResourceMapper implements LocalResourceMapper {
 void main() {
   group('RdfLocalResource', () {
     test('standard constructor with classIri', () {
-      final classIri = IriTerm('http://example.org/classIri');
+      final classIri = const IriTerm('http://example.org/classIri');
 
       final annotation = RdfLocalResource(classIri);
 

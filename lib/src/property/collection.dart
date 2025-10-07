@@ -150,7 +150,7 @@ class RdfMapValue extends RdfAnnotation {
 ///    Example with literal mapper for language-tagged strings:
 ///    ```dart
 ///    @RdfProperty(
-///      IriTerm.prevalidated('http://example.org/book/title'),
+///      IriTerm('http://example.org/book/title'),
 ///      literal: LiteralMapping.mapperInstance(const LocalizedEntryMapper())
 ///    )
 ///    final Map<String, String> translations; // Key=language code, Value=translated text
