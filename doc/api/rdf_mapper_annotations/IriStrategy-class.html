@@ -115,7 +115,8 @@ final rdfMapper = initRdfMapper(
 <li>The parent mapper that uses this type needs to provide the context values</li>
 <li>Context variables can be resolved from:
 a. Properties in the parent class annotated with <code>@RdfProvides('variableName')</code>
-b. Or required in the parent mapper's constructor (which may propagate up to <code>initRdfMapper</code>)</li>
+b. The parent resource's IRI itself, when the parent's <code>IriStrategy</code> specifies <code>providedAs</code> parameter
+c. Or required in the parent mapper's constructor (which may propagate up to <code>initRdfMapper</code>)</li>
 </ul>
 </li>
 </ol>
@@ -123,6 +124,33 @@ b. Or required in the parent mapper's constructor (which may propagate up to <co
 deployment environments without hardcoding values. Unlike the <code>RdfIri</code> annotation which is used
 for classes that represent IRI terms themselves, <code>IriStrategy</code> is used within <code>RdfGlobalResource</code>
 to define how instance IRIs are constructed from their properties.</p>
+<h3 id="example-providing-parent-iri-to-child-resources">Example: Providing Parent IRI to Child Resources</h3>
+<p>The <a href="../rdf_mapper_annotations/IriStrategy/providedAs.html">providedAs</a> parameter enables a resource to provide its own IRI to dependent mappers.
+This is particularly useful for hierarchical data structures:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  ParentClass.classIri,
+  IriStrategy('{+baseUri}/parents/{id}', 'parentIri')
+)
+class Parent {
+  @RdfIriPart()
+  final String id;
+
+  @RdfProperty(Vocab.child)
+  final Child child;
+}
+
+@RdfGlobalResource(
+  ChildClass.classIri,
+  IriStrategy('{+parentIri}/children/{childId}'),
+  registerGlobally: false
+)
+class Child {
+  @RdfIriPart()
+  final String childId;
+}
+</code></pre>
+<p>In this example, the <code>Parent</code> mapper will provide a <code>String Function()</code> that returns
+the parent's IRI, making it available to the <code>Child</code> mapper via <code>{+parentIri}</code>.</p>
 <h2 id="internal-record-based-mechanism">Internal Record-Based Mechanism</h2>
 <p>Unlike <code>RdfIri</code> and <code>IriMapping</code> which work with complete objects, <code>IriStrategy</code> operates
 on a record composed of the values from properties marked with <code>@RdfIriPart</code>. This
@@ -156,7 +184,7 @@ changing field order.</p>
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>IriStrategy</li>
     </ul>
   </dd>
@@ -177,38 +205,45 @@ changing field order.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="IriStrategy.new" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.html">IriStrategy.new</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span></span>])</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.html">IriStrategy.new</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span>, </span><span class="parameter" id="-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span>])</span>
         </dt>
         <dd>
           Creates a strategy for generating IRIs from resource properties.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.mapper" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapper.html">IriStrategy.mapper</a></span><span class="signature">(<span class="parameter" id="mapper-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> <span class="parameter-name">mapperType</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapper.html">IriStrategy.mapper</a></span><span class="signature">(<span class="parameter" id="mapper-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> <span class="parameter-name">mapperType</span>, {</span><span class="parameter" id="mapper-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span>})</span>
         </dt>
         <dd>
           Creates a reference to a mapper that will be instantiated from the given type.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.mapperInstance.html">IriStrategy.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span>, {</span><span class="parameter" id="mapperInstance-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span>})</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.namedFactory" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.namedFactory.html">IriStrategy.namedFactory</a></span><span class="signature">(<span class="parameter" id="namedFactory-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, [</span><span class="parameter" id="namedFactory-param-configInstance"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">configInstance</span></span>])</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.namedFactory.html">IriStrategy.namedFactory</a></span><span class="signature">(<span class="parameter" id="namedFactory-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, [</span><span class="parameter" id="namedFactory-param-configInstance"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">configInstance</span>, </span><span class="parameter" id="namedFactory-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span>])</span>
         </dt>
         <dd>
           Creates a reference to a named factory function for creating IRI mappers.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="IriStrategy.namedMapper" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.namedMapper.html">IriStrategy.namedMapper</a></span><span class="signature">(<span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.namedMapper.html">IriStrategy.namedMapper</a></span><span class="signature">(<span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, {</span><span class="parameter" id="namedMapper-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span>})</span>
         </dt>
         <dd>
           Creates a reference to a named mapper for this IRI strategy.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+        <dt id="IriStrategy.withFragment" class="callable">
+          <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/IriStrategy.withFragment.html">IriStrategy.withFragment</a></span><span class="signature">(<span class="parameter" id="withFragment-param-baseIriTemplate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseIriTemplate</span>, </span><span class="parameter" id="withFragment-param-fragmentTemplate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fragmentTemplate</span>, {</span><span class="parameter" id="withFragment-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span>})</span>
+        </dt>
+        <dd>
+          Creates a strategy for generating IRIs by appending a fragment to a base IRI.
             <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
@@ -219,6 +254,18 @@ changing field order.</p>
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="fragmentTemplate" class="property">
+  <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/fragmentTemplate.html">fragmentTemplate</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd>
+  Optional template for the fragment identifier to append to the base IRI.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
@@ -233,13 +280,25 @@ changing field order.</p>
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
 <dd class="inherited">
   Provides a <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a> if a custom mapper is specified.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="providedAs" class="property">
+  <span class="name"><a href="../rdf_mapper_annotations/IriStrategy/providedAs.html">providedAs</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd>
+  Optional name under which this resource's IRI will be provided to dependent mappers.
+  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
@@ -352,7 +411,7 @@ changing field order.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

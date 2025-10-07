@@ -54,7 +54,8 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">IriStrategy</span>(<wbr>[<ol class="parameter-list single-line"> <li><span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span></span></li>
+      <span class="name ">IriStrategy</span>(<wbr>[<ol class="parameter-list single-line"> <li><span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span>, </span></li>
+<li><span class="parameter" id="-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span></li>
 </ol>])
     </section>
     
@@ -102,13 +103,18 @@ class Book {
 <p>When the <code>template</code> contains unbound variables (not matching any property with <code>@RdfIriPart</code>),
 the generator will automatically create provider parameters. With <code>registerGlobally = true</code>
 (the default), these providers become required parameters in the <code>initRdfMapper</code> function.</p>
+<p>The optional <code>providedAs</code> parameter allows this resource's IRI to be provided to dependent
+mappers under the specified name. When set, child/dependent mappers can reference this IRI
+in their templates using <code>{providedName}</code>.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const IriStrategy([this.template]) : super();</code></pre>
+  <pre class="language-dart"><code class="language-dart">const IriStrategy([this.template, this.providedAs])
+    : fragmentTemplate = null,
+      super();</code></pre>
 </section>
 
 
@@ -136,7 +142,7 @@ the generator will automatically create provider parameters. With <code>register
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

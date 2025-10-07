@@ -54,8 +54,9 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">IriStrategy.namedMapper</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
-</ol>)
+      <span class="name ">IriStrategy.namedMapper</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, {</span></li>
+<li><span class="parameter" id="namedMapper-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
@@ -90,7 +91,7 @@ class ProductIdMapper implements IriTermMapper&lt;(String, String)&gt; {
   @override
   IriTerm toRdfTerm((String, String) record, SerializationContext context) {
     final (category, id) = record;
-    return IriTerm('https://example.org/products/$category/$id');
+    return context.createIriTerm('https://example.org/products/$category/$id');
   }
 
   @override
@@ -109,14 +110,17 @@ final rdfMapper = initRdfMapper(productIdMapper: productMapper);
 <li>During serialization: Extract the properties into a record to pass to your mapper</li>
 <li>During deserialization: Take the record your mapper produces and set the properties</li>
 </ul>
+<p>The optional <code>providedAs</code> parameter allows this resource's IRI to be provided to dependent
+mappers under the specified name, enabling hierarchical IRI patterns.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const IriStrategy.namedMapper(String name)
+  <pre class="language-dart"><code class="language-dart">const IriStrategy.namedMapper(String name, {this.providedAs})
     : template = null,
+      fragmentTemplate = null,
       super.namedMapper(name);</code></pre>
 </section>
 
@@ -145,7 +149,7 @@ final rdfMapper = initRdfMapper(productIdMapper: productMapper);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

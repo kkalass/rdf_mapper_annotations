@@ -76,12 +76,14 @@ mapper to handle complex multi-part IRIs</li>
 </li>
 <li>
 <p><strong>Context variables</strong>: Variables like <code>{+baseUri}</code> or <code>{+storageRoot}</code> that are provided
-through one of two methods:</p>
+through one of three methods:</p>
 <ul>
 <li>Via global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>).
 The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
 <li>Via other properties in the same class annotated with <code>@RdfProvides('baseUri')</code>.
 This is preferred for context variables that are already available in the class.</li>
+<li>Via the parent resource's IRI, when the parent's <code>IriStrategy</code> specifies <code>providedAs</code> parameter.
+This is useful for hierarchical structures where children need the parent's IRI.</li>
 <li>The <code>+</code> prefix (e.g., <code>{+baseUri}</code>) indicates variables that may contain URI-reserved
 characters like slashes, which should not be percent-encoded when substituted</li>
 </ul>
@@ -123,7 +125,7 @@ will be used as the complete IRI value.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

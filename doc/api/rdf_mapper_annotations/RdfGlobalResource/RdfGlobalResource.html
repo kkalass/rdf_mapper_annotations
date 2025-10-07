@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfGlobalResource</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-classIri"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.14/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">classIri</span>, </span></li>
+      <span class="name ">RdfGlobalResource</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="-param-classIri"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.20/rdf/IriTerm-class.html">IriTerm</a>?</span> <span class="parameter-name">classIri</span>, </span></li>
 <li><span class="parameter" id="-param-iriStrategy"><span class="type-annotation"><a href="../../rdf_mapper_annotations/IriStrategy-class.html">IriStrategy</a></span> <span class="parameter-name">iriStrategy</span>, {</span></li>
 <li><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span>, </span></li>
 </ol>})
@@ -81,7 +81,7 @@ not <code>@RdfProvides</code>.</p>
 <li>
 <p>Any <code>@RdfProperty</code> annotation in this class has an <a href="../../rdf_mapper_annotations/IriMapping-class.html">IriMapping</a> that
 contains a template variable not provided by this resource class
-via an <code>@RdfProvides</code> annotation.</p>
+via an <code>@RdfProvides</code> annotation or by a parent's <code>IriStrategy.providedAs</code>.</p>
 </li>
 <li>
 <p>The <code>@RdfIri</code> annotation of any <code>@RdfProperty</code>'s value class contains <code>registerGlobally: false</code> (so it will be instantiated by this resource mapper instead of using the globally registered mapper) and contains
@@ -89,6 +89,7 @@ a template variable not provided by either:</p>
 <ul>
 <li>The value class's own <code>@RdfIriPart</code> annotations</li>
 <li>This resource class via <code>@RdfProvides</code> annotations</li>
+<li>A parent resource via <code>IriStrategy.providedAs</code> parameter</li>
 </ul>
 </li>
 </ol>
@@ -102,7 +103,7 @@ determines how unique identifiers are generated for each instance
 <code>registerGlobally</code> controls whether the generated mapper should be registered globally
 in the <code>initRdfMapper</code> function. Set to <code>false</code> when the mapper should not be
 globally accessible, typically when all required context will be provided by parent
-objects via <code>@RdfProvides</code> annotations.</p>
+objects via <code>@RdfProvides</code> annotations or via the parent's <code>IriStrategy.providedAs</code> parameter.</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(SchemaBook.classIri, IriStrategy('http://example.org/book/{id}'))
 class Book {
@@ -148,7 +149,7 @@ class Book {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

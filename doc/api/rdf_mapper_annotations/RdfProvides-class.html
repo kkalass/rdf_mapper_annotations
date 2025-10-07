@@ -72,6 +72,10 @@ ensures the necessary providers are available</li>
 mapper receives provider functions for all variables it needs. This avoids the need
 to register global provider functions in <code>initRdfMapper</code> for values that are
 available within the object graph.</p>
+<h2 id="alternative-providing-the-resource-iri">Alternative: Providing the Resource IRI</h2>
+<p>Instead of annotating properties with <code>@RdfProvides</code>, you can also provide the resource's
+own IRI to dependent mappers by using the <code>providedAs</code> parameter on <code>IriStrategy</code>.
+See <a href="../rdf_mapper_annotations/IriStrategy-class.html">IriStrategy</a> documentation for details on this alternative approach.</p>
 <p>Examples:</p>
 <p><strong>Example: Using @RdfProvides to pass parentId to Iri property and nested resource</strong></p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
@@ -275,7 +279,7 @@ in <code>initRdfMapper</code> and will only be used within the context of the Pa
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

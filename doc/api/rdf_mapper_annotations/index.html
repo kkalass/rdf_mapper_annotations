@@ -115,7 +115,7 @@ final decodedPerson = rdfMapper.decodeObject&lt;Person&gt;(personTurtle);
 class PersonMapper implements GlobalResourceMapper&lt;Person&gt; {
   @override
   (IriTerm, List&lt;Triple&gt;) toRdfResource(Person instance, SerializationContext context, {RdfSubject? parentSubject}) {
-    return context.resourceBuilder(IriTerm(instance.id))
+    return context.resourceBuilder(context.createIriTerm(instance.id))
       .addValue(FoafPerson.name, instance.name)
       .build();
   }
@@ -233,7 +233,7 @@ while supporting domain-specific RDF vocabularies.</p>
 </dd>
 
           <dt id="BaseMappingAnnotation">
-  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
+  <span class="name "><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter">M extends <a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/Mapper-class.html">Mapper</a></span>&gt;</span></span> 
 
 </dt>
 <dd>
@@ -562,7 +562,7 @@ conversion.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

@@ -81,7 +81,7 @@ require additional configuration parameters.</p>
 class IsbnMapper implements IriTermMapper&lt;ISBN&gt; {
   @override
   IriTerm toRdfTerm(ISBN isbn, SerializationContext context) {
-    return IriTerm('urn:isbn:${isbn.value}');
+    return context.createIriTerm('urn:isbn:${isbn.value}');
   }
 
   @override
@@ -102,6 +102,7 @@ class IsbnMapper implements IriTermMapper&lt;ISBN&gt; {
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">const IriMapping.mapper(Type mapperType)
     : template = null,
+      fragmentTemplate = null,
       super.mapper(mapperType);</code></pre>
 </section>
 
@@ -130,7 +131,7 @@ class IsbnMapper implements IriTermMapper&lt;ISBN&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

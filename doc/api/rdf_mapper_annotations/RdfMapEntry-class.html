@@ -67,7 +67,7 @@ in your @RdfProperty that work with MapEntry&lt;K,V&gt; and the correct generic
 type parameters, no RdfMapEntry annotation is required.</p>
 <p>Example with literal mapper for language-tagged strings:</p>
 <pre class="language-dart"><code class="language-dart">@RdfProperty(
-  IriTerm.prevalidated('http://example.org/book/title'),
+  IriTerm('http://example.org/book/title'),
   literal: LiteralMapping.mapperInstance(const LocalizedEntryMapper())
 )
 final Map&lt;String, String&gt; translations; // Key=language code, Value=translated text
@@ -329,7 +329,7 @@ class SettingsEntry {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

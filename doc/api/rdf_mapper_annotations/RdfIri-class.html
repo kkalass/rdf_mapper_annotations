@@ -244,8 +244,8 @@ class Product {
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
-        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMapping-class.html">BaseMapping</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
+        <li><a href="../rdf_mapper_annotations/BaseMappingAnnotation-class.html">BaseMappingAnnotation</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span></li>
       <li>RdfIri</li>
     </ul>
   </dd>
@@ -286,7 +286,7 @@ class Product {
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfIri.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
@@ -299,6 +299,13 @@ class Product {
           Creates a reference to a named mapper for this IRI term.
             <div class="constructor-modifier features">const</div>
         </dd>
+        <dt id="RdfIri.withFragment" class="callable">
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.withFragment.html">RdfIri.withFragment</a></span><span class="signature">(<span class="parameter" id="withFragment-param-baseIriTemplate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseIriTemplate</span>, </span><span class="parameter" id="withFragment-param-fragmentTemplate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fragmentTemplate</span>, {</span><span class="parameter" id="withFragment-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>})</span>
+        </dt>
+        <dd>
+          Creates an IRI mapping by appending a fragment to a base IRI.
+            <div class="constructor-modifier features">const</div>
+        </dd>
     </dl>
   </section>
     
@@ -307,6 +314,18 @@ class Product {
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="fragmentTemplate" class="property">
+  <span class="name"><a href="../rdf_mapper_annotations/RdfIri/fragmentTemplate.html">fragmentTemplate</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd>
+  Optional template for the fragment identifier to append to the base IRI.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
@@ -321,7 +340,7 @@ class Product {
 
         <dt id="mapper" class="property inherited">
   <span class="name"><a href="../rdf_mapper_annotations/BaseMapping/mapper.html">mapper</a></span>
-  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperRef-class.html">MapperRef</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span>&gt;</span>?</span>
   
 
 </dt>
@@ -453,7 +472,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

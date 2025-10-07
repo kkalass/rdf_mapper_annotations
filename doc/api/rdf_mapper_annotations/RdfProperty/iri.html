@@ -88,6 +88,7 @@ for this specific property.</p>
 <ul>
 <li>Global provider functions in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>)</li>
 <li>Properties in the same class annotated with <code>@RdfProvides('baseUri')</code></li>
+<li>The parent resource's IRI, when the parent's <code>IriStrategy</code> specifies <code>providedAs</code> parameter</li>
 <li>The <code>+</code> prefix (e.g., <code>{+baseUri}</code>) indicates variables that may contain URI-reserved
 characters like slashes, which should not be percent-encoded when substituted</li>
 </ul>
@@ -139,7 +140,7 @@ final String userId; // Converts to "https://example.com/profile/jsmith" if user
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

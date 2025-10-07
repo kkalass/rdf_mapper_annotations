@@ -86,7 +86,7 @@ can lead to duplicate data collection and unexpected behavior.</p>
 <p>Basic usage (subject-scoped unmapped triples):</p>
 <pre class="language-dart"><code class="language-dart">@RdfLocalResource()
 class Person {
-  @RdfProperty(IriTerm.prevalidated("https://example.org/vocab/name"))
+  @RdfProperty(IriTerm("https://example.org/vocab/name"))
   late final String name;
 
   @RdfUnmappedTriples()
@@ -95,14 +95,14 @@ class Person {
 </code></pre>
 <p>Global usage (entire graph unmapped triples - use only on top-level document):</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
-  IriTerm.prevalidated("http://xmlns.com/foaf/0.1/PersonalProfileDocument"),
+  IriTerm("http://xmlns.com/foaf/0.1/PersonalProfileDocument"),
   IriStrategy("https://example.org/profile/{id}"),
 )
 class ProfileDocument {
   @RdfIriPart("id")
   final String id;
 
-  @RdfProperty(IriTerm.prevalidated("http://xmlns.com/foaf/0.1/primaryTopic"))
+  @RdfProperty(IriTerm("http://xmlns.com/foaf/0.1/primaryTopic"))
   final Person primaryTopic;
 
   /// Captures ALL unmapped triples from the entire document graph
@@ -274,7 +274,7 @@ class ProfileDocument {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

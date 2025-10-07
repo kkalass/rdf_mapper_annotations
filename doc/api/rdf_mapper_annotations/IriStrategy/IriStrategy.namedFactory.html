@@ -55,7 +55,8 @@
     <section class="multi-line-signature">
       const
       <span class="name ">IriStrategy.namedFactory</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="namedFactory-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, [</span></li>
-<li><span class="parameter" id="namedFactory-param-configInstance"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">configInstance</span></span></li>
+<li><span class="parameter" id="namedFactory-param-configInstance"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">configInstance</span>, </span></li>
+<li><span class="parameter" id="namedFactory-param-providedAs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">providedAs</span></span></li>
 </ol>])
     </section>
     
@@ -140,14 +141,19 @@ final rdfMapper = initRdfMapper(
 the simplicity of annotation-driven configuration. The factory function can access
 shared resources, configuration, or coordination services to ensure consistent
 IRI allocation patterns across your application.</p>
+<p>The optional <code>providedAs</code> parameter allows this resource's IRI to be provided to dependent
+mappers under the specified name, enabling hierarchical IRI patterns.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const IriStrategy.namedFactory(String name, [Object? configInstance])
+  <pre class="language-dart"><code class="language-dart">const IriStrategy.namedFactory(String name,
+    [Object? configInstance, String? providedAs])
     : template = null,
+      fragmentTemplate = null,
+      providedAs = providedAs,
       super.namedFactory(name, configInstance);</code></pre>
 </section>
 
@@ -176,7 +182,7 @@ IRI allocation patterns across your application.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

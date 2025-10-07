@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfIri.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.1/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span></li>
+      <span class="name ">RdfIri.mapperInstance</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span></li>
 </ol>)
     </section>
     
@@ -87,6 +87,7 @@ the mapper instance must be a compile-time constant.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">const RdfIri.mapperInstance(IriTermMapper instance)
     : template = null,
+      fragmentTemplate = null,
       super.mapperInstance(instance);</code></pre>
 </section>
 
@@ -115,7 +116,7 @@ the mapper instance must be a compile-time constant.</p>
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

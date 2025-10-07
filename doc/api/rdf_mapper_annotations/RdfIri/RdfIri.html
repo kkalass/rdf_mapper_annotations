@@ -78,6 +78,7 @@ both classes and enums:</p>
 <ul>
 <li>Global providers in <code>initRdfMapper()</code> (e.g., <code>baseUriProvider: () =&gt; 'https://api.example.com'</code>)</li>
 <li>Class properties annotated with <code>@RdfProvides('variableName')</code></li>
+<li>Parent resource's IRI, when the parent's <code>IriStrategy</code> specifies <code>providedAs</code> parameter</li>
 </ul>
 <h3 id="usage-for-classes">Usage for Classes:</h3>
 <pre class="language-dart"><code class="language-dart">// Template with property placeholders
@@ -141,7 +142,8 @@ Set to <code>false</code> if the mapper should be registered manually or used at
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">const RdfIri([this.template, bool registerGlobally = true])
-    : super(registerGlobally: registerGlobally);</code></pre>
+    : fragmentTemplate = null,
+      super(registerGlobally: registerGlobally);</code></pre>
 </section>
 
 
@@ -169,7 +171,7 @@ Set to <code>false</code> if the mapper should be registered manually or used at
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

@@ -73,6 +73,7 @@ transformed into an IRI term in the RDF graph.</p>
 <ul>
 <li>Global providers in <code>initRdfMapper()</code> (e.g., <code>baseUriProvider: () =&gt; 'https://api.example.com'</code>)</li>
 <li>Class properties annotated with <code>@RdfProvides('variableName')</code></li>
+<li>Parent resource's IRI, when the parent's <code>IriStrategy</code> specifies <code>providedAs</code> parameter</li>
 </ul>
 <p><strong>Important:</strong> This constructor is only designed for properties of type <code>String</code>.
 For non-String types (like value objects or domain-specific types), you have two options:</p>
@@ -160,7 +161,9 @@ class UserId {
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const IriMapping([this.template]) : super();</code></pre>
+  <pre class="language-dart"><code class="language-dart">const IriMapping([this.template])
+    : fragmentTemplate = null,
+      super();</code></pre>
 </section>
 
 
@@ -188,7 +191,7 @@ class UserId {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

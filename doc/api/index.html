@@ -343,6 +343,94 @@ void main() {
 <li>Supporting user-specific or deployment-specific base URIs</li>
 <li>Maintaining a consistent IRI structure across your entire model</li>
 </ul>
+<h4 id="property-level-context-variables-with-rdfprovides">Property-Level Context Variables with <code>@RdfProvides</code></h4>
+<p>For context variables that are already available as properties in your class, use <code>@RdfProvides</code> to pass them to child mappers:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  SchemaBook.classIri,
+  IriStrategy('{+baseUri}/books/{id}')
+)
+class Book {
+  @RdfIriPart()
+  @RdfProvides('bookId')  // Make the book's ID available to child mappers
+  final String id;
+
+  @RdfProperty(SchemaBook.hasPart)
+  final List&lt;Chapter&gt; chapters;  // Chapters can use {bookId} in their IRI templates
+}
+
+@RdfGlobalResource(
+  SchemaChapter.classIri,
+  IriStrategy('{+baseUri}/books/{bookId}/chapters/{chapterNum}'),
+  registerGlobally: false  // Only used within Book context
+)
+class Chapter {
+  @RdfIriPart()
+  final int chapterNum;
+  // {bookId} will be provided by the parent Book
+}
+</code></pre>
+<p>This approach avoids the need for global provider parameters when context values are already available in the object graph.</p>
+<h4 id="parent-iri-as-context-with-providedas">Parent IRI as Context with <code>providedAs</code></h4>
+<p>For hierarchical structures where child resources need their parent's IRI, use the <code>providedAs</code> parameter:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  SchemaBook.classIri,
+  IriStrategy('{+baseUri}/books/{id}', 'bookIri')  // Provide this resource's IRI as {bookIri}
+)
+class Book {
+  @RdfIriPart()
+  final String id;
+
+  @RdfProperty(SchemaBook.author)
+  final Author author;  // Author can reference the book's IRI
+}
+
+@RdfGlobalResource(
+  SchemaAuthor.classIri,
+  IriStrategy('{+bookIri}/author'),  // Use the parent book's IRI
+  registerGlobally: false
+)
+class Author {
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+}
+</code></pre>
+<p>This is particularly useful for creating URIs that are relative to their parent resource.</p>
+<p>For complete details on context variable resolution, see the API documentation for <code>IriStrategy</code>, <code>@RdfProvides</code>, and <code>IriMapping</code>.</p>
+<h4 id="fragment-based-iris-with-withfragment">Fragment-based IRIs with <code>withFragment</code></h4>
+<p>For resources within the same document that differ only by their fragment identifier, use the <code>withFragment</code> constructor. This works with any URI scheme, including non-hierarchical schemes like <code>tag:</code>:</p>
+<pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
+  DocumentClass.classIri,
+  IriStrategy('tag:example.org,2025:document-{docId}', 'documentIri')
+)
+class Document {
+  @RdfIriPart()
+  final String docId;
+
+  @RdfProperty(Vocab.hasSection)
+  final List&lt;Section&gt; sections;
+}
+
+@RdfGlobalResource(
+  SectionClass.classIri,
+  IriStrategy.withFragment('{+documentIri}', 'section-{sectionId}'),
+  registerGlobally: false
+)
+class Section {
+  @RdfIriPart()
+  final String sectionId;
+
+  @RdfProperty(SchemaCreativeWork.name)
+  final String name;
+  // Section IRI will be: tag:example.org,2025:document-123#section-intro
+}
+</code></pre>
+<p>The <code>withFragment</code> constructor automatically strips any existing fragment from the base IRI and appends the new fragment with a <code>#</code> separator. This is particularly useful for:</p>
+<ul>
+<li>Document-based structures (WebID profiles, HTML documents with internal links)</li>
+<li>Non-hierarchical URI schemes like <code>tag:</code> where traditional path-based hierarchies don't apply</li>
+<li>RDF graphs where multiple resources share the same document but have different fragment identifiers</li>
+</ul>
+<p>Similar constructors are available for property-level (<code>IriMapping.withFragment</code>) and IRI term classes (<code>RdfIri.withFragment</code>).</p>
 <h4 id="custom-mapper-for-complex-cases">Custom Mapper for Complex Cases</h4>
 <p>When you need complete control over IRI generation and parsing:</p>
 <pre class="language-dart"><code class="language-dart">@RdfGlobalResource(
@@ -367,7 +455,7 @@ class ChapterIdMapper implements IriTermMapper&lt;(String bookId, int chapterId)
   
   @override
   IriTerm toRdfTerm((String, int) value, SerializationContext context) {
-    return IriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
+    return context.createIriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
   }
   
   @override
@@ -451,7 +539,7 @@ class Rating {
 @RdfLiteral.custom(
   toLiteralTermMethod: 'formatCelsius',
   fromLiteralTermMethod: 'parse',
-  datatype: IriTerm.prevalidated('http://example.org/temperature')
+  datatype: IriTerm('http://example.org/temperature')
 )
 class Temperature {
   final double celsius;
@@ -800,10 +888,10 @@ class EventMapper implements GlobalResourceMapper&lt;Event&gt; {
   @override
   RdfSubject toRdfResource(Event instance, SerializationContext context, {RdfSubject? parentSubject}) {
     // Custom serialization logic here
-    return context.resourceBuilder(IriTerm('http://example.org/events/${instance.id}'))
+    return context.resourceBuilder(context.createIriTerm('http://example.org/events/${instance.id}'))
       .addValue(EventVocab.timestamp, instance.timestamp)
       .addValues(instance.customData.entries.map(
-        (e) =&gt; MapEntry(IriTerm('http://example.org/property/${e.key}'), e.value)))
+        (e) =&gt; MapEntry(context.createIriTerm('http://example.org/property/${e.key}'), e.value)))
       .build();
   }
   
@@ -909,7 +997,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>

@@ -159,12 +159,14 @@ final String userId;
 <p>In the example above:</p>
 <ul>
 <li><code>{userId}</code> is a property-specific placeholder that refers directly to the property's value</li>
-<li><code>{+baseUri}</code> is a context variable that must be provided through one of two methods:
+<li><code>{+baseUri}</code> is a context variable that must be provided through one of three methods:
 <ol>
 <li>Via a global provider function in <code>initRdfMapper</code> (e.g., <code>baseUriProvider: () =&gt; 'https://example.com'</code>)
 The generator will automatically add a required parameter to <code>initRdfMapper</code>.</li>
 <li>Via another property in the same class annotated with <code>@RdfProvides('baseUri')</code>
 This is preferred for context variables that are already available in the class.</li>
+<li>Via the parent resource's IRI, when the parent's <code>IriStrategy</code> specifies <code>providedAs</code> parameter
+This is useful for hierarchical structures where children need the parent's IRI.</li>
 </ol>
 </li>
 <li>The <code>+</code> prefix (e.g., <code>{+baseUri}</code>) indicates variables that may contain URI-reserved
@@ -277,7 +279,7 @@ final List&lt;String&gt; genres; // Creates rdf:Bag structure
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfProperty.new" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/RdfProperty.html">RdfProperty.new</a></span><span class="signature">(<span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.14/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span><span class="parameter" id="-param-include"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">include</span> = <span class="default-value">true</span>, </span><span class="parameter" id="-param-defaultValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">defaultValue</span>, </span><span class="parameter" id="-param-includeDefaultsInSerialization"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeDefaultsInSerialization</span> = <span class="default-value">false</span>, </span><span class="parameter" id="-param-iri"><span class="type-annotation"><a href="../rdf_mapper_annotations/IriMapping-class.html">IriMapping</a>?</span> <span class="parameter-name">iri</span>, </span><span class="parameter" id="-param-localResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/LocalResourceMapping-class.html">LocalResourceMapping</a>?</span> <span class="parameter-name">localResource</span>, </span><span class="parameter" id="-param-literal"><span class="type-annotation"><a href="../rdf_mapper_annotations/LiteralMapping-class.html">LiteralMapping</a>?</span> <span class="parameter-name">literal</span>, </span><span class="parameter" id="-param-globalResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a>?</span> <span class="parameter-name">globalResource</span>, </span><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a>?</span> <span class="parameter-name">collection</span> = <span class="default-value">const CollectionMapping.auto()</span>, </span><span class="parameter" id="-param-itemType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a>?</span> <span class="parameter-name">itemType</span>, </span><span class="parameter" id="-param-contextual"><span class="type-annotation"><a href="../rdf_mapper_annotations/ContextualMapping-class.html">ContextualMapping</a>?</span> <span class="parameter-name">contextual</span></span>})</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/RdfProperty.html">RdfProperty.new</a></span><span class="signature">(<span class="parameter" id="-param-predicate"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_core/0.9.20/rdf/IriTerm-class.html">IriTerm</a></span> <span class="parameter-name">predicate</span>, {</span><span class="parameter" id="-param-include"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">include</span> = <span class="default-value">true</span>, </span><span class="parameter" id="-param-defaultValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">defaultValue</span>, </span><span class="parameter" id="-param-includeDefaultsInSerialization"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeDefaultsInSerialization</span> = <span class="default-value">false</span>, </span><span class="parameter" id="-param-iri"><span class="type-annotation"><a href="../rdf_mapper_annotations/IriMapping-class.html">IriMapping</a>?</span> <span class="parameter-name">iri</span>, </span><span class="parameter" id="-param-localResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/LocalResourceMapping-class.html">LocalResourceMapping</a>?</span> <span class="parameter-name">localResource</span>, </span><span class="parameter" id="-param-literal"><span class="type-annotation"><a href="../rdf_mapper_annotations/LiteralMapping-class.html">LiteralMapping</a>?</span> <span class="parameter-name">literal</span>, </span><span class="parameter" id="-param-globalResource"><span class="type-annotation"><a href="../rdf_mapper_annotations/GlobalResourceMapping-class.html">GlobalResourceMapping</a>?</span> <span class="parameter-name">globalResource</span>, </span><span class="parameter" id="-param-collection"><span class="type-annotation"><a href="../rdf_mapper_annotations/CollectionMapping-class.html">CollectionMapping</a>?</span> <span class="parameter-name">collection</span> = <span class="default-value">const CollectionMapping.auto()</span>, </span><span class="parameter" id="-param-itemType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a>?</span> <span class="parameter-name">itemType</span>, </span><span class="parameter" id="-param-contextual"><span class="type-annotation"><a href="../rdf_mapper_annotations/ContextualMapping-class.html">ContextualMapping</a>?</span> <span class="parameter-name">contextual</span></span>})</span>
         </dt>
         <dd>
           Creates an RDF property mapping annotation.
@@ -425,7 +427,7 @@ final List&lt;String&gt; genres; // Creates rdf:Bag structure
 
         <dt id="predicate" class="property">
   <span class="name"><a href="../rdf_mapper_annotations/RdfProperty/predicate.html">predicate</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rdf_core/0.9.14/rdf/IriTerm-class.html">IriTerm</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rdf_core/0.9.20/rdf/IriTerm-class.html">IriTerm</a></span>
   
 
 </dt>
@@ -532,7 +534,7 @@ final List&lt;String&gt; genres; // Creates rdf:Bag structure
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.2
+      0.10.3
   </span>
   
 </footer>
