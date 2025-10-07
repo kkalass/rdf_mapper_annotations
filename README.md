@@ -387,6 +387,45 @@ This is particularly useful for creating URIs that are relative to their parent 
 
 For complete details on context variable resolution, see the API documentation for `IriStrategy`, `@RdfProvides`, and `IriMapping`.
 
+#### Fragment-based IRIs with `withFragment`
+
+For resources within the same document that differ only by their fragment identifier, use the `withFragment` constructor. This works with any URI scheme, including non-hierarchical schemes like `tag:`:
+
+```dart
+@RdfGlobalResource(
+  DocumentClass.classIri,
+  IriStrategy('tag:example.org,2025:document-{docId}', providedAs: 'documentIri')
+)
+class Document {
+  @RdfIriPart()
+  final String docId;
+
+  @RdfProperty(Vocab.hasSection)
+  final List<Section> sections;
+}
+
+@RdfGlobalResource(
+  SectionClass.classIri,
+  IriStrategy.withFragment('{+documentIri}', 'section-{sectionId}'),
+  registerGlobally: false
+)
+class Section {
+  @RdfIriPart()
+  final String sectionId;
+
+  @RdfProperty(SchemaCreativeWork.name)
+  final String name;
+  // Section IRI will be: tag:example.org,2025:document-123#section-intro
+}
+```
+
+The `withFragment` constructor automatically strips any existing fragment from the base IRI and appends the new fragment with a `#` separator. This is particularly useful for:
+- Document-based structures (WebID profiles, HTML documents with internal links)
+- Non-hierarchical URI schemes like `tag:` where traditional path-based hierarchies don't apply
+- RDF graphs where multiple resources share the same document but have different fragment identifiers
+
+Similar constructors are available for property-level (`IriMapping.withFragment`) and IRI term classes (`RdfIri.withFragment`).
+
 #### Custom Mapper for Complex Cases
 
 When you need complete control over IRI generation and parsing:
