@@ -20,10 +20,10 @@ description: >
 environment:
   sdk: '^3.6.0'
 dependencies:
-  rdf_core: ^0.9.14
-  rdf_vocabularies_core: ^0.4.4 
-  rdf_vocabularies_schema: ^0.4.4 
-  rdf_mapper: ^0.10.1
+  rdf_core: ^0.9.20
+  rdf_vocabularies_core: ^0.4.5
+  rdf_vocabularies_schema: ^0.4.5 
+  rdf_mapper: ^0.10.2
   logging: ^1.2.0
 
 dev_dependencies:
