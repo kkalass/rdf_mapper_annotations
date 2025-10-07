@@ -476,10 +476,11 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///   // Section IRI will be: tag:example.org,2025:document-123#section-intro
   /// }
   /// ```
-  const RdfIri.withFragment(String baseIriTemplate, String fragmentTemplate)
+  const RdfIri.withFragment(String baseIriTemplate, String fragmentTemplate,
+      {bool registerGlobally = true})
       : template = baseIriTemplate,
         fragmentTemplate = fragmentTemplate,
-        super();
+        super(registerGlobally: registerGlobally);
 }
 
 /// Configures mapping details for IRI terms in RDF at the property level.
