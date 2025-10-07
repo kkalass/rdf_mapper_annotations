@@ -235,6 +235,18 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// will be used as the complete IRI value.
   final String? template;
 
+  /// Optional template for the fragment identifier to append to the base IRI.
+  ///
+  /// When specified (via `RdfIri.withFragment` constructor), the generator will:
+  /// 1. Process [template] to get the base IRI
+  /// 2. Strip any existing fragment from the base IRI (everything after and including `#`)
+  /// 3. Process [fragmentTemplate] to get the fragment value
+  /// 4. Append `#${fragmentValue}` to create the final IRI
+  ///
+  /// This enables creating IRI term classes that differ from a base IRI only by their fragment identifier,
+  /// which works with any URI scheme (hierarchical or non-hierarchical like `tag:`).
+  final String? fragmentTemplate;
+
   /// Creates an annotation for a class or enum to be mapped to an IRI term.
   ///
   /// This standard constructor creates a mapper that automatically handles the
@@ -317,7 +329,8 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// [registerGlobally] - Whether to register the generated mapper in `initRdfMapper`.
   /// Set to `false` if the mapper should be registered manually or used at the property level instead.
   const RdfIri([this.template, bool registerGlobally = true])
-      : super(registerGlobally: registerGlobally);
+      : fragmentTemplate = null,
+        super(registerGlobally: registerGlobally);
 
   /// Creates a reference to a named mapper for this IRI term.
   ///
@@ -351,6 +364,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// ```
   const RdfIri.namedMapper(String name)
       : template = null,
+        fragmentTemplate = null,
         super.namedMapper(name);
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
@@ -388,6 +402,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// ```
   const RdfIri.mapper(Type mapperType)
       : template = null,
+        fragmentTemplate = null,
         super.mapper(mapperType);
 
   /// Creates a reference to a directly provided mapper instance for this IRI term.
@@ -417,6 +432,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// the mapper instance must be a compile-time constant.
   const RdfIri.mapperInstance(IriTermMapper instance)
       : template = null,
+        fragmentTemplate = null,
         super.mapperInstance(instance);
 
   /// Creates an IRI mapping by appending a fragment to a base IRI.
@@ -426,8 +442,11 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// like `https://` or non-hierarchical like `tag:`), making it ideal for identifier classes
   /// that represent fragment-based references within a document.
   ///
-  /// The [baseIriTemplate] is processed first and any existing fragment is automatically stripped.
-  /// Then the [fragmentTemplate] is appended with a `#` separator to create the final IRI.
+  /// The generator will:
+  /// 1. Process [baseIriTemplate] to get the base IRI
+  /// 2. Strip any existing fragment from the base IRI (everything after and including `#`)
+  /// 3. Process [fragmentTemplate] to get the fragment value
+  /// 4. Append `#${fragmentValue}` to create the final IRI
   ///
   /// Both templates support the standard placeholder system:
   /// - Property placeholders from `@RdfIriPart` annotated properties
@@ -458,7 +477,8 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// }
   /// ```
   const RdfIri.withFragment(String baseIriTemplate, String fragmentTemplate)
-      : template = '$baseIriTemplate#$fragmentTemplate',
+      : template = baseIriTemplate,
+        fragmentTemplate = fragmentTemplate,
         super();
 }
 
@@ -589,6 +609,18 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// 2. Annotate the value class itself with `@RdfIri` and implement the template logic there.
   final String? template;
 
+  /// Optional template for the fragment identifier to append to the base IRI.
+  ///
+  /// When specified (via `IriMapping.withFragment` constructor), the generator will:
+  /// 1. Process [template] to get the base IRI
+  /// 2. Strip any existing fragment from the base IRI (everything after and including `#`)
+  /// 3. Process [fragmentTemplate] to get the fragment value
+  /// 4. Append `#${fragmentValue}` to create the final IRI
+  ///
+  /// This enables creating property IRIs that differ from a base IRI only by their fragment identifier,
+  /// which works with any URI scheme (hierarchical or non-hierarchical like `tag:`).
+  final String? fragmentTemplate;
+
   /// Creates an IRI mapping template for property-specific IRI generation.
   ///
   /// Use this constructor to customize how a specific property should be
@@ -693,7 +725,9 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///   UserId(this.value);
   /// }
   /// ```
-  const IriMapping([this.template]) : super();
+  const IriMapping([this.template])
+      : fragmentTemplate = null,
+        super();
 
   /// Creates a reference to a named mapper for this IRI term.
   ///
@@ -741,6 +775,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// ```
   const IriMapping.namedMapper(String name)
       : template = null,
+        fragmentTemplate = null,
         super.namedMapper(name);
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
@@ -785,6 +820,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// ```
   const IriMapping.mapper(Type mapperType)
       : template = null,
+        fragmentTemplate = null,
         super.mapper(mapperType);
 
   /// Creates a reference to a directly provided mapper instance for this IRI term.
@@ -820,6 +856,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// the mapper instance must be a compile-time constant.
   const IriMapping.mapperInstance(IriTermMapper instance)
       : template = null,
+        fragmentTemplate = null,
         super.mapperInstance(instance);
 
   /// Creates a reference to a named factory function for creating IRI mappers.
@@ -909,6 +946,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// maintaining clean separation between global and property-specific mapping strategies.
   const IriMapping.namedFactory(String name, [Object? configInstance])
       : template = null,
+        fragmentTemplate = null,
         super.namedFactory(name, configInstance);
 
   /// Creates a mapping for generating IRIs by appending a fragment to a base IRI.
@@ -918,8 +956,11 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// or non-hierarchical like `tag:`), making it ideal for properties that reference resources
   /// within the same document distinguished by fragments.
   ///
-  /// The [baseIriTemplate] is processed first and any existing fragment is automatically stripped.
-  /// Then the [fragmentTemplate] is appended with a `#` separator to create the final IRI.
+  /// The generator will:
+  /// 1. Process [baseIriTemplate] to get the base IRI
+  /// 2. Strip any existing fragment from the base IRI (everything after and including `#`)
+  /// 3. Process [fragmentTemplate] to get the fragment value
+  /// 4. Append `#${fragmentValue}` to create the final IRI
   ///
   /// Both templates support the standard placeholder system:
   /// - Property placeholders corresponding to the annotated property's value
@@ -945,7 +986,8 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// }
   /// ```
   const IriMapping.withFragment(String baseIriTemplate, String fragmentTemplate)
-      : template = '$baseIriTemplate#$fragmentTemplate',
+      : template = baseIriTemplate,
+        fragmentTemplate = fragmentTemplate,
         super();
 }
 
@@ -1100,6 +1142,18 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// will be used directly as the complete IRI value.
   final String? template;
 
+  /// Optional template for the fragment identifier to append to the base IRI.
+  ///
+  /// When specified (via `IriStrategy.withFragment` constructor), the generator will:
+  /// 1. Process [template] to get the base IRI
+  /// 2. Strip any existing fragment from the base IRI (everything after and including `#`)
+  /// 3. Process [fragmentTemplate] to get the fragment value
+  /// 4. Append `#${fragmentValue}` to create the final IRI
+  ///
+  /// This enables creating IRIs that differ from a base IRI only by their fragment identifier,
+  /// which works with any URI scheme (hierarchical or non-hierarchical like `tag:`).
+  final String? fragmentTemplate;
+
   /// Optional name under which this resource's IRI will be provided to dependent mappers.
   ///
   /// When specified, the generated mapper will provide a `String Function()` that returns
@@ -1184,7 +1238,9 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
   /// mappers under the specified name. When set, child/dependent mappers can reference this IRI
   /// in their templates using `{providedName}`.
-  const IriStrategy([this.template, this.providedAs]) : super();
+  const IriStrategy([this.template, this.providedAs])
+      : fragmentTemplate = null,
+        super();
 
   /// Creates a reference to a named mapper for this IRI strategy.
   ///
@@ -1244,6 +1300,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// mappers under the specified name, enabling hierarchical IRI patterns.
   const IriStrategy.namedMapper(String name, {this.providedAs})
       : template = null,
+        fragmentTemplate = null,
         super.namedMapper(name);
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
@@ -1291,6 +1348,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// mappers under the specified name, enabling hierarchical IRI patterns.
   const IriStrategy.mapper(Type mapperType, {this.providedAs})
       : template = null,
+        fragmentTemplate = null,
         super.mapper(mapperType);
 
   /// Creates a reference to a directly provided mapper instance for this IRI term.
@@ -1330,6 +1388,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// mappers under the specified name, enabling hierarchical IRI patterns.
   const IriStrategy.mapperInstance(IriTermMapper instance, {this.providedAs})
       : template = null,
+        fragmentTemplate = null,
         super.mapperInstance(instance);
 
   /// Creates a reference to a named factory function for creating IRI mappers.
@@ -1432,6 +1491,7 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   const IriStrategy.namedFactory(String name,
       [Object? configInstance, String? providedAs])
       : template = null,
+        fragmentTemplate = null,
         providedAs = providedAs,
         super.namedFactory(name, configInstance);
 
@@ -1442,8 +1502,11 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// or non-hierarchical like `tag:`), making it ideal for resources within the same document
   /// that are distinguished by fragments.
   ///
-  /// The [baseIriTemplate] is processed first and any existing fragment is automatically stripped.
-  /// Then the [fragmentTemplate] is appended with a `#` separator to create the final IRI.
+  /// The generator will:
+  /// 1. Process [baseIriTemplate] to get the base IRI
+  /// 2. Strip any existing fragment from the base IRI (everything after and including `#`)
+  /// 3. Process [fragmentTemplate] to get the fragment value
+  /// 4. Append `#${fragmentValue}` to create the final IRI
   ///
   /// Both templates support the standard placeholder system:
   /// - Property placeholders from `@RdfIriPart` annotated properties
@@ -1507,7 +1570,8 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   const IriStrategy.withFragment(
       String baseIriTemplate, String fragmentTemplate,
       {this.providedAs})
-      : template = '$baseIriTemplate#$fragmentTemplate',
+      : template = baseIriTemplate,
+        fragmentTemplate = fragmentTemplate,
         super();
 }
 
