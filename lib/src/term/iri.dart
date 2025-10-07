@@ -221,11 +221,13 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///      mapper to handle complex multi-part IRIs
   ///
   /// 2. **Context variables**: Variables like `{+baseUri}` or `{+storageRoot}` that are provided
-  ///    through one of two methods:
+  ///    through one of three methods:
   ///    - Via global provider functions in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`).
   ///      The generator will automatically add a required parameter to `initRdfMapper`.
   ///    - Via other properties in the same class annotated with `@RdfProvides('baseUri')`.
   ///      This is preferred for context variables that are already available in the class.
+  ///    - Via the parent resource's IRI, when the parent's `IriStrategy` specifies `providedAs` parameter.
+  ///      This is useful for hierarchical structures where children need the parent's IRI.
   ///    - The `+` prefix (e.g., `{+baseUri}`) indicates variables that may contain URI-reserved
   ///      characters like slashes, which should not be percent-encoded when substituted
   ///
@@ -253,6 +255,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// Context variables are resolved from:
   /// - Global providers in `initRdfMapper()` (e.g., `baseUriProvider: () => 'https://api.example.com'`)
   /// - Class properties annotated with `@RdfProvides('variableName')`
+  /// - Parent resource's IRI, when the parent's `IriStrategy` specifies `providedAs` parameter
   ///
   /// ### Usage for Classes:
   /// ```dart
@@ -523,11 +526,13 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   ///      the template and the property
   ///
   /// 2. **Context variables**: Variables like `{+baseUri}` or `{+storageRoot}` that are provided
-  ///    through one of two methods:
+  ///    through one of three methods:
   ///    - Via global provider functions in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`).
   ///      The generator will automatically add a required parameter to `initRdfMapper`.
   ///    - Via other properties in the same class annotated with `@RdfProvides('baseUri')`.
   ///      This is preferred for context variables that are already available in the class.
+  ///    - Via the parent resource's IRI, when the parent's `IriStrategy` specifies `providedAs` parameter.
+  ///      This is useful for hierarchical structures where children need the parent's IRI.
   ///    - Example: `IriMapping('{+baseUri}/users/{userId}')`
   ///    - The `+` prefix (e.g., `{+baseUri}`) indicates variables that may contain URI-reserved
   ///      characters like slashes, which should not be percent-encoded when substituted
@@ -557,6 +562,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// Context variables are resolved from:
   /// - Global providers in `initRdfMapper()` (e.g., `baseUriProvider: () => 'https://api.example.com'`)
   /// - Class properties annotated with `@RdfProvides('variableName')`
+  /// - Parent resource's IRI, when the parent's `IriStrategy` specifies `providedAs` parameter
   ///
   /// **Important:** This constructor is only designed for properties of type `String`.
   /// For non-String types (like value objects or domain-specific types), you have two options:
@@ -818,7 +824,7 @@ class IriMapping extends BaseMapping<IriTermMapper> {
   /// ## Example
   ///
   /// **Factory with the target type as configuration object:**
-  /// 
+  ///
   /// This works together with the Solid Pod example from [IriStrategy.namedFactory]
   /// where a single strategy mapper implements complex, pod specific IRI logic.
   /// The IriMapping is for creating IRIs for properties as a reference, so in
@@ -921,12 +927,45 @@ class IriMapping extends BaseMapping<IriTermMapper> {
 ///    - The parent mapper that uses this type needs to provide the context values
 ///    - Context variables can be resolved from:
 ///      a. Properties in the parent class annotated with `@RdfProvides('variableName')`
-///      b. Or required in the parent mapper's constructor (which may propagate up to `initRdfMapper`)
+///      b. The parent resource's IRI itself, when the parent's `IriStrategy` specifies `providedAs` parameter
+///      c. Or required in the parent mapper's constructor (which may propagate up to `initRdfMapper`)
 ///
 /// This system enables flexible, context-aware IRI patterns that can adapt to different
 /// deployment environments without hardcoding values. Unlike the `RdfIri` annotation which is used
 /// for classes that represent IRI terms themselves, `IriStrategy` is used within `RdfGlobalResource`
 /// to define how instance IRIs are constructed from their properties.
+///
+/// ### Example: Providing Parent IRI to Child Resources
+///
+/// The [providedAs] parameter enables a resource to provide its own IRI to dependent mappers.
+/// This is particularly useful for hierarchical data structures:
+///
+/// ```dart
+/// @RdfGlobalResource(
+///   ParentClass.classIri,
+///   IriStrategy('{+baseUri}/parents/{id}', 'parentIri')
+/// )
+/// class Parent {
+///   @RdfIriPart()
+///   final String id;
+///
+///   @RdfProperty(Vocab.child)
+///   final Child child;
+/// }
+///
+/// @RdfGlobalResource(
+///   ChildClass.classIri,
+///   IriStrategy('{+parentIri}/children/{childId}'),
+///   registerGlobally: false
+/// )
+/// class Child {
+///   @RdfIriPart()
+///   final String childId;
+/// }
+/// ```
+///
+/// In this example, the `Parent` mapper will provide a `String Function()` that returns
+/// the parent's IRI, making it available to the `Child` mapper via `{+parentIri}`.
 ///
 /// ## Internal Record-Based Mechanism
 ///
@@ -982,6 +1021,41 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// will be used directly as the complete IRI value.
   final String? template;
 
+  /// Optional name under which this resource's IRI will be provided to dependent mappers.
+  ///
+  /// When specified, the generated mapper will provide a `String Function()` that returns
+  /// the resource's IRI, making it available to child/dependent mappers that reference
+  /// `{providedName}` in their IRI templates.
+  ///
+  /// This is particularly useful for hierarchical data structures where child resources
+  /// need to reference their parent's IRI in their own IRI construction.
+  ///
+  /// Example:
+  /// ```dart
+  /// @RdfGlobalResource(
+  ///   ParentClass.classIri,
+  ///   IriStrategy('{+baseUri}/parents/{id}', 'parentIri')
+  /// )
+  /// class Parent {
+  ///   @RdfIriPart()
+  ///   final String id;
+  ///
+  ///   @RdfProperty(Vocab.child)
+  ///   final Child child;
+  /// }
+  ///
+  /// @RdfGlobalResource(
+  ///   ChildClass.classIri,
+  ///   IriStrategy('{+parentIri}/children/{childId}'),
+  ///   registerGlobally: false
+  /// )
+  /// class Child {
+  ///   @RdfIriPart()
+  ///   final String childId;
+  /// }
+  /// ```
+  final String? providedAs;
+
   /// Creates a strategy for generating IRIs from resource properties.
   ///
   /// Use this constructor with `@RdfGlobalResource` to have the generator create
@@ -1027,7 +1101,11 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// When the [template] contains unbound variables (not matching any property with `@RdfIriPart`),
   /// the generator will automatically create provider parameters. With `registerGlobally = true`
   /// (the default), these providers become required parameters in the `initRdfMapper` function.
-  const IriStrategy([this.template]) : super();
+  ///
+  /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
+  /// mappers under the specified name. When set, child/dependent mappers can reference this IRI
+  /// in their templates using `{providedName}`.
+  const IriStrategy([this.template, this.providedAs]) : super();
 
   /// Creates a reference to a named mapper for this IRI strategy.
   ///
@@ -1082,7 +1160,10 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// The resource mapper will:
   /// - During serialization: Extract the properties into a record to pass to your mapper
   /// - During deserialization: Take the record your mapper produces and set the properties
-  const IriStrategy.namedMapper(String name)
+  ///
+  /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
+  /// mappers under the specified name, enabling hierarchical IRI patterns.
+  const IriStrategy.namedMapper(String name, {this.providedAs})
       : template = null,
         super.namedMapper(name);
 
@@ -1126,7 +1207,10 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   ///   }
   /// }
   /// ```
-  const IriStrategy.mapper(Type mapperType)
+  ///
+  /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
+  /// mappers under the specified name, enabling hierarchical IRI patterns.
+  const IriStrategy.mapper(Type mapperType, {this.providedAs})
       : template = null,
         super.mapper(mapperType);
 
@@ -1162,7 +1246,10 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
-  const IriStrategy.mapperInstance(IriTermMapper instance)
+  ///
+  /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
+  /// mappers under the specified name, enabling hierarchical IRI patterns.
+  const IriStrategy.mapperInstance(IriTermMapper instance, {this.providedAs})
       : template = null,
         super.mapperInstance(instance);
 
@@ -1260,8 +1347,13 @@ class IriStrategy extends BaseMapping<IriTermMapper> {
   /// the simplicity of annotation-driven configuration. The factory function can access
   /// shared resources, configuration, or coordination services to ensure consistent
   /// IRI allocation patterns across your application.
-  const IriStrategy.namedFactory(String name, [Object? configInstance])
+  ///
+  /// The optional [providedAs] parameter allows this resource's IRI to be provided to dependent
+  /// mappers under the specified name, enabling hierarchical IRI patterns.
+  const IriStrategy.namedFactory(String name,
+      [Object? configInstance, String? providedAs])
       : template = null,
+        providedAs = providedAs,
         super.namedFactory(name, configInstance);
 }
 

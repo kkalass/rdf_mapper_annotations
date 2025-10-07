@@ -323,6 +323,70 @@ This approach is particularly useful for:
 - Supporting user-specific or deployment-specific base URIs
 - Maintaining a consistent IRI structure across your entire model
 
+#### Property-Level Context Variables with `@RdfProvides`
+
+For context variables that are already available as properties in your class, use `@RdfProvides` to pass them to child mappers:
+
+```dart
+@RdfGlobalResource(
+  SchemaBook.classIri,
+  IriStrategy('{+baseUri}/books/{id}')
+)
+class Book {
+  @RdfIriPart()
+  @RdfProvides('bookId')  // Make the book's ID available to child mappers
+  final String id;
+
+  @RdfProperty(SchemaBook.hasPart)
+  final List<Chapter> chapters;  // Chapters can use {bookId} in their IRI templates
+}
+
+@RdfGlobalResource(
+  SchemaChapter.classIri,
+  IriStrategy('{+baseUri}/books/{bookId}/chapters/{chapterNum}'),
+  registerGlobally: false  // Only used within Book context
+)
+class Chapter {
+  @RdfIriPart()
+  final int chapterNum;
+  // {bookId} will be provided by the parent Book
+}
+```
+
+This approach avoids the need for global provider parameters when context values are already available in the object graph.
+
+#### Parent IRI as Context with `providedAs`
+
+For hierarchical structures where child resources need their parent's IRI, use the `providedAs` parameter:
+
+```dart
+@RdfGlobalResource(
+  SchemaBook.classIri,
+  IriStrategy('{+baseUri}/books/{id}', 'bookIri')  // Provide this resource's IRI as {bookIri}
+)
+class Book {
+  @RdfIriPart()
+  final String id;
+
+  @RdfProperty(SchemaBook.author)
+  final Author author;  // Author can reference the book's IRI
+}
+
+@RdfGlobalResource(
+  SchemaAuthor.classIri,
+  IriStrategy('{+bookIri}/author'),  // Use the parent book's IRI
+  registerGlobally: false
+)
+class Author {
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+}
+```
+
+This is particularly useful for creating URIs that are relative to their parent resource.
+
+For complete details on context variable resolution, see the API documentation for `IriStrategy`, `@RdfProvides`, and `IriMapping`.
+
 #### Custom Mapper for Complex Cases
 
 When you need complete control over IRI generation and parsing:

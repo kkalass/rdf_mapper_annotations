@@ -105,11 +105,13 @@ import 'package:rdf_mapper_annotations/src/term/literal.dart';
 ///
 /// In the example above:
 /// - `{userId}` is a property-specific placeholder that refers directly to the property's value
-/// - `{+baseUri}` is a context variable that must be provided through one of two methods:
+/// - `{+baseUri}` is a context variable that must be provided through one of three methods:
 ///   1. Via a global provider function in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`)
 ///      The generator will automatically add a required parameter to `initRdfMapper`.
 ///   2. Via another property in the same class annotated with `@RdfProvides('baseUri')`
 ///      This is preferred for context variables that are already available in the class.
+///   3. Via the parent resource's IRI, when the parent's `IriStrategy` specifies `providedAs` parameter
+///      This is useful for hierarchical structures where children need the parent's IRI.
 /// - The `+` prefix (e.g., `{+baseUri}`) indicates variables that may contain URI-reserved
 ///   characters like slashes, which should not be percent-encoded when substituted
 ///
@@ -259,6 +261,7 @@ class RdfProperty implements RdfAnnotation {
   /// 2. Context variables (e.g., `{+baseUri}`) are provided through:
   ///    - Global provider functions in `initRdfMapper` (e.g., `baseUriProvider: () => 'https://example.com'`)
   ///    - Properties in the same class annotated with `@RdfProvides('baseUri')`
+  ///    - The parent resource's IRI, when the parent's `IriStrategy` specifies `providedAs` parameter
   ///    - The `+` prefix (e.g., `{+baseUri}`) indicates variables that may contain URI-reserved
   ///      characters like slashes, which should not be percent-encoded when substituted
   ///

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Parent IRI Provider**: New `providedAs` parameter on `IriStrategy` enables resources to provide their own IRI to dependent mappers. This facilitates hierarchical IRI patterns where child resources need to reference their parent's IRI in their own IRI construction.
+- **Complete context variable documentation**: Added comprehensive documentation across all relevant annotations (`IriStrategy`, `IriMapping`, `RdfIri`, `@RdfProvides`, `@RdfGlobalResource`, `@RdfProperty`) explaining all three methods of providing context variables: global providers, `@RdfProvides`, and the new `providedAs` parameter.
+- **README examples**: Added practical examples demonstrating all three context variable resolution approaches with real-world use cases.
+
+### Enhanced
+- **IriStrategy constructors**: All `IriStrategy` constructors now support the optional `providedAs` parameter (default constructor uses positional parameter, named constructors use named parameter, `namedFactory` uses positional parameter for compatibility).
+- **Context variable resolution**: Extended local resolution to include parent resource IRIs alongside existing `@RdfProvides` annotations and global providers.
+
 ### Changed
 - Replaced deprecated `IriTerm.prevalidated()` constructor with standard `IriTerm()` constructor throughout codebase
 - Updated examples and documentation to use `context.createIriTerm()` for creating IRI terms from strings in mapper implementations

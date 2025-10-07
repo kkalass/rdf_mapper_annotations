@@ -370,11 +370,13 @@ class BookFormatMapper implements IriTermMapper<BookFormat> {
     RdfSubject? parentSubject,
   }) =>
       switch (value) {
-        BookFormat.audiobook => context.createIriTerm(_buildIri('AudiobookFormat')),
+        BookFormat.audiobook =>
+          context.createIriTerm(_buildIri('AudiobookFormat')),
         BookFormat.hardcover => context.createIriTerm(_buildIri('Hardcover')),
         BookFormat.paperback => context.createIriTerm(_buildIri('Paperback')),
         BookFormat.ebook => context.createIriTerm(_buildIri('Ebook')),
-        BookFormat.graphicNovel => context.createIriTerm(_buildIri('GraphicNovel')),
+        BookFormat.graphicNovel =>
+          context.createIriTerm(_buildIri('GraphicNovel')),
       };
 
   /// Generates the complete IRI for a given enum value

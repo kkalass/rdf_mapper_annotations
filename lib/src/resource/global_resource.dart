@@ -114,12 +114,13 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   ///
   /// 2. Any `@RdfProperty` annotation in this class has an [IriMapping] that
   ///    contains a template variable not provided by this resource class
-  ///    via an `@RdfProvides` annotation.
+  ///    via an `@RdfProvides` annotation or by a parent's `IriStrategy.providedAs`.
   ///
   /// 3. The `@RdfIri` annotation of any `@RdfProperty`'s value class contains `registerGlobally: false` (so it will be instantiated by this resource mapper instead of using the globally registered mapper) and contains
   ///    a template variable not provided by either:
   ///    - The value class's own `@RdfIriPart` annotations
   ///    - This resource class via `@RdfProvides` annotations
+  ///    - A parent resource via `IriStrategy.providedAs` parameter
   ///
   /// Also set to `false` if you want to manually manage the mapper registration.
   ///
@@ -132,7 +133,7 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   /// [registerGlobally] controls whether the generated mapper should be registered globally
   /// in the `initRdfMapper` function. Set to `false` when the mapper should not be
   /// globally accessible, typically when all required context will be provided by parent
-  /// objects via `@RdfProvides` annotations.
+  /// objects via `@RdfProvides` annotations or via the parent's `IriStrategy.providedAs` parameter.
   ///
   /// Example:
   /// ```dart

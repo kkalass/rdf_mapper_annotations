@@ -20,6 +20,12 @@ import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 /// to register global provider functions in `initRdfMapper` for values that are
 /// available within the object graph.
 ///
+/// ## Alternative: Providing the Resource IRI
+///
+/// Instead of annotating properties with `@RdfProvides`, you can also provide the resource's
+/// own IRI to dependent mappers by using the `providedAs` parameter on `IriStrategy`.
+/// See [IriStrategy] documentation for details on this alternative approach.
+///
 /// Examples:
 ///
 /// **Example: Using @RdfProvides to pass parentId to Iri property and nested resource**

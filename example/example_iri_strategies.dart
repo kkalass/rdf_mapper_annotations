@@ -42,9 +42,7 @@ class UserReference {
 // The actual document type that uses pod-coordinated IRI generation
 // This demonstrates how solid-crdt-sync coordinates storage for actual entities
 @RdfGlobalResource(
-  SchemaBook.classIri,
-  IriStrategy.namedFactory('podIriStrategyFactory')
-)
+    SchemaBook.classIri, IriStrategy.namedFactory('podIriStrategyFactory'))
 class Document {
   @RdfIriPart()
   final String id;
@@ -109,7 +107,8 @@ class IriStrategyMapper implements IriTermMapper<(String,)> {
 
     // For this example, simulate type-aware coordination:
     final typeName = targetType.toString().toLowerCase();
-    return context.createIriTerm('https://alice.pod.example.org/$typeName/${id.substring(0, 2)}/$id');
+    return context.createIriTerm(
+        'https://alice.pod.example.org/$typeName/${id.substring(0, 2)}/$id');
   }
 
   @override
@@ -123,7 +122,8 @@ class IriStrategyMapper implements IriTermMapper<(String,)> {
       return (id,);
     }
 
-    throw FormatException('Invalid pod IRI format for ${targetType}: ${term.value}');
+    throw FormatException(
+        'Invalid pod IRI format for ${targetType}: ${term.value}');
   }
 }
 
@@ -219,7 +219,8 @@ class ChapterIdMapper implements IriTermMapper<(String bookId, int chapterId)> {
     (String bookId, int chapterNumber) value,
     SerializationContext context,
   ) {
-    return context.createIriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
+    return context
+        .createIriTerm('$baseUrl/books/${value.$1}/chapters/${value.$2}');
   }
 }
 
@@ -241,7 +242,8 @@ void initRdfMapper({
   // In a real implementation, these would be registered with a mapper registry
   // The Document class would use the strategy factory for its IRI generation
   final documentIriMapper = podIriStrategyFactory<Document>();
-  print('Created pod-coordinated Document IRI mapper for type ${Document}: $documentIriMapper');
+  print(
+      'Created pod-coordinated Document IRI mapper for type ${Document}: $documentIriMapper');
 }
 
 // -- Back to your code --
@@ -254,7 +256,8 @@ void main() {
   initRdfMapper(
     userReferenceMapper: UserReferenceMapper(baseUrl: baseUrl),
     chapterIdMapper: ChapterIdMapper(baseUrl: baseUrl),
-    podIriStrategyFactory: createPodIriStrategyMapper, // Pod-coordinated IRI strategy
+    podIriStrategyFactory:
+        createPodIriStrategyMapper, // Pod-coordinated IRI strategy
   );
 
   // Create sample data
@@ -263,7 +266,8 @@ void main() {
   final user = UserReference('johndoe');
   final book = SimpleBook('hobbit', 'The Hobbit');
   final chapter = Chapter('hobbit', 3, 'Riddles in the Dark');
-  final document = Document(id: 'abc123def', title: 'My Document', content: 'Some content');
+  final document =
+      Document(id: 'abc123def', title: 'My Document', content: 'Some content');
 
   // Example IRIs that would be generated
   print('ISBN IRI: ${isbn.value} => urn:isbn:9780261102217');
