@@ -495,6 +495,105 @@ class ChapterIdMapper implements IriTermMapper&lt;(String bookId, int chapterId)
 </ul>
 <hr>
 <h2 id="advanced-features">Advanced Features</h2>
+<h3 id="directional-mappers-serialize-only--deserialize-only">Directional Mappers (Serialize-Only / Deserialize-Only)</h3>
+<p>Control whether a mapper handles serialization, deserialization, or both. This is useful for:</p>
+<ul>
+<li><strong>Read-only scenarios</strong>: Consuming external RDF data without needing to serialize</li>
+<li><strong>Write-only scenarios</strong>: Generating RDF exports without deserialization support</li>
+<li><strong>Performance optimization</strong>: Generated code only includes the necessary direction</li>
+</ul>
+<h4 id="for-auto-generated-mappers">For Auto-Generated Mappers</h4>
+<p>Use specialized constructors that make the intent explicit:</p>
+<pre class="language-dart"><code class="language-dart">// Deserialize-only: IRI strategy is optional since it's not needed
+@RdfGlobalResource.deserializeOnly(SchemaBook.classIri)
+class ExternalBook {
+  // No @RdfIriPart needed - we're only reading RDF
+  @RdfProperty(SchemaBook.name)
+  final String title;
+  
+  @RdfProperty(SchemaBook.isbn)
+  final String isbn;
+  
+  ExternalBook({required this.title, required this.isbn});
+}
+
+// Serialize-only: IRI strategy is required for generating IRIs
+@RdfGlobalResource.serializeOnly(
+  SchemaProduct.classIri,
+  IriStrategy('http://example.org/products/{id}')
+)
+class ProductExport {
+  @RdfIriPart('id')
+  final String productId;
+  
+  @RdfProperty(SchemaProduct.name)
+  final String name;
+  
+  ProductExport({required this.productId, required this.name});
+}
+
+// Standard bidirectional (default)
+@RdfGlobalResource(
+  SchemaPerson.classIri,
+  IriStrategy('http://example.org/people/{id}')
+)
+class Person {
+  @RdfIriPart('id')
+  final String id;
+  
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+  
+  Person({required this.id, required this.name});
+}
+</code></pre>
+<h4 id="for-custom-mappers">For Custom Mappers</h4>
+<p>Use the <code>direction</code> parameter with custom mapper constructors:</p>
+<pre class="language-dart"><code class="language-dart">// Deserialize-only custom mapper
+@RdfGlobalResource.namedMapper(
+  'readOnlyArticleMapper',
+  direction: MapperDirection.deserializeOnly
+)
+class ReadOnlyArticle {
+  final String title;
+  final String content;
+  
+  ReadOnlyArticle({required this.title, required this.content});
+}
+
+// Serialize-only custom mapper
+@RdfGlobalResource.mapper(
+  WriteOnlyArticleMapper,
+  direction: MapperDirection.serializeOnly
+)
+class WriteOnlyArticle {
+  final String articleId;
+  final String title;
+  
+  WriteOnlyArticle({required this.articleId, required this.title});
+}
+
+// Also works with .mapperInstance()
+@RdfGlobalResource.mapperInstance(
+  myCustomMapper,
+  direction: MapperDirection.deserializeOnly
+)
+class CustomClass { /* ... */ }
+</code></pre>
+<p>The <code>MapperDirection</code> enum has three values:</p>
+<ul>
+<li><code>MapperDirection.both</code> (default) - Full bidirectional mapping</li>
+<li><code>MapperDirection.serializeOnly</code> - Only write to RDF</li>
+<li><code>MapperDirection.deserializeOnly</code> - Only read from RDF</li>
+</ul>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>Type safety: Standard constructor maintains required IRI strategy</li>
+<li>Explicit intent: Code clearly shows the mapping direction</li>
+<li>Optimization: Generator creates optimized single-direction code</li>
+<li>Flexibility: Works with all custom mapper constructors</li>
+</ul>
+<p>See <a href="example/directional_mappers.dart"><code>example/directional_mappers.dart</code></a> for a complete demonstration.</p>
 <h3 id="custom-annotation-classes">Custom Annotation Classes</h3>
 <p>Create domain-specific annotations by subclassing existing annotation classes:</p>
 <pre class="language-dart"><code class="language-dart">enum PodIriStrategy { twoTwoDigitDirs, noDirs }
@@ -997,7 +1096,7 @@ final eventGraph = rdfMapper.encodeObject(event);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.3
+      0.10.4
   </span>
   
 </footer>

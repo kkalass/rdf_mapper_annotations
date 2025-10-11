@@ -54,8 +54,9 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfLocalResource.mapper</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="mapper-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> <span class="parameter-name">mapperType</span></span></li>
-</ol>)
+      <span class="name ">RdfLocalResource.mapper</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="mapper-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> <span class="parameter-name">mapperType</span>, {</span></li>
+<li><span class="parameter" id="mapper-param-direction"><span class="type-annotation"><a href="../../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
@@ -80,7 +81,7 @@ class CustomChapterMapper implements LocalResourceMapper&lt;Chapter&gt; {
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfLocalResource.mapper(Type mapperType)
+  <pre class="language-dart"><code class="language-dart">const RdfLocalResource.mapper(Type mapperType, {super.direction})
     : classIri = null,
       super.mapper(mapperType);</code></pre>
 </section>
@@ -110,7 +111,7 @@ class CustomChapterMapper implements LocalResourceMapper&lt;Chapter&gt; {
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.3
+      0.10.4
   </span>
   
 </footer>

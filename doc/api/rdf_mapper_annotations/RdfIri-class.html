@@ -272,28 +272,28 @@ class Product {
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="RdfIri.new" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.html">RdfIri.new</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span></span>])</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.html">RdfIri.new</a></span><span class="signature">([<span class="parameter" id="-param-template"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">template</span>, </span><span class="parameter" id="-param-registerGlobally"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">registerGlobally</span> = <span class="default-value">true</span>, </span><span class="parameter" id="-param-direction"><span class="type-annotation"><a href="../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span></span>])</span>
         </dt>
         <dd>
           Creates an annotation for a class or enum to be mapped to an IRI term.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfIri.mapper" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapper.html">RdfIri.mapper</a></span><span class="signature">(<span class="parameter" id="mapper-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> <span class="parameter-name">mapperType</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapper.html">RdfIri.mapper</a></span><span class="signature">(<span class="parameter" id="mapper-param-mapperType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> <span class="parameter-name">mapperType</span>, {</span><span class="parameter" id="mapper-param-direction"><span class="type-annotation"><a href="../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span></span>})</span>
         </dt>
         <dd>
           Creates a reference to a mapper that will be instantiated from the given type.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfIri.mapperInstance" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.mapperInstance.html">RdfIri.mapperInstance</a></span><span class="signature">(<span class="parameter" id="mapperInstance-param-instance"><span class="type-annotation"><a href="https://pub.dev/documentation/rdf_mapper/0.10.2/rdf_mapper/IriTermMapper-class.html">IriTermMapper</a></span> <span class="parameter-name">instance</span>, {</span><span class="parameter" id="mapperInstance-param-direction"><span class="type-annotation"><a href="../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span></span>})</span>
         </dt>
         <dd>
           Creates a reference to a directly provided mapper instance for this IRI term.
             <div class="constructor-modifier features">const</div>
         </dd>
         <dt id="RdfIri.namedMapper" class="callable">
-          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.namedMapper.html">RdfIri.namedMapper</a></span><span class="signature">(<span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>)</span>
+          <span class="name"><a href="../rdf_mapper_annotations/RdfIri/RdfIri.namedMapper.html">RdfIri.namedMapper</a></span><span class="signature">(<span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, {</span><span class="parameter" id="namedMapper-param-direction"><span class="type-annotation"><a href="../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span></span>})</span>
         </dt>
         <dd>
           Creates a reference to a named mapper for this IRI term.
@@ -314,6 +314,18 @@ class Product {
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="direction" class="property inherited">
+  <span class="name"><a href="../rdf_mapper_annotations/BaseMappingAnnotation/direction.html">direction</a></span>
+  <span class="signature">&#8594; <a href="../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Specifies whether this mapper should handle serialization, deserialization, or both.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
         <dt id="fragmentTemplate" class="property">
   <span class="name"><a href="../rdf_mapper_annotations/RdfIri/fragmentTemplate.html">fragmentTemplate</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
@@ -472,7 +484,7 @@ in the <code>initRdfMapper</code> function.
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.3
+      0.10.4
   </span>
   
 </footer>

@@ -54,8 +54,9 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">RdfGlobalResource.namedMapper</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
-</ol>)
+      <span class="name ">RdfGlobalResource.namedMapper</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, {</span></li>
+<li><span class="parameter" id="namedMapper-param-direction"><span class="type-annotation"><a href="../../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
@@ -68,12 +69,24 @@ implementation via dependency injection. When using this approach, you must:</p>
 <li>Provide the mapper instance as a named parameter to <code>initRdfMapper</code></li>
 </ol>
 <p>The <code>name</code> will correspond to a parameter in the generated <code>initRdfMapper</code> function.</p>
+<p>The <code>direction</code> parameter controls whether the mapper handles serialization,
+deserialization, or both. Defaults to <a href="../../rdf_mapper_annotations/MapperDirection.html">MapperDirection.both</a>.</p>
 <p>This approach is particularly useful for resources that require complex mapping
 logic or external context (like base URLs) that might vary between deployments.</p>
 <p>Note: The mapper will be registered globally in the <code>RdfMapper</code> instance.
 If you need non-global registration, simply do not annotate the class with <code>@RdfGlobalResource</code>.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">@RdfGlobalResource.namedMapper('customBookMapper')
+<pre class="language-dart"><code class="language-dart">// Bidirectional mapper (default)
+@RdfGlobalResource.namedMapper('customBookMapper')
+class Book {
+  // ...
+}
+
+// Deserialize-only mapper
+@RdfGlobalResource.namedMapper(
+  'customBookMapper',
+  direction: MapperDirection.deserializeOnly
+)
 class Book {
   // ...
 }
@@ -93,10 +106,11 @@ final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const RdfGlobalResource.namedMapper(String name)
+  <pre class="language-dart"><code class="language-dart">const RdfGlobalResource.namedMapper(String name,
+    {MapperDirection direction = MapperDirection.both})
     : iri = null,
       classIri = null,
-      super.namedMapper(name);</code></pre>
+      super.namedMapper(name, direction: direction);</code></pre>
 </section>
 
 
@@ -124,7 +138,7 @@ final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.3
+      0.10.4
   </span>
   
 </footer>

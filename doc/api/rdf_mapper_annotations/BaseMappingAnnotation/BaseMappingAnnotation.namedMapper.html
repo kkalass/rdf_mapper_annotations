@@ -54,8 +54,9 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">BaseMappingAnnotation&lt;<wbr><span class="type-parameter">M extends Mapper</span>&gt;.namedMapper</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
-</ol>)
+      <span class="name ">BaseMappingAnnotation&lt;<wbr><span class="type-parameter">M extends Mapper</span>&gt;.namedMapper</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="namedMapper-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, {</span></li>
+<li><span class="parameter" id="namedMapper-param-direction"><span class="type-annotation"><a href="../../rdf_mapper_annotations/MapperDirection.html">MapperDirection</a></span> <span class="parameter-name">direction</span> = <span class="default-value">MapperDirection.both</span>, </span></li>
+</ol>})
     </section>
     
 
@@ -63,8 +64,10 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const BaseMappingAnnotation.namedMapper(String name)
+  <pre class="language-dart"><code class="language-dart">const BaseMappingAnnotation.namedMapper(String name,
+    {MapperDirection direction = MapperDirection.both})
     : registerGlobally = true,
+      direction = direction,
       super.namedMapper(name);</code></pre>
 </section>
 
@@ -93,7 +96,7 @@
 <footer>
   <span class="no-break">
     rdf_mapper_annotations
-      0.10.3
+      0.10.4
   </span>
   
 </footer>
