@@ -1,6 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
+import 'package:rdf_mapper_annotations/src/base/mapper_direction.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 
 /// Marks a Dart class as a local RDF resource (referred to via a blank node).
@@ -120,8 +121,11 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   ///   // ...
   /// }
   /// ```
-  const RdfLocalResource([this.classIri, bool registerGlobally = true])
-      : super(registerGlobally: registerGlobally);
+  const RdfLocalResource(
+      [this.classIri,
+      bool registerGlobally = true,
+      MapperDirection direction = MapperDirection.both])
+      : super(registerGlobally: registerGlobally, direction: direction);
 
   /// Creates a reference to a named mapper for this local resource.
   ///
@@ -155,7 +159,7 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   /// final chapterMapper = MyChapterMapper();
   /// final rdfMapper = initRdfMapper(customChapterMapper: chapterMapper);
   /// ```
-  const RdfLocalResource.namedMapper(String name)
+  const RdfLocalResource.namedMapper(String name, {super.direction})
       : classIri = null,
         super.namedMapper(name);
 
@@ -177,7 +181,7 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   ///   // Implementation details...
   /// }
   /// ```
-  const RdfLocalResource.mapper(Type mapperType)
+  const RdfLocalResource.mapper(Type mapperType, {super.direction})
       : classIri = null,
         super.mapper(mapperType);
 
@@ -204,7 +208,8 @@ class RdfLocalResource extends BaseMappingAnnotation<LocalResourceMapper>
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
-  const RdfLocalResource.mapperInstance(LocalResourceMapper instance)
+  const RdfLocalResource.mapperInstance(LocalResourceMapper instance,
+      {super.direction})
       : classIri = null,
         super.mapperInstance(instance);
 }
