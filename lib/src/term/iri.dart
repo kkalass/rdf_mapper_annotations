@@ -1,5 +1,6 @@
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
+import 'package:rdf_mapper_annotations/src/base/mapper_direction.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 
 /// Marks a Dart class or enum as representing an RDF IRI term.
@@ -328,9 +329,12 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///
   /// [registerGlobally] - Whether to register the generated mapper in `initRdfMapper`.
   /// Set to `false` if the mapper should be registered manually or used at the property level instead.
-  const RdfIri([this.template, bool registerGlobally = true])
+  const RdfIri(
+      [this.template,
+      bool registerGlobally = true,
+      MapperDirection direction = MapperDirection.both])
       : fragmentTemplate = null,
-        super(registerGlobally: registerGlobally);
+        super(registerGlobally: registerGlobally, direction: direction);
 
   /// Creates a reference to a named mapper for this IRI term.
   ///
