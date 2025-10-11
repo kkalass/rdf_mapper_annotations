@@ -1,6 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
+import 'package:rdf_mapper_annotations/src/base/mapper_direction.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 import 'package:rdf_mapper_annotations/src/term/iri.dart';
 
@@ -37,9 +38,11 @@ import 'package:rdf_mapper_annotations/src/term/iri.dart';
 ///
 /// You can use this annotation in several ways, depending on your mapping needs:
 /// 1. Standard: Use `@RdfGlobalResource(classIri, iriStrategy)` with an IRI template - the mapper is automatically generated and registered within initRdfMapper
-/// 2. Named mapper: Use `@RdfGlobalResource.namedMapper()` - you must implement the mapper, instantiate it, and provide it to `initRdfMapper` as a named parameter
-/// 3. Mapper type: Use `@RdfGlobalResource.mapper()` - you must implement the mapper, it will be instantiated and registered within initRdfMapper automatically
-/// 4. Mapper instance: Use `@RdfGlobalResource.mapperInstance()` - you must implement the mapper, your instance will be registered within initRdfMapper automatically
+/// 2. Deserialize-only: Use `@RdfGlobalResource.deserializeOnly(classIri)` - generates a mapper that only deserializes from RDF (IRI strategy not needed)
+/// 3. Serialize-only: Use `@RdfGlobalResource.serializeOnly(classIri, iriStrategy)` - generates a mapper that only serializes to RDF
+/// 4. Named mapper: Use `@RdfGlobalResource.namedMapper()` - you must implement the mapper, instantiate it, and provide it to `initRdfMapper` as a named parameter
+/// 5. Mapper type: Use `@RdfGlobalResource.mapper()` - you must implement the mapper, it will be instantiated and registered within initRdfMapper automatically
+/// 6. Mapper instance: Use `@RdfGlobalResource.mapperInstance()` - you must implement the mapper, your instance will be registered within initRdfMapper automatically
 ///
 /// This annotation is typically used for:
 /// - Domain entities with unique identifiers
@@ -149,6 +152,70 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
       : iri = iriStrategy,
         super();
 
+  /// Creates an annotation for deserialization-only mapping.
+  ///
+  /// Use this constructor when you only need to read RDF data and construct objects,
+  /// but never need to serialize objects back to RDF. Since serialization is not
+  /// supported, an IRI strategy is not required.
+  ///
+  /// This is particularly useful when:
+  /// - You're consuming RDF data from external sources
+  /// - The IRI construction logic is complex or context-dependent
+  /// - You only need read-only access to RDF data
+  ///
+  /// A deserializer-only mapper is automatically generated based on the property
+  /// annotations in your class and registered within `initRdfMapper` when
+  /// [registerGlobally] is true.
+  ///
+  /// Example:
+  /// ```dart
+  /// @RdfGlobalResource.deserializeOnly(SchemaBook.classIri)
+  /// class Book {
+  ///   @RdfProperty(SchemaBook.name)
+  ///   final String title;
+  ///   // No @RdfIriPart needed since we don't serialize
+  ///   // ...
+  /// }
+  /// ```
+  const RdfGlobalResource.deserializeOnly(this.classIri,
+      {super.registerGlobally = true, this.iri})
+      : super(direction: MapperDirection.deserializeOnly);
+
+  /// Creates an annotation for serialization-only mapping.
+  ///
+  /// Use this constructor when you only need to write RDF data from objects,
+  /// but never need to reconstruct objects from RDF. An IRI strategy is required
+  /// to generate the subject IRIs during serialization.
+  ///
+  /// This is useful when:
+  /// - You're generating RDF data for export
+  /// - You don't need to read back the data you produce
+  /// - You want to make it explicit that deserialization is not supported
+  ///
+  /// A serializer-only mapper is automatically generated based on the property
+  /// annotations in your class and registered within `initRdfMapper` when
+  /// [registerGlobally] is true.
+  ///
+  /// Example:
+  /// ```dart
+  /// @RdfGlobalResource.serializeOnly(
+  ///   SchemaBook.classIri,
+  ///   IriStrategy('http://example.org/book/{id}')
+  /// )
+  /// class Book {
+  ///   @RdfIriPart('id')
+  ///   final String id;
+  ///
+  ///   @RdfProperty(SchemaBook.name)
+  ///   final String title;
+  ///   // ...
+  /// }
+  /// ```
+  const RdfGlobalResource.serializeOnly(this.classIri, IriStrategy iriStrategy,
+      {super.registerGlobally = true})
+      : iri = iriStrategy,
+        super(direction: MapperDirection.serializeOnly);
+
   /// Creates a reference to a named mapper for this global resource.
   ///
   /// Use this constructor when you want to provide a custom `GlobalResourceMapper`
@@ -159,6 +226,9 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   ///
   /// The `name` will correspond to a parameter in the generated `initRdfMapper` function.
   ///
+  /// The [direction] parameter controls whether the mapper handles serialization,
+  /// deserialization, or both. Defaults to [MapperDirection.both].
+  ///
   /// This approach is particularly useful for resources that require complex mapping
   /// logic or external context (like base URLs) that might vary between deployments.
   ///
@@ -167,7 +237,17 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   ///
   /// Example:
   /// ```dart
+  /// // Bidirectional mapper (default)
   /// @RdfGlobalResource.namedMapper('customBookMapper')
+  /// class Book {
+  ///   // ...
+  /// }
+  ///
+  /// // Deserialize-only mapper
+  /// @RdfGlobalResource.namedMapper(
+  ///   'customBookMapper',
+  ///   direction: MapperDirection.deserializeOnly
+  /// )
   /// class Book {
   ///   // ...
   /// }
@@ -181,10 +261,11 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   /// final bookMapper = MyBookMapper();
   /// final rdfMapper = initRdfMapper(customBookMapper: bookMapper);
   /// ```
-  const RdfGlobalResource.namedMapper(String name)
+  const RdfGlobalResource.namedMapper(String name,
+      {MapperDirection direction = MapperDirection.both})
       : iri = null,
         classIri = null,
-        super.namedMapper(name);
+        super.namedMapper(name, direction: direction);
 
   /// Creates a reference to a mapper that will be instantiated from the given type.
   ///
@@ -196,6 +277,9 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   /// for instances of this class. The type must implement `GlobalResourceMapper<T>` where T
   /// is the annotated class.
   ///
+  /// The [direction] parameter controls whether the mapper handles serialization,
+  /// deserialization, or both. Defaults to [MapperDirection.both].
+  ///
   /// Note: The mapper will be registered globally in the `RdfMapper` instance.
   /// If you need non-global registration, do not annotate your class with `@RdfGlobalResource`.
   ///
@@ -206,16 +290,26 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   ///   // ...
   /// }
   ///
+  /// // Deserialize-only mapper
+  /// @RdfGlobalResource.mapper(
+  ///   CustomBookMapper,
+  ///   direction: MapperDirection.deserializeOnly
+  /// )
+  /// class Book {
+  ///   // ...
+  /// }
+  ///
   /// // The mapper implementation must be accessible to the generator and
   /// // it must provide a no-argument constructor:
   /// class CustomBookMapper implements GlobalResourceMapper<Book> {
   ///   // Implementation details...
   /// }
   /// ```
-  const RdfGlobalResource.mapper(Type mapperType)
+  const RdfGlobalResource.mapper(Type mapperType,
+      {MapperDirection direction = MapperDirection.both})
       : iri = null,
         classIri = null,
-        super.mapper(mapperType);
+        super.mapper(mapperType, direction: direction);
 
   /// Creates a reference to a directly provided mapper instance.
   ///
@@ -226,6 +320,8 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   /// This allows you to supply a pre-existing instance of a `GlobalResourceMapper`
   /// for this class.
   ///
+  /// The [direction] parameter controls whether the mapper handles serialization,
+  /// deserialization, or both. Defaults to [MapperDirection.both].
   ///
   /// Example:
   /// ```dart
@@ -239,14 +335,24 @@ class RdfGlobalResource extends BaseMappingAnnotation<GlobalResourceMapper>
   /// class Book {
   ///   // ...
   /// }
+  ///
+  /// // Deserialize-only mapper
+  /// @RdfGlobalResource.mapperInstance(
+  ///   bookMapper,
+  ///   direction: MapperDirection.deserializeOnly
+  /// )
+  /// class Book {
+  ///   // ...
+  /// }
   /// ```
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
-  const RdfGlobalResource.mapperInstance(GlobalResourceMapper instance)
+  const RdfGlobalResource.mapperInstance(GlobalResourceMapper instance,
+      {MapperDirection direction = MapperDirection.both})
       : iri = null,
         classIri = null,
-        super.mapperInstance(instance);
+        super.mapperInstance(instance, direction: direction);
 }
 
 /// Configures mapping details for global resources (resources with IRIs) at the property level.

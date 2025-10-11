@@ -169,6 +169,7 @@ library;
 export 'src/term/rdf_enum_value.dart';
 
 export 'src/base/base_mapping.dart';
+export 'src/base/mapper_direction.dart';
 export 'src/base/mapper_ref.dart';
 export 'src/base/rdf_annotation.dart';
 

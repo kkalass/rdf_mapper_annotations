@@ -59,6 +59,97 @@ void main() {
       expect(annotation.mapper!.type, isNull);
       expect(annotation.mapper!.instance, equals(mapperInstance));
     });
+
+    test('deserializeOnly constructor with classIri', () {
+      final classIri = const IriTerm('http://example.org/classIri');
+      final annotation = RdfGlobalResource.deserializeOnly(classIri);
+
+      expect(annotation.classIri, equals(classIri));
+      expect(annotation.iri, isNull);
+      expect(annotation.mapper, isNull);
+      expect(annotation.registerGlobally, isTrue);
+      expect(annotation.direction, equals(MapperDirection.deserializeOnly));
+    });
+
+    test('deserializeOnly constructor with registerGlobally false', () {
+      final classIri = const IriTerm('http://example.org/classIri');
+      final annotation =
+          RdfGlobalResource.deserializeOnly(classIri, registerGlobally: false);
+
+      expect(annotation.classIri, equals(classIri));
+      expect(annotation.iri, isNull);
+      expect(annotation.registerGlobally, isFalse);
+      expect(annotation.direction, equals(MapperDirection.deserializeOnly));
+    });
+
+    test('serializeOnly constructor with classIri and iriStrategy', () {
+      final classIri = const IriTerm('http://example.org/classIri');
+      final iriStrategy = IriStrategy('http://example.org/resource/{id}');
+      final annotation = RdfGlobalResource.serializeOnly(classIri, iriStrategy);
+
+      expect(annotation.classIri, equals(classIri));
+      expect(annotation.iri, equals(iriStrategy));
+      expect(annotation.mapper, isNull);
+      expect(annotation.registerGlobally, isTrue);
+      expect(annotation.direction, equals(MapperDirection.serializeOnly));
+    });
+
+    test('namedMapper with direction parameter', () {
+      const mapperName = 'testMapper';
+      final annotation = RdfGlobalResource.namedMapper(
+        mapperName,
+        direction: MapperDirection.deserializeOnly,
+      );
+
+      expect(annotation.classIri, isNull);
+      expect(annotation.iri, isNull);
+      expect(annotation.mapper, isNotNull);
+      expect(annotation.mapper!.name, equals(mapperName));
+      expect(annotation.direction, equals(MapperDirection.deserializeOnly));
+    });
+
+    test('mapper with direction parameter', () {
+      final annotation = RdfGlobalResource.mapper(
+        MockGlobalResourceMapper,
+        direction: MapperDirection.serializeOnly,
+      );
+
+      expect(annotation.classIri, isNull);
+      expect(annotation.iri, isNull);
+      expect(annotation.mapper, isNotNull);
+      expect(annotation.mapper!.type, equals(MockGlobalResourceMapper));
+      expect(annotation.direction, equals(MapperDirection.serializeOnly));
+    });
+
+    test('mapperInstance with direction parameter', () {
+      const mapperInstance = MockGlobalResourceMapper();
+      final annotation = RdfGlobalResource.mapperInstance(
+        mapperInstance,
+        direction: MapperDirection.deserializeOnly,
+      );
+
+      expect(annotation.classIri, isNull);
+      expect(annotation.iri, isNull);
+      expect(annotation.mapper, isNotNull);
+      expect(annotation.mapper!.instance, equals(mapperInstance));
+      expect(annotation.direction, equals(MapperDirection.deserializeOnly));
+    });
+
+    test('default direction is both for namedMapper', () {
+      final annotation = RdfGlobalResource.namedMapper('testMapper');
+      expect(annotation.direction, equals(MapperDirection.both));
+    });
+
+    test('default direction is both for mapper', () {
+      final annotation = RdfGlobalResource.mapper(MockGlobalResourceMapper);
+      expect(annotation.direction, equals(MapperDirection.both));
+    });
+
+    test('default direction is both for mapperInstance', () {
+      const mapperInstance = MockGlobalResourceMapper();
+      final annotation = RdfGlobalResource.mapperInstance(mapperInstance);
+      expect(annotation.direction, equals(MapperDirection.both));
+    });
   });
 
   group('GlobalResourceMapping', () {

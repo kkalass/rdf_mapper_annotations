@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Directional Mapper Support**: New `MapperDirection` enum enables control over whether mappers handle serialization, deserialization, or both
+- **Deserialize-only constructor**: New `@RdfGlobalResource.deserializeOnly(classIri)` constructor for resources that only need to be read from RDF. IRI strategy is optional since it's not needed for deserialization.
+- **Serialize-only constructor**: New `@RdfGlobalResource.serializeOnly(classIri, iriStrategy)` constructor for resources that only need to be written to RDF
+- **Direction parameter for custom mappers**: All custom mapper constructors (`.namedMapper()`, `.mapper()`, `.mapperInstance()`) now support an optional `direction` parameter (defaults to `MapperDirection.both`)
+
+### Enhanced
+- **Hybrid approach for mapper direction**: Combines specialized constructors (`.deserializeOnly()`, `.serializeOnly()`) for standard cases with enum-based control for custom mappers, optimizing both type safety and flexibility
+- **Type safety preserved**: Standard constructor maintains required `IriStrategy` parameter, ensuring type safety for the common bidirectional mapping case
+
 ## [0.10.3] - 2025-10-07
 
 ### Added

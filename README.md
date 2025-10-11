@@ -499,6 +499,112 @@ This is especially valuable for:
 
 ## Advanced Features
 
+### Directional Mappers (Serialize-Only / Deserialize-Only)
+
+Control whether a mapper handles serialization, deserialization, or both. This is useful for:
+- **Read-only scenarios**: Consuming external RDF data without needing to serialize
+- **Write-only scenarios**: Generating RDF exports without deserialization support
+- **Performance optimization**: Generated code only includes the necessary direction
+
+#### For Auto-Generated Mappers
+
+Use specialized constructors that make the intent explicit:
+
+```dart
+// Deserialize-only: IRI strategy is optional since it's not needed
+@RdfGlobalResource.deserializeOnly(SchemaBook.classIri)
+class ExternalBook {
+  // No @RdfIriPart needed - we're only reading RDF
+  @RdfProperty(SchemaBook.name)
+  final String title;
+  
+  @RdfProperty(SchemaBook.isbn)
+  final String isbn;
+  
+  ExternalBook({required this.title, required this.isbn});
+}
+
+// Serialize-only: IRI strategy is required for generating IRIs
+@RdfGlobalResource.serializeOnly(
+  SchemaProduct.classIri,
+  IriStrategy('http://example.org/products/{id}')
+)
+class ProductExport {
+  @RdfIriPart('id')
+  final String productId;
+  
+  @RdfProperty(SchemaProduct.name)
+  final String name;
+  
+  ProductExport({required this.productId, required this.name});
+}
+
+// Standard bidirectional (default)
+@RdfGlobalResource(
+  SchemaPerson.classIri,
+  IriStrategy('http://example.org/people/{id}')
+)
+class Person {
+  @RdfIriPart('id')
+  final String id;
+  
+  @RdfProperty(SchemaPerson.name)
+  final String name;
+  
+  Person({required this.id, required this.name});
+}
+```
+
+#### For Custom Mappers
+
+Use the `direction` parameter with custom mapper constructors:
+
+```dart
+// Deserialize-only custom mapper
+@RdfGlobalResource.namedMapper(
+  'readOnlyArticleMapper',
+  direction: MapperDirection.deserializeOnly
+)
+class ReadOnlyArticle {
+  final String title;
+  final String content;
+  
+  ReadOnlyArticle({required this.title, required this.content});
+}
+
+// Serialize-only custom mapper
+@RdfGlobalResource.mapper(
+  WriteOnlyArticleMapper,
+  direction: MapperDirection.serializeOnly
+)
+class WriteOnlyArticle {
+  final String articleId;
+  final String title;
+  
+  WriteOnlyArticle({required this.articleId, required this.title});
+}
+
+// Also works with .mapperInstance()
+@RdfGlobalResource.mapperInstance(
+  myCustomMapper,
+  direction: MapperDirection.deserializeOnly
+)
+class CustomClass { /* ... */ }
+```
+
+The `MapperDirection` enum has three values:
+- `MapperDirection.both` (default) - Full bidirectional mapping
+- `MapperDirection.serializeOnly` - Only write to RDF
+- `MapperDirection.deserializeOnly` - Only read from RDF
+
+**Benefits:**
+- Type safety: Standard constructor maintains required IRI strategy
+- Explicit intent: Code clearly shows the mapping direction
+- Optimization: Generator creates optimized single-direction code
+- Flexibility: Works with all custom mapper constructors
+
+See [`example/directional_mappers.dart`](example/directional_mappers.dart) for a complete demonstration.
+
 ### Custom Annotation Classes
 
 Create domain-specific annotations by subclassing existing annotation classes:

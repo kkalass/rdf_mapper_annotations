@@ -230,22 +230,40 @@ abstract class BaseMappingAnnotation<M extends Mapper> extends BaseMapping<M>
   /// - You want to prevent the mapper's dependencies from being required in `initRdfMapper`
   final bool registerGlobally;
 
-  const BaseMappingAnnotation({this.registerGlobally = true}) : super();
+  /// Specifies whether this mapper should handle serialization, deserialization, or both.
+  ///
+  /// This is only used when custom mappers are specified (via `.namedMapper()`,
+  /// `.mapper()`, or `.mapperInstance()` constructors). For standard constructors,
+  /// specialized constructors like `.deserializeOnly()` should be used instead.
+  final MapperDirection? direction;
 
-  const BaseMappingAnnotation.namedMapper(String name)
+  const BaseMappingAnnotation(
+      {this.registerGlobally = true,
+      MapperDirection direction = MapperDirection.both})
+      : direction = direction,
+        super();
+
+  const BaseMappingAnnotation.namedMapper(String name,
+      {MapperDirection direction = MapperDirection.both})
       : registerGlobally = true,
+        direction = direction,
         super.namedMapper(name);
 
-  const BaseMappingAnnotation.mapper(Type mapperType)
+  const BaseMappingAnnotation.mapper(Type mapperType,
+      {MapperDirection direction = MapperDirection.both})
       : registerGlobally = true,
+        direction = direction,
         super.mapper(mapperType);
 
-  const BaseMappingAnnotation.mapperInstance(M instance)
+  const BaseMappingAnnotation.mapperInstance(M instance,
+      {MapperDirection direction = MapperDirection.both})
       : registerGlobally = true,
+        direction = direction,
         super.mapperInstance(instance);
 
   const BaseMappingAnnotation.namedFactory(String name,
       [Object? configInstance, bool registerGlobally = true])
       : registerGlobally = registerGlobally,
+        direction = null,
         super.namedFactory(name, configInstance);
 }
