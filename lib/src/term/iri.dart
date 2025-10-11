@@ -362,7 +362,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   /// final userRefMapper = MyUserReferenceMapper();
   /// final rdfMapper = initRdfMapper(userReferenceMapper: userRefMapper);
   /// ```
-  const RdfIri.namedMapper(String name)
+  const RdfIri.namedMapper(String name, {super.direction})
       : template = null,
         fragmentTemplate = null,
         super.namedMapper(name);
@@ -400,7 +400,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///   }
   /// }
   /// ```
-  const RdfIri.mapper(Type mapperType)
+  const RdfIri.mapper(Type mapperType, {super.direction})
       : template = null,
         fragmentTemplate = null,
         super.mapper(mapperType);
@@ -430,7 +430,7 @@ class RdfIri extends BaseMappingAnnotation<IriTermMapper>
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
-  const RdfIri.mapperInstance(IriTermMapper instance)
+  const RdfIri.mapperInstance(IriTermMapper instance, {super.direction})
       : template = null,
         fragmentTemplate = null,
         super.mapperInstance(instance);

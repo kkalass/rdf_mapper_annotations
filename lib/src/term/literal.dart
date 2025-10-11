@@ -1,6 +1,7 @@
 import 'package:rdf_core/rdf_core.dart';
 import 'package:rdf_mapper/rdf_mapper.dart';
 import 'package:rdf_mapper_annotations/src/base/base_mapping.dart';
+import 'package:rdf_mapper_annotations/src/base/mapper_direction.dart';
 import 'package:rdf_mapper_annotations/src/base/rdf_annotation.dart';
 import 'package:rdf_vocabularies_core/rdf.dart';
 
@@ -233,10 +234,13 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///   low,               // → "low" (uses enum name)
   /// }
   /// ```
-  const RdfLiteral([this.datatype, bool registerGlobally = true])
+  const RdfLiteral(
+      [this.datatype,
+      bool registerGlobally = true,
+      MapperDirection direction = MapperDirection.both])
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
-        super(registerGlobally: registerGlobally);
+        super(registerGlobally: registerGlobally, direction: direction);
 
   /// Creates an annotation for a class using custom methods for literal conversion.
   ///
@@ -312,7 +316,7 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   /// final tempMapper = MyTemperatureMapper();
   /// final rdfMapper = initRdfMapper(temperatureMapper: tempMapper);
   /// ```
-  const RdfLiteral.namedMapper(String name)
+  const RdfLiteral.namedMapper(String name, {super.direction})
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
         datatype = null,
@@ -349,7 +353,7 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///   }
   /// }
   /// ```
-  const RdfLiteral.mapper(Type mapperType)
+  const RdfLiteral.mapper(Type mapperType, {super.direction})
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
         datatype = null,
@@ -384,7 +388,7 @@ class RdfLiteral extends BaseMappingAnnotation<LiteralTermMapper>
   ///
   /// Note: Since annotations in Dart must be evaluated at compile-time,
   /// the mapper instance must be a compile-time constant.
-  const RdfLiteral.mapperInstance(LiteralTermMapper instance)
+  const RdfLiteral.mapperInstance(LiteralTermMapper instance, {super.direction})
       : toLiteralTermMethod = null,
         fromLiteralTermMethod = null,
         datatype = null,
