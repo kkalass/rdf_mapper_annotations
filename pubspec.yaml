@@ -1,5 +1,5 @@
 name: rdf_mapper_annotations
-version: 0.10.5-dev
+version: 0.10.5
 homepage: https://kkalass.github.io/rdf_mapper_annotations/
 repository: https://github.com/kkalass/rdf_mapper_annotations
 issue_tracker: https://github.com/kkalass/rdf_mapper_annotations/issues
@@ -14,8 +14,7 @@ changelog: CHANGELOG.md
 license: LICENSE
 maintainers:
   - "Klas Kalaß <habbatical@gmail.com>"
-description: >
-  Dart annotations for declarative RDF graph mapping and code generation.
+description: "DEPRECATED: Moved to locorda_rdf_mapper_annotations. This package is no longer maintained."
 
 environment:
   sdk: '^3.6.0'

@@ -1,3 +1,15 @@
+> # ⚠️ DEPRECATED - This package has moved!
+> 
+> **This package is no longer maintained.** It has been integrated into the [locorda](https://github.com/locorda) project's monorepo and rebranded.
+> 
+> **Please migrate to:** [`locorda_rdf_mapper_annotations`](https://pub.dev/packages/locorda_rdf_mapper_annotations)
+> 
+> All future development and support will happen in the new package. This repository will be archived.
+> 
+> **Migration:** Simply replace `rdf_mapper_annotations` with `locorda_rdf_mapper_annotations` in your `pubspec.yaml` and update your imports.
+> 
+> **⚠️ Important:** If you use code generation with `rdf_mapper_generator`, you must also migrate to [`locorda_rdf_mapper_generator`](https://pub.dev/packages/locorda_rdf_mapper_generator) and other related packages. All rdf_* packages have been moved to the locorda project.
+
 # RDF Mapper Annotations for Dart
 
 > **🎯 Code Generation Now Available**  
